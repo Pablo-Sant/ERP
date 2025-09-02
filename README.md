@@ -9,7 +9,7 @@ Abaixo está um guia rápido de como clonar o repositório e contribuir com o pr
 
 Antes de começar, certifique-se de ter o **Git** instalado na sua máquina.
 
-#```bash
+```bash
 # Clonar o repositório
 git clone https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git
 
