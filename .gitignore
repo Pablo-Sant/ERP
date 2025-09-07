@@ -1,0 +1,33 @@
+# --- Backend (Python / FastAPI) ---
+backend/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+instance/
+.env
+.env.* 
+.DS_Store
+
+# Logs
+*.log
+
+# --- Frontend (React / Vite) ---
+frontend/node_modules/
+frontend/dist/
+*.local
+
+# --- Editor / Sistema ---
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+
+# --- Docker ---
+/docker/*.pid
+*.pid
+*.seed
