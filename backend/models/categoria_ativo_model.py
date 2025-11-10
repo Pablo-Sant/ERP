@@ -1,9 +1,9 @@
 from sqlalchemy import (
     Column, Integer, String, Text, Date, Numeric, Boolean,
-    ForeignKey, DateTime, JSON, CheckConstraint, text, func
+    ForeignKey, DateTime, JSON, CheckConstraint, text, func, orm
 )
 from core.configs import DBBaseModel
-
+# Consertar os relacionamentos
 class CategoriaAtivo(DBBaseModel):
     __tablename__ = "categorias_ativos"
     __table_args__ = (
@@ -16,7 +16,8 @@ class CategoriaAtivo(DBBaseModel):
 
     id = Column(Integer, primary_key=True)
     id_organizacao = Column(Integer, nullable=False)
-    id_categoria_pai = Column(Integer)
+    id_categoria_pai = Column(Integer, ForeignKey('categoria_pai_model.id'))
+    categoria_pai = orm.relationship('CategoriaPai', lazy='joined')
     codigo = Column(String(20), nullable=False)
     nome = Column(String(255), nullable=False)
     descricao = Column(Text)

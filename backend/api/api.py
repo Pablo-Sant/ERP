@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from models.cliente_model import ClienteModel
+from models.categoria_ativo_model import CategoriaAtivo
 from schemas.cliente_schema import ClientesSchema
 from core.deps import get_session
 
