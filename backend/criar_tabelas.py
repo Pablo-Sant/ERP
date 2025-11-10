@@ -1,4 +1,4 @@
-from core.configs import settings, DBBaseModel
+from core.configs import DBBaseModel
 from core.database import engine
 
 
