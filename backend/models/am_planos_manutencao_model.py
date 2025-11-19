@@ -20,7 +20,7 @@ class PlanosManutencao(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_organizacao = Column(Integer, ForeignKey("organizacao.id"), nullable=False)
+    #id_organizacao = Column(Integer, ForeignKey("organizacao.id"), nullable=False)
     nome = Column(String(255), nullable=False)
     descricao = Column(Text)
     tipo_manutencao = Column(String(50))

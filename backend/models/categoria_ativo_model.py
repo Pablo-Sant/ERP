@@ -16,8 +16,8 @@ class CategoriaAtivo(DBBaseModel):
 
     id = Column(Integer, primary_key=True)
     id_organizacao = Column(Integer, nullable=False)
-    id_categoria_pai = Column(Integer, ForeignKey('categoria_pai_model.id'))
-    categoria_pai = orm.relationship('CategoriaPai', lazy='joined')
+    #id_categoria_pai = Column(Integer, ForeignKey('categoria_pai_model.id'))
+    #categoria_pai = orm.relationship('CategoriaPai', lazy='joined')
     codigo = Column(String(20), nullable=False)
     nome = Column(String(255), nullable=False)
     descricao = Column(Text)

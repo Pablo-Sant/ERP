@@ -6,7 +6,9 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from core.configs import DBBaseModel
 from typing import List
 from models.categoria_ativo_model import CategoriaAtivo
-from backend.models.localizacao_model import Localizacao
+from models.localizacao_model import Localizacao
+from models.fornecedor_model import Fornecedor
+
 
 class Ativo(DBBaseModel):
     __tablename__ = "ativos"
@@ -25,14 +27,12 @@ class Ativo(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    uuid = Column(UUID(as_uuid=True), server_default=text("am.uuid_generate_v4()"))
-    id_organizacao = Column(Integer, nullable=False)
-    id_categoria = Column(Integer, ForeignKey("am.categoria_ativo.id"), nullable=False)
+    #uuid = Column(UUID(as_uuid=True), server_default=text("am.uuid_generate_v4()"))
+    #id_organizacao = Column(Integer, nullable=False)
+    id_categoria = Column(Integer, ForeignKey("am.categorias_ativos.id"), nullable=False)
     categoria = orm.relationship(CategoriaAtivo, lazy='joined')
-    id_localizacao = Column(Integer, ForeignKey("localizacao_model.id"), nullable=False)
-    localizacao = orm.relationship(Localizacao, lazy='joined')
-    id_ativo_pai = Column(Integer, ForeignKey('ativo_pai.id')),
-    ativo_pai = orm.relationship('AtivoPai', lazy='joined')
+    id_localizacao = Column(Integer, ForeignKey("am.localizacoes.id"), nullable=False)
+    localizacao = orm.relationship("Localizacao", lazy='joined')
     numero_tag = Column(String(100), nullable=False)
     numero_serie = Column(String(100))
     modelo = Column(String(255))
@@ -45,6 +45,7 @@ class Ativo(DBBaseModel):
     custo_aquisicao = Column(Numeric(18, 2))
     numero_ordem_compra = Column(String(100))
     id_fornecedor = Column(Integer, ForeignKey("am.fornecedores.id"))
+    fornecedores = orm.relationship(Fornecedor, lazy='joined')
     data_vencimento_garantia = Column(Date)
     vida_util_anos = Column(Integer)
     valor_residual = Column(Numeric(18, 2), server_default=text("0"))

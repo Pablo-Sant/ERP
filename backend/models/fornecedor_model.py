@@ -16,8 +16,8 @@ class Fornecedor(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True)
-    id_organizacao = Column(Integer, ForeignKey('am.organizacao.id'), nullable=False)
-    organizacao = orm.relationship('Organizacao', lazy='joined')
+    #id_organizacao = Column(Integer, ForeignKey('am.organizacao.id'), nullable=False)
+    # = orm.relationship('Organizacao', lazy='joined')
     codigo = Column(String(20), nullable=False)
     nome = Column(String(255), nullable=False)
     tipo_fornecedor = Column(String(50))

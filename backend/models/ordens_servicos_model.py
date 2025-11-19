@@ -5,6 +5,8 @@ from sqlalchemy import (
     ForeignKey, DateTime, JSON, CheckConstraint, text, func, orm
 )
 from typing import List
+from models.am_planos_manutencao_model import PlanosManutencao
+from models.ativos_model import Ativo
 
 class OrdemServico(DBBaseModel):
     __tablename__ = "ordens_servico"
@@ -24,12 +26,12 @@ class OrdemServico(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_organizacao = Column(Integer, ForeignKey('Organizacao.id'), nullable=False)
-    organizacao = orm.relationship('Organizacao', lazy='joined')
-    id_ativo = Column(Integer, ForeignKey("ativos.id"), nullable=False)
+    #id_organizacao = Column(Integer, ForeignKey('Organizacao.id'), nullable=False)
+    #organizacao = orm.relationship('Organizacao', lazy='joined')
+    id_ativo = Column(Integer, ForeignKey("am.ativos.id"), nullable=False)
     ativo = orm.relationship('Ativo', lazy='joined')
-    id_plano_manutencao = Column(Integer, ForeignKey('manutencao.id'))
-    plano_manutencao = orm.relationship('Manutencao', lazy='joined')
+    id_plano_manutencao = Column(Integer, ForeignKey('am.planos_manutencao.id'))
+    plano_manutencao = orm.relationship('PlanosManutencao', lazy='joined')
     numero_os = Column(String(100), nullable=False)
     tipo_os = Column(String(50))
     prioridade = Column(String(20), server_default=text("'medio'"))

@@ -1,1 +1,5 @@
 from models.cliente_model import ClienteModel
+from models.am_pecas_ordem_servico import PecasOrdemServico
+from models.am_planos_manutencao_model import PlanosManutencao
+from models.am_registro_calibracao import RegistrosCalibracao
+from models.ativos_model import Ativo
