@@ -18,7 +18,7 @@ class MovimentacaoAtivo(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_ativo = Column(Integer, ForeignKey("ativos_model.id"), nullable=False)
+    id_ativo = Column(Integer, ForeignKey("am.ativos.id"), nullable=False)
     ativo = orm.relationship(Ativo, lazy='joined')
     id_local_origem = Column(Integer)
     local_origem = orm.relationship(Localizacao, lazy='joined')

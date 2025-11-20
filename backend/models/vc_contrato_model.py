@@ -5,8 +5,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.configs import DBBaseModel
-from models.vc_cliente_final_model import ClienteFinal
-from models.vc_vendedor_model import Vendedor
+
 
 
 class Contrato(DBBaseModel):

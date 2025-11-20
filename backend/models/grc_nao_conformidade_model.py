@@ -31,21 +31,13 @@ class NaoConformidadeAuditoria(DBBaseModel):
     classificacao = Column(String(50))
     prazo_correcao = Column(Date)
 
-    responsavel_correcao_id = Column(
-        Integer,
-        ForeignKey("grc.usuarios.id")
-    )
 
     data_correcao = Column(Date)
     evidencia_correcao = Column(Text)
 
-    status = Column(
-        String(20),
-        default="ABERTA",
-        nullable=False
-    )
+    status = Column(String(20), default="ABERTA", nullable=False)
 
     
     auditoria = relationship("Auditoria", lazy="joined")
-    responsavel_correcao = relationship("Usuario", lazy="joined")
+   
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, Text, Numeric, Boolean, ForeignKey, CheckConstraint, TIMESTAMP
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
-from models.financeiro_extrato import FinanceirosExtratosBancarios
+#from models.financeiro_extrato import FinanceirosExtratosBancarios
 
 class FinanceiroContas(DBBaseModel):
     __tablename__ = "financeiro_contas"

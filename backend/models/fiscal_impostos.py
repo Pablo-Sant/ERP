@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, Text, Numeric, Boolean, ForeignKey, CheckConstraint, TIMESTAMP
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
-from models.fiscal_notas_fiscais import FiscalNotasFiscais
+
 
 class FiscalImpostos(DBBaseModel):
     __tablename__ = "fiscal_impostos"

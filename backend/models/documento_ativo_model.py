@@ -17,8 +17,8 @@ class DocumentoAtivo(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True)
-    id_ativo = Column(Integer, ForeignKey("ativos_model.id"), nullable=False)
-    ativo = orm.relationship('Ativo', lazy='joined')
+    id_ativo = Column(Integer, ForeignKey("am.ativos.id"), nullable=False)
+    ativo = orm.relationship("Ativo", lazy='joined')
     tipo_documento = Column(String(50))
     nome_documento = Column(String(255), nullable=False)
     nome_arquivo = Column(String(255))
