@@ -1,7 +1,11 @@
+// src/pages/Dashboard.jsx
 import React from 'react';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+
   const stats = [
     { title: 'Projetos Ativos', value: '12', icon: '📋', color: '#3498db' },
     { title: 'Itens em Estoque', value: '245', icon: '📦', color: '#2ecc71' },
@@ -20,7 +24,7 @@ const Dashboard = () => {
     <div className="dashboard">
       <div className="dashboard-header">
         <h1>Dashboard</h1>
-        <p>Visão geral do sistema</p>
+        <p>Bem-vindo de volta, <strong>{user?.nome}</strong>! 👋</p>
       </div>
 
       <div className="stats-grid">

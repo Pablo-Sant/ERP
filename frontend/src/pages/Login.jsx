@@ -24,8 +24,8 @@ const Login = () => {
       const result = await login(credentials);
       
       if (result.success) {
-        console.log('✅ Login bem-sucedido:', result.user);
-        navigate('/dashboard');
+        console.log('✅ Login bem-sucedido, redirecionando...');
+        navigate('/dashboard', { replace: true }); // Adicione replace: true
       } else {
         setError(result.error);
       }

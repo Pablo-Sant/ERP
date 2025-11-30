@@ -8,7 +8,7 @@ import './styles/App.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
-import Loading from './components/Loading'; // Usando seu componente Loading
+import Loading from './components/Loading';
 
 // Pages
 import Home from './pages/Home';
@@ -26,11 +26,69 @@ import Sales from './pages/modules/Sales';
 import Services from './pages/modules/Services';
 import BusinessIntelligence from './pages/modules/BusinessIntelligence';
 
-function App() {
-  const { isAuthenticated, user, loading, logout } = useAuth();
+// Componente para Layout Autenticado
+const AuthenticatedLayout = ({ user, logout, children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Mostra o loading enquanto verifica a autenticação
+  return (
+    <div className="app-layout">
+      <Header 
+        user={user}
+        onLogout={logout} 
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+      />
+      <div className="main-content">
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)}
+          user={user}
+        />
+        <div className="content-area">
+          {children}
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+// Componente para Rotas Protegidas
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, user, logout, loading } = useAuth();
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <AuthenticatedLayout user={user} logout={logout}>
+      {children}
+    </AuthenticatedLayout>
+  );
+};
+
+// Componente para Rotas Públicas
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+function App() {
+  const { loading } = useAuth();
+
   if (loading) {
     return <Loading />;
   }
@@ -38,46 +96,96 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {!isAuthenticated ? (
-          // Rotas públicas (usuário não autenticado)
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/sobre" element={<About />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        ) : (
-          // Layout principal (usuário autenticado)
-          <div className="app-layout">
-            <Header 
-              user={user}
-              onLogout={logout} 
-              onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            />
-            <div className="main-content">
-              <Sidebar 
-                isOpen={sidebarOpen} 
-                onClose={() => setSidebarOpen(false)}
-                user={user}
-              />
-              <div className="content-area">
-                <Routes>
-                  <Route path="/dashboard" element={<Dashboard user={user} />} />
-                  <Route path="/ps" element={<ProjectManagement />} />
-                  <Route path="/mm" element={<MaterialManagement />} />
-                  <Route path="/fi" element={<Financial />} />
-                  <Route path="/am" element={<AssetManagement />} />
-                  <Route path="/rh" element={<HumanResources />} />
-                  <Route path="/vc" element={<Sales />} />
-                  <Route path="/sm" element={<Services />} />
-                  <Route path="/bi" element={<BusinessIntelligence />} />
-                  <Route path="*" element={<Navigate to="/dashboard" />} />
-                </Routes>
-              </div>
-            </div>
-            <Footer />
-          </div>
-        )}
+        <Routes>
+          {/* Rotas Públicas */}
+          <Route path="/" element={<Home />} />
+          <Route path="/sobre" element={<About />} />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+          
+          {/* Rotas Protegidas */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ps" 
+            element={
+              <ProtectedRoute>
+                <ProjectManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/mm" 
+            element={
+              <ProtectedRoute>
+                <MaterialManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/fi" 
+            element={
+              <ProtectedRoute>
+                <Financial />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/am" 
+            element={
+              <ProtectedRoute>
+                <AssetManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/rh" 
+            element={
+              <ProtectedRoute>
+                <HumanResources />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/vc" 
+            element={
+              <ProtectedRoute>
+                <Sales />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/sm" 
+            element={
+              <ProtectedRoute>
+                <Services />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/bi" 
+            element={
+              <ProtectedRoute>
+                <BusinessIntelligence />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
       </div>
     </Router>
   );

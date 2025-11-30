@@ -1,21 +1,22 @@
-# api/auth.py
+# api/auth.py - ADICIONE NO INÍCIO
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import or_
 from core.deps import get_session
-from models.usuario import UsuarioModel  # CORRIGIR A IMPORTACAÇÃO
+from models.usuario import UsuarioModel
 from schemas.auth_schema import LoginSchema, TokenSchema, UserResponseSchema
 from security import criar_token_jwt, verificar_senha, verificar_token_jwt
 from typing import Annotated
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
@@ -116,3 +117,4 @@ async def get_current_user_info(
 @router.post("/logout")
 async def logout():
     return {"message": "Logout realizado com sucesso"}
+
