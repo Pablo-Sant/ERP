@@ -47,3 +47,4 @@ from models.vc_historico_compra_model import HistoricoCompra
 from models.vc_pedido_venda_model import PedidoVenda
 from models.vc_prospecto_model import Prospecto
 from models.vc_vendedor_model import Vendedor
+from models.usuario import UsuarioModel

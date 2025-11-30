@@ -1,47 +1,79 @@
+// src/pages/Login.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/Login.css';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
   });
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    
-    // Simulação de processo de login
-    setTimeout(() => {
-      if (credentials.username && credentials.password) {
-        onLogin();
+
+    try {
+      const result = await login(credentials);
+      
+      if (result.success) {
+        console.log('✅ Login bem-sucedido:', result.user);
+        navigate('/dashboard');
+      } else {
+        setError(result.error);
       }
+    } catch (error) {
+      setError('Erro ao conectar com o servidor');
+      console.error('Erro no login:', error);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (error) setError('');
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
-          <div className="logo">ERP System</div>
+          <div className="logo">BluERP</div>
           <h1>Bem-vindo de Volta</h1>
           <p>Faça login para acessar o sistema</p>
         </div>
         
         <form onSubmit={handleSubmit} className="login-form">
+          {error && (
+            <div className="error-message">
+              ❌ {error}
+            </div>
+          )}
+          
           <div className="form-group">
-            <label htmlFor="username">Usuário</label>
+            <label htmlFor="username">Email ou Nome de Usuário</label>
             <input
               type="text"
               id="username"
+              name="username"
               value={credentials.username}
-              onChange={(e) => setCredentials({...credentials, username: e.target.value})}
-              placeholder="Digite seu usuário"
+              onChange={handleInputChange}
+              placeholder="Digite seu email ou nome de usuário"
               required
               disabled={loading}
+              autoComplete="username"
             />
           </div>
           
@@ -50,29 +82,37 @@ const Login = ({ onLogin }) => {
             <input
               type="password"
               id="password"
+              name="password"
               value={credentials.password}
-              onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+              onChange={handleInputChange}
               placeholder="Digite sua senha"
               required
               disabled={loading}
+              autoComplete="current-password"
             />
           </div>
 
           <button 
             type="submit" 
             className={`login-btn ${loading ? 'loading' : ''}`}
-            disabled={loading}
+            disabled={loading || !credentials.username || !credentials.password}
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? (
+              <>
+                <div className="spinner"></div>
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
           </button>
         </form>
 
         <div className="login-footer">
-          <p>
-            <Link to="/">← Voltar para a página inicial</Link>
-          </p>
           <p className="demo-credentials">
-            <strong>Demo:</strong> Use qualquer usuário e senha
+            <strong>Credenciais de teste:</strong><br />
+            Email: <code>admin@bluerp.com</code><br />
+            Senha: <code>admin123</code>
           </p>
         </div>
       </div>

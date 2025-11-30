@@ -7,7 +7,7 @@ const About = () => {
     <div className="about-page">
       <nav className="home-nav">
         <div className="nav-brand">
-          <h2>ERP System</h2>
+          <h2>BluERP</h2>
         </div>
         <div className="nav-links">
           <Link to="/" className="nav-link">Home</Link>
@@ -17,7 +17,7 @@ const About = () => {
 
       <div className="about-container">
         <div className="about-header">
-          <h1>Sobre o ERP System</h1>
+          <h1>Sobre o BluERP</h1>
           <p>Solução completa para gestão empresarial</p>
         </div>
 

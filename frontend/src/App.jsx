@@ -1,11 +1,14 @@
+// src/App.js
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
 import './styles/App.css';
 
 // Components
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
+import Loading from './components/Loading'; // Usando seu componente Loading
 
 // Pages
 import Home from './pages/Home';
@@ -24,41 +27,42 @@ import Services from './pages/modules/Services';
 import BusinessIntelligence from './pages/modules/BusinessIntelligence';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, user, loading, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-  };
+  // Mostra o loading enquanto verifica a autenticação
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <Router>
       <div className="App">
         {!isAuthenticated ? (
+          // Rotas públicas (usuário não autenticado)
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/sobre" element={<About />} />
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         ) : (
+          // Layout principal (usuário autenticado)
           <div className="app-layout">
             <Header 
-              onLogout={handleLogout} 
+              user={user}
+              onLogout={logout} 
               onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             />
             <div className="main-content">
               <Sidebar 
                 isOpen={sidebarOpen} 
                 onClose={() => setSidebarOpen(false)}
+                user={user}
               />
               <div className="content-area">
                 <Routes>
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard" element={<Dashboard user={user} />} />
                   <Route path="/ps" element={<ProjectManagement />} />
                   <Route path="/mm" element={<MaterialManagement />} />
                   <Route path="/fi" element={<Financial />} />

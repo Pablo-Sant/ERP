@@ -50,7 +50,7 @@ const Home = () => {
     <div className="home">
       <nav className="home-nav">
         <div className="nav-brand">
-          <h2>ERP System</h2>
+          <h2>BluERP</h2>
         </div>
         <div className="nav-links">
           <Link to="/sobre" className="nav-link">Sobre</Link>
@@ -95,7 +95,7 @@ const Home = () => {
 
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 ERP System. Desenvolvido para otimizar sua gestão empresarial.</p>
+          <p>&copy; 2025 BluERP. Desenvolvido para otimizar sua gestão empresarial.</p>
         </div>
       </footer>
     </div>
