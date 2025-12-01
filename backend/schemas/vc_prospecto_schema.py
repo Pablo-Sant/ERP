@@ -13,7 +13,7 @@ class ProspectoCreate(ProspectoBase):
     pass
 
 
-class ProspectoRead(ProspectoBase):
+class ProspectoResponse(ProspectoBase):
     prospectoid: int
 
     class Config:

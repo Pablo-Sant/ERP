@@ -21,7 +21,7 @@ class VendedorCreate(VendedorBase):
     pass
 
 
-class VendedorRead(VendedorBase):
+class VendedorResponse(VendedorBase):
     vendedorid: int
 
     class Config:

@@ -9,6 +9,8 @@ class CategoriaAtivoBase(BaseModel):
     metodo_depreciacao: Optional[str] = "linha_reta"
     vida_util_padrao_anos: Optional[int] = 5
     taxa_residual_padrao: Optional[float] = 0.0
+    nivel_hierarquia: Optional[str]
+    caminho_string: Optional[str]
 
 class CategoriaAtivoCreate(CategoriaAtivoBase):
     pass

@@ -15,7 +15,7 @@ class ContratoCreate(ContratoBase):
     vendedorid: int
 
 
-class ContratoRead(ContratoBase):
+class ContratoResponse(ContratoBase):
     contratoid: int
 
     class Config:

@@ -18,7 +18,7 @@ class ClienteFinalCreate(ClienteFinalBase):
     pass
 
 
-class ClienteFinalRead(ClienteFinalBase):
+class ClienteFinalResponse(ClienteFinalBase):
     cliente_finalid: int
 
     class Config:

@@ -15,7 +15,7 @@ class PedidoVendaCreate(PedidoVendaBase):
     pass
 
 
-class PedidoVendaRead(PedidoVendaBase):
+class PedidoVendaResponse(PedidoVendaBase):
     pedidoid: int
 
     class Config:

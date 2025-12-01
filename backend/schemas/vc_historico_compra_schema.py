@@ -14,7 +14,7 @@ class HistoricoCompraCreate(HistoricoCompraBase):
     pass
 
 
-class HistoricoCompraRead(HistoricoCompraBase):
+class HistoricoCompraResponse(HistoricoCompraBase):
     historicoid: int
 
     class Config:
