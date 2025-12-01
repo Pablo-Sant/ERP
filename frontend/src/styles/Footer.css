@@ -1,0 +1,28 @@
+.footer {
+  background: #2c3e50;
+  color: white;
+  padding: 1.5rem 2rem;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-content p {
+  margin: 0.25rem 0;
+  color: #bdc3c7;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 1rem;
+  }
+  
+  .footer-content p {
+    font-size: 0.8rem;
+  }
+}
