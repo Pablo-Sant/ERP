@@ -1,5 +1,6 @@
 # models/usuario.py - CORRIGIDO (remover importação circular)
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
@@ -19,3 +20,5 @@ class UsuarioModel(Base):
     data_criacao = Column(DateTime, default=datetime.utcnow)
     ultimo_login = Column(DateTime)
     device_id = Column(String)
+
+    

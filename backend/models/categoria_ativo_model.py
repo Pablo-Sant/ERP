@@ -1,9 +1,10 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, Date, Numeric, Boolean,
-    ForeignKey, DateTime, JSON, CheckConstraint, text, func, orm
+    Column, Integer, String, Text, Numeric,
+    CheckConstraint, text, Boolean, ForeignKey
 )
+from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
-# Consertar os relacionamentos
+
 class CategoriaAtivo(DBBaseModel):
     __tablename__ = "categorias_ativos"
     __table_args__ = (
@@ -14,11 +15,10 @@ class CategoriaAtivo(DBBaseModel):
         {"schema": "am"}
     )
 
-    id = Column(Integer, primary_key=True)
-    id_organizacao = Column(Integer, nullable=False)
-    #id_categoria_pai = Column(Integer, ForeignKey('categoria_pai_model.id'))
-    #categoria_pai = orm.relationship('CategoriaPai', lazy='joined')
-    codigo = Column(String(20), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    id_organizacao = Column(Integer, nullable=False, default=1)
+    id_categoria_pai = Column(Integer, ForeignKey("am.categorias_ativos.id"))
+    codigo = Column(String(20), nullable=False, unique=True)
     nome = Column(String(255), nullable=False)
     descricao = Column(Text)
     metodo_depreciacao = Column(String(50), server_default=text("'linha_reta'"))
@@ -26,3 +26,17 @@ class CategoriaAtivo(DBBaseModel):
     taxa_residual_padrao = Column(Numeric(5, 2), server_default=text("0"))
     nivel_hierarquia = Column(Integer, server_default=text("0"))
     caminho_string = Column(Text)
+    ativo = Column(Boolean, server_default=text("true"))
+
+    # Relacionamentos
+    ativos = relationship("Ativo", back_populates="categoria")
+    subcategorias = relationship(
+        "CategoriaAtivo",
+        back_populates="categoria_pai",
+        remote_side=[id]
+    )
+    categoria_pai = relationship(
+        "CategoriaAtivo",
+        back_populates="subcategorias",
+        remote_side=[id]
+    )

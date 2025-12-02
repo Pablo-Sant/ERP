@@ -1,9 +1,9 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, Date, Numeric, Boolean,
-    ForeignKey, DateTime, JSON, CheckConstraint, text, func, orm
+    Column, Integer, String, Text, Numeric, Boolean,
+    ForeignKey, CheckConstraint, text
 )
+from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
-from typing import List
 
 class Localizacao(DBBaseModel):
     __tablename__ = "localizacoes"
@@ -15,11 +15,9 @@ class Localizacao(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    #id_organizacao = Column(Integer, ForeignKey('organizao.id'), nullable=False)
-    #organizaco = orm.relationship('Organizacao', lazy='joined')
-    #id_local_pai = Column(Integer, ForeignKey('local_pai.id'))
-    #local_pai = orm.relationship('LocalPai', lazy='joined')
-    codigo = Column(String(20), nullable=False)
+    id_organizacao = Column(Integer, nullable=False, default=1)
+    id_local_pai = Column(Integer, ForeignKey("am.localizacoes.id"))
+    codigo = Column(String(20), nullable=False, unique=True)
     nome = Column(String(255), nullable=False)
     tipo_local = Column(String(50))
     endereco = Column(Text)
@@ -30,3 +28,25 @@ class Localizacao(DBBaseModel):
     ativo = Column(Boolean, server_default=text("true"))
     nivel_hierarquia = Column(Integer, server_default=text("0"))
     caminho_string = Column(Text)
+
+    # Relacionamentos
+    ativos = relationship("Ativo", back_populates="localizacao")
+    local_pai = relationship(
+        "Localizacao",
+        remote_side=[id],
+        back_populates="sub_localizacoes"
+    )
+    sub_localizacoes = relationship(
+        "Localizacao",
+        back_populates="local_pai"
+    )
+    movimentacoes_origem = relationship(
+        "MovimentacaoAtivo",
+        foreign_keys="[MovimentacaoAtivo.id_local_origem]",
+        back_populates="local_origem_rel"
+    )
+    movimentacoes_destino = relationship(
+        "MovimentacaoAtivo",
+        foreign_keys="[MovimentacaoAtivo.id_local_destino]",
+        back_populates="local_destino_rel"
+    )
