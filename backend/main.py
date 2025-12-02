@@ -4,7 +4,8 @@ from api.auth import router as auth_router
 from api.projects import router as projects_router
 from api.mm import router as mm_router
 from api.fi import router as fi_router
-from api.am import ativos, categorias, localizacoes, fornecedores
+from api.am import router as ativos.router
+from api.rh import router as rh_router
 
 app = FastAPI(
     title="BluERP API",
@@ -33,6 +34,7 @@ app.include_router(projects_router, prefix="/api")
 app.include_router(mm_router, prefix="/api")
 app.include_router(fi_router, prefix="/api")
 app.include_router(ativos.router, prefix="/api")
+app.include_router(rh_router, prefix="/api")
 
 @app.get("/")
 async def root():
