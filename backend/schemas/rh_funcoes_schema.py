@@ -1,17 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 class FuncaoBase(BaseModel):
-    nome: str
-    descricao: Optional[str] = None
-
+    nome: str = Field(..., max_length=50)
+    descricao: Optional[str] = Field(None, max_length=200)
 
 class FuncaoCreate(FuncaoBase):
     pass
 
+class FuncaoUpdate(BaseModel):
+    nome: Optional[str] = Field(None, max_length=50)
+    descricao: Optional[str] = Field(None, max_length=200)
 
-class FuncaoRead(FuncaoBase):
+class FuncaoResponse(FuncaoBase):
     id: int
-
+    
     class Config:
-        orm_mode = True
+        from_attributes = True

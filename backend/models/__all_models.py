@@ -48,3 +48,5 @@ from models.vc_pedido_venda_model import PedidoVenda
 from models.vc_prospecto_model import Prospecto
 from models.vc_vendedor_model import Vendedor
 from models.usuario import UsuarioModel
+from models.rh_funcoes_model import Funcao
+from models.rh_colaboradores_model import Colaborador

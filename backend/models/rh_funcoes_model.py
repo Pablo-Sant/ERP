@@ -1,21 +1,14 @@
-from sqlalchemy import Column, Integer, String, Date, Float, Sequence
+from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
 
-class Colaborador(DBBaseModel):
-    __tablename__ = "colaboradores"
+class Funcao(DBBaseModel):
+    __tablename__ = "funcoes"
     __table_args__ = {"schema": "rh"}
 
-    id = Column(Integer, Sequence("rh.colaboradores_id_seq"), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(50), nullable=False)
+    descricao = Column(String(200))
 
-    nome = Column(String(100), nullable=False)
-    cpf = Column(String(11), nullable=False)
-    email = Column(String(100))
-
-    funcao_id = Column(Integer)
-    data_contratacao = Column(Date, nullable=False)
-    carga_horaria = Column(Integer, nullable=False)
-
-    data_de_nascimento = Column(Date)
-    data_de_recrutamento = Column(Date, nullable=False)
-
-    salario = Column(Float, nullable=False)
+    # Relacionamentos
+    colaboradores = relationship("Colaborador", back_populates="funcao_rel")
