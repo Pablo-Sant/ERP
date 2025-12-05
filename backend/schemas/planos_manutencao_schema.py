@@ -17,11 +17,12 @@ class PlanosManutencaoBase(BaseModel):
 
 
 class PlanosManutencaoCreate(PlanosManutencaoBase):
-    pass
+    id_organizacao: int
 
 
 class PlanosManutencaoResponse(PlanosManutencaoBase):
     id: int
+    id_organizacao: int
 
     class Config:
         from_attributes = True

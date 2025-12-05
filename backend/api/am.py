@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from core.database import get_db
 from schemas.ativo_schema import AtivoCreate, AtivoResponse, AtivoUpdate
-from ativo_service import AtivoService
+from backend.services.ativo_service import AtivoService
 
 router = APIRouter(prefix="/ativos", tags=["ativos"])
 

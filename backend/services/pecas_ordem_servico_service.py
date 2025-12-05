@@ -38,7 +38,7 @@ class PecasOrdemServicoService:
             nome_peca=dto.nome_peca,
             quantidade=dto.quantidade,
             custo_unitario=dto.custo_unitario
-            # custo_total NÃO É necessário: é calculado pelo banco (Computed)
+            # custo_total não é necessário, pois é calculado pelo banco
         )
 
         db.add(nova)

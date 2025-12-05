@@ -1,68 +1,45 @@
 from typing import List
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
 from core.deps import get_session
+from services.financeiro_extrato_service import FinanceiroExtratoService
 
-from models.financeiro_extrato import FinanceiroExtratosBancarios
-from schemas.financeiro_extratos_bancarios import FinanceiroExtratosBancariosCreate, FinanceiroExtratosBancariosResponse
+from schemas.financeiro_extratos_bancarios import (
+    FinanceiroExtratosBancariosCreate,
+    FinanceiroExtratosBancariosUpdate,
+    FinanceiroExtratosBancariosResponse
+)
 
 router = APIRouter()
 
 
-async def get_plano_conta_or_404(id: int, db: AsyncSession):
-    query = select(FinanceiroExtratosBancarios).filter(FinanceiroExtratosBancarios.id_extrato == id)
-    result = await db.execute(query)
-    obj = result.scalar_one_or_none()
-
-    if not obj:
-        raise HTTPException(status_code=404, detail="Documento ativo não encontrado")
-    return obj
-
 
 @router.get('/', response_model=List[FinanceiroExtratosBancariosResponse])
-async def get_planos_conta(db: AsyncSession = Depends(get_session)):
-    result = await db.execute(select(FinanceiroExtratosBancarios))
-    return result.scalars().all()
+async def listar_extratos(db: AsyncSession = Depends(get_session)):
+    return await FinanceiroExtratoService.listar(db)
 
 
-@router.post('/', response_model=FinanceiroExtratosBancariosResponse, status_code=201)
-async def post_plano_conta(payload: FinanceiroExtratosBancariosCreate, db: AsyncSession = Depends(get_session)):
-    novo = FinanceiroExtratosBancarios(**payload.model_dump())
-    db.add(novo)
 
-    await db.commit()
-    await db.refresh(novo)
-
-    return novo
+@router.post('/', response_model=FinanceiroExtratosBancariosResponse, status_code=status.HTTP_201_CREATED)
+async def criar_extrato(payload: FinanceiroExtratosBancariosCreate, db: AsyncSession = Depends(get_session)):
+    return await FinanceiroExtratoService.criar(payload, db)
 
 
-@router.get('/{id}', response_model=FinanceiroExtratosBancariosResponse)
-async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    return await get_plano_conta_or_404(id, db)
+
+@router.get('/{id_extrato}', response_model=FinanceiroExtratosBancariosResponse)
+async def obter_extrato(id_extrato: int, db: AsyncSession = Depends(get_session)):
+    return await FinanceiroExtratoService.obter_por_id(id_extrato, db)
 
 
-@router.put('/{id}', response_model=FinanceiroExtratosBancarios)
-async def put_plano_conta(id: int, payload: FinanceiroExtratosBancariosCreate, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-    data = payload.model_dump()
 
-    
-    for attr, value in data.items():
-        setattr(plano, attr, value)
-
-    await db.commit()
-    await db.refresh(plano)
-
-    return plano
+@router.put('/{id_extrato}', response_model=FinanceiroExtratosBancariosResponse)
+async def atualizar_extrato(id_extrato: int, payload: FinanceiroExtratosBancariosUpdate, db: AsyncSession = Depends(get_session)):
+    return await FinanceiroExtratoService.atualizar(id_extrato, payload, db)
 
 
-@router.delete('/{id}', status_code=204)
-async def delete_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
 
-    await db.delete(plano)
-    await db.commit()
-
-    return Response(status_code=204)
+@router.delete('/{id_extrato}', status_code=status.HTTP_204_NO_CONTENT)
+async def deletar_extrato(id_extrato: int, db: AsyncSession = Depends(get_session)):
+    await FinanceiroExtratoService.deletar(id_extrato, db)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
