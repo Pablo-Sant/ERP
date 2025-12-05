@@ -8,8 +8,8 @@ from core.deps import get_session
 from schemas.financeiro_orcamentos import FinanceiroOrcamentosCreate, FinanceiroOrcamentosResponse
 from services.financeiro_orcamento_service import FinanceiroOrcamentosService
 
-router = APIRouter()
 
+router = APIRouter()
 
 
 @router.get('/', response_model=List[FinanceiroOrcamentosResponse])
