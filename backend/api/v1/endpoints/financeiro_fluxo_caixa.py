@@ -7,62 +7,32 @@ from core.deps import get_session
 
 from models.financeiro_fluxo_caixa import FinanceiroFluxoCaixa
 from schemas.financeiro_fluxo_caixa import FinanceiroFluxoCaixaCreate, FinanceiroFluxoCaixaResponse
+from services.financeiro_fluxo_caixa_service import FinanceiroFluxoCaixaService
 
 router = APIRouter()
 
 
-async def get_plano_conta_or_404(id: int, db: AsyncSession):
-    query = select(FinanceiroFluxoCaixa).filter(FinanceiroFluxoCaixa.id_extrato == id)
-    result = await db.execute(query)
-    obj = result.scalar_one_or_none()
-
-    if not obj:
-        raise HTTPException(status_code=404, detail="Documento ativo não encontrado")
-    return obj
-
 
 @router.get('/', response_model=List[FinanceiroFluxoCaixaResponse])
 async def get_planos_conta(db: AsyncSession = Depends(get_session)):
-    result = await db.execute(select(FinanceiroFluxoCaixa))
-    return result.scalars().all()
+    return await FinanceiroFluxoCaixaService.get_all(db)
 
 
 @router.post('/', response_model=FinanceiroFluxoCaixaResponse, status_code=201)
 async def post_plano_conta(payload: FinanceiroFluxoCaixaCreate, db: AsyncSession = Depends(get_session)):
-    novo = FinanceiroFluxoCaixa(**payload.model_dump())
-    db.add(novo)
-
-    await db.commit()
-    await db.refresh(novo)
-
-    return novo
+    return await FinanceiroFluxoCaixaService.create(payload, db)
 
 
 @router.get('/{id}', response_model=FinanceiroFluxoCaixaResponse)
 async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    return await get_plano_conta_or_404(id, db)
+    return await FinanceiroFluxoCaixaService.get_by_id(id, db)
 
 
 @router.put('/{id}', response_model=FinanceiroFluxoCaixa)
 async def put_plano_conta(id: int, payload: FinanceiroFluxoCaixaCreate, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-    data = payload.model_dump()
-
-    
-    for attr, value in data.items():
-        setattr(plano, attr, value)
-
-    await db.commit()
-    await db.refresh(plano)
-
-    return plano
+    return await FinanceiroFluxoCaixaService.update(id, payload, db)
 
 
 @router.delete('/{id}', status_code=204)
 async def delete_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-
-    await db.delete(plano)
-    await db.commit()
-
-    return Response(status_code=204)
+    return await FinanceiroFluxoCaixaService.delete(id, db)
