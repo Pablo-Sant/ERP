@@ -1,9 +1,10 @@
+# models/registros_depreciacao_model.py - CORRIGIDO
 from sqlalchemy import (
-    Column, Integer, String, Numeric, Date, Boolean, Text, CheckConstraint, ForeignKey, Computed
+    Column, Integer, String, Numeric, Date, Text, CheckConstraint, ForeignKey
 )
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
-from models.ativos_model import Ativo
+# REMOVA ESTA LINHA: from models.ativos_model import Ativo  # ← Causa import circular
 
 class RegistrosDepreciacao(DBBaseModel):
     __tablename__ = "registros_depreciacao"
@@ -25,4 +26,5 @@ class RegistrosDepreciacao(DBBaseModel):
     data_calculo = Column(Date, nullable=False)
     referencia_lancamento = Column(String(100))
 
-    ativo = relationship("Ativo", back_populates="registros_depreciacao")
+    # CORREÇÃO: Use string literal para evitar import circular
+    #ativo = relationship("Ativo", back_populates="registros_depreciacao")

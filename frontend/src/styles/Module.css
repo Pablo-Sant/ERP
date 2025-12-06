@@ -2391,3 +2391,75 @@ table tbody tr:last-child td {
   color: #dc3545;
 }
 
+/* Adicione estas classes ao seu arquivo Module.css */
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.alert-error {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c00;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.status-select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.status-select.status-fechada {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.status-select.status-negociação {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.status-select.status-proposta {
+  background-color: #cce5ff;
+  border-color: #b8daff;
+  color: #004085;
+}
+
+.status-select.status-perdida {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.status-select.status-cancelada {
+  background-color: #f1f1f1;
+  border-color: #ddd;
+  color: #666;
+}
+
+.contact-name {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}

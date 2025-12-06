@@ -4,8 +4,8 @@ from api.auth import router as auth_router
 from api.projects import router as projects_router
 from api.mm import router as mm_router
 from api.fi import router as fi_router
-from api.am import router as ativos_router
-from api.rh import router as rh_router
+#from api.am import router as ativos_router
+#from api.rh import router as rh_router
 from api.vc import router as vc_router
 from api.sm import router as sm_router
 from api.bi import router as bi_router
@@ -36,8 +36,8 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
 app.include_router(mm_router, prefix="/api")
 app.include_router(fi_router, prefix="/api")
-app.include_router(ativos_router, prefix="/api")
-app.include_router(rh_router, prefix="/api")
+#app.include_router(ativos_router, prefix="/api")
+#app.include_router(rh_router, prefix="/api")
 app.include_router(vc_router, prefix="/api")
 app.include_router(sm_router, prefix="/api")
 app.include_router(bi_router, prefix="/api")

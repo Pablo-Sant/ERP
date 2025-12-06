@@ -15,13 +15,12 @@ class HistoricoCompraCreate(HistoricoCompraBase):
 
 
 class HistoricoCompraResponse(HistoricoCompraBase):
-    historicoid: int
+    historicoid: int  # CORRIGIDO: historico_id -> historicoid
 
     class Config:
-        from_attributes = True  # Corrigido: de orm_mode para from_attributes
+        from_attributes = True
 
 
-# ADICIONE ESTA CLASSE
 class HistoricoCompraUpdate(BaseModel):
     """Schema para atualização parcial de histórico de compra"""
     cliente_finalid: Optional[int] = None

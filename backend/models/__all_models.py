@@ -2,7 +2,6 @@ from models.cliente_model import ClienteModel
 from models.am_pecas_ordem_servico import PecasOrdemServico
 from models.am_planos_manutencao_model import PlanosManutencao
 from models.am_registro_calibracao import RegistrosCalibracao
-from models.ativos_model import Ativo
 from models.bi_cache_dados_model import CacheDadosBI
 from models.bi_dashboard_model import Dashboard
 from models.bi_metrica_kpi_model import MetricaKPI
@@ -40,7 +39,6 @@ from models.ordens_servicos_model import OrdemServico
 from models.pp_ordens_producao_model import OrdemProducao
 from models.ps_riscos_projetos_model import RiscoProjeto
 from models.qm_ordem_inspecao_model import OrdemInspecao
-from models.registro_depreciacao import RegistrosDepreciacao
 from models.vc_cliente_final_model import ClienteFinal
 from models.vc_contrato_model import Contrato
 from models.vc_historico_compra_model import HistoricoCompra
@@ -54,3 +52,5 @@ from models.sm_atendente_model import atendente
 from models.sm_ticket_atendimento_model import TicketAtendimento
 from models.sm_solicitacao_troca_model import solicitacaoTroca
 from models.sm_ticket_atendimento_model import vw_dashboard_servicos
+from models.ativos_model import Ativo
+from models.registro_depreciacao import RegistrosDepreciacao

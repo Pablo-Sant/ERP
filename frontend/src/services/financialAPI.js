@@ -1,39 +1,60 @@
-// src/services/financialApi.js
+// src/services/salesApi.js
 import api from './api';
 
-const financialApi = {
-  // Contas
-  getAccounts: (params) => api.get('/fi/contas', { params }),
-  getAccount: (id) => api.get(`/fi/contas/${id}`),
-  createAccount: (data) => api.post('/fi/contas', data),
-  updateAccount: (id, data) => api.put(`/fi/contas/${id}`, data),
-  deleteAccount: (id) => api.delete(`/fi/contas/${id}`),
+const salesApi = {
+  // ========== CLIENTES ==========
+  getClients: (params) => api.get('/vc/clientes', { params }),
+  getClient: (id) => api.get(`/vc/clientes/${id}`),
+  createClient: (data) => api.post('/vc/clientes', data),
+  updateClient: (id, data) => api.put(`/vc/clientes/${id}`, data),
+  deleteClient: (id) => api.delete(`/vc/clientes/${id}`),
 
-  // Transações
-  getTransactions: (params) => api.get('/fi/lancamentos', { params }),
-  getTransaction: (id) => api.get(`/fi/lancamentos/${id}`),
-  createTransaction: (data) => api.post('/fi/lancamentos', data),
-  updateTransaction: (id, data) => api.put(`/fi/lancamentos/${id}`, data),
-  deleteTransaction: (id) => api.delete(`/fi/lancamentos/${id}`),
+  // ========== VENDEDORES ==========
+  getSellers: (params) => api.get('/vc/vendedores', { params }),
+  getSeller: (id) => api.get(`/vc/vendedores/${id}`),
+  createSeller: (data) => api.post('/vc/vendedores', data),
+  updateSeller: (id, data) => api.put(`/vc/vendedores/${id}`, data),
+  deleteSeller: (id) => api.delete(`/vc/vendedores/${id}`),
 
-  // Dashboard
-  getDashboard: () => api.get('/fi/dashboard'),
-  getReports: (params) => api.get('/fi/relatorios/receitas-despesas', { params }),
+  // ========== PEDIDOS/VENDAS ==========
+  getSales: (params) => api.get('/vc/pedidos', { params }),
+  getSale: (id) => api.get(`/vc/pedidos/${id}`),
+  createSale: (data) => api.post('/vc/pedidos', data),
+  updateSale: (id, data) => api.put(`/vc/pedidos/${id}`, data),
+  updateSaleStatus: (id, status) => api.put(`/vc/pedidos/${id}/status`, { status }),
+  deleteSale: (id) => api.delete(`/vc/pedidos/${id}`),
 
-  // Orçamentos
-  getBudgets: (params) => api.get('/fi/orcamentos', { params }),
-  createBudget: (data) => api.post('/fi/orcamentos', data),
+  // ========== CONTRATOS ==========
+  getContracts: (params) => api.get('/vc/contratos', { params }),
+  getContract: (id) => api.get(`/vc/contratos/${id}`),
+  createContract: (data) => api.post('/vc/contratos', data),
+  updateContract: (id, data) => api.put(`/vc/contratos/${id}`, data),
+  deleteContract: (id) => api.delete(`/vc/contratos/${id}`),
 
-  // Fluxo de Caixa
-  getCashFlow: (params) => api.get('/fi/fluxo-caixa', { params }),
-  generateCashFlow: (data) => api.post('/fi/fluxo-caixa/gerar', null, { params: data }),
+  // ========== PROSPECTOS ==========
+  getProspects: (params) => api.get('/vc/prospectos', { params }),
+  getProspect: (id) => api.get(`/vc/prospectos/${id}`),
+  createProspect: (data) => api.post('/vc/prospectos', data),
+  updateProspect: (id, data) => api.put(`/vc/prospectos/${id}`, data),
+  updateProspectPhase: (id, faseFunil) => api.put(`/vc/prospectos/${id}/fase`, { fase_funil: faseFunil }),
+  deleteProspect: (id) => api.delete(`/vc/prospectos/${id}`),
 
-  // Notas Fiscais
-  getInvoices: (params) => api.get('/fi/notas-fiscais', { params }),
-  createInvoice: (data) => api.post('/fi/notas-fiscais', data),
+  // ========== HISTÓRICO DE COMPRA ==========
+  getPurchaseHistory: (params) => api.get('/vc/historicos', { params }),
+  getClientPurchaseHistory: (clientId) => api.get(`/vc/clientes/${clientId}/historicos`),
+  createPurchaseHistory: (data) => api.post('/vc/historicos', data),
+  deletePurchaseHistory: (id) => api.delete(`/vc/historicos/${id}`),
 
-  // Saúde do módulo
-  healthCheck: () => api.get('/fi/health')
+  // ========== RELATÓRIOS ==========
+  getSalesBySeller: (params) => api.get('/vc/relatorios/vendas-por-vendedor', { params }),
+  getActiveClients: () => api.get('/vc/relatorios/clientes-ativos'),
+
+  // ========== DASHBOARD ==========
+  getSalesDashboard: () => api.get('/vc/dashboard'),
+  getSalesSummary: (params) => api.get('/vc/resumo-vendas', { params }),
+
+  // ========== SAÚDE DO MÓDULO ==========
+  healthCheck: () => api.get('/vc/health')
 };
 
-export default financialApi;
+export default salesApi;

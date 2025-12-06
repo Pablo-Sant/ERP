@@ -1,3 +1,4 @@
+# models/ativos_model.py - CORRIGIDO
 from sqlalchemy import (
     Column, Integer, String, Text, Date, Numeric, Boolean,
     ForeignKey, DateTime, CheckConstraint, text, func
@@ -23,7 +24,7 @@ class Ativo(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_organizacao = Column(Integer, nullable=False, default=1)  # Adicionado campo obrigatório
+    id_organizacao = Column(Integer, nullable=False, default=1)
     id_categoria = Column(Integer, ForeignKey("am.categorias_ativos.id"), nullable=False)
     id_localizacao = Column(Integer, ForeignKey("am.localizacoes.id"), nullable=False)
     id_fornecedor = Column(Integer, ForeignKey("am.fornecedores.id"))
@@ -53,12 +54,35 @@ class Ativo(DBBaseModel):
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
     data_atualizacao = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relacionamentos
+    # CORREÇÃO: Use string literals para todos os relacionamentos
     categoria = relationship("CategoriaAtivo", back_populates="ativos")
     localizacao = relationship("Localizacao", back_populates="ativos")
     fornecedor = relationship("Fornecedor", back_populates="ativos")
-    registros_depreciacao = relationship("RegistrosDepreciacao", back_populates="ativo")
-    registros_calibracao = relationship("RegistrosCalibracao", back_populates="ativo")
-    ordens_servico = relationship("OrdemServico", back_populates="ativo")
-    documentos = relationship("DocumentoAtivo", back_populates="ativo")
-    movimentacoes = relationship("MovimentacaoAtivo", back_populates="ativo")
+    
+    # String literal com o nome da classe
+    registros_depreciacao = relationship(
+        "RegistrosDepreciacao",  # ← String literal, não import
+        back_populates="ativo",
+        cascade="all, delete-orphan"
+    )
+    
+    # Se outras classes também causam problemas, use string literals:
+    registros_calibracao = relationship(
+        "RegistrosCalibracao",  # ← String literal
+        back_populates="ativo"
+    )
+    
+    ordens_servico = relationship(
+        "OrdemServico",  # ← String literal
+        back_populates="ativo"
+    )
+    
+    documentos = relationship(
+        "DocumentoAtivo",  # ← String literal
+        back_populates="ativo"
+    )
+    
+    movimentacoes = relationship(
+        "MovimentacaoAtivo",  # ← String literal
+        back_populates="ativo"
+    )
