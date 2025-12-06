@@ -20,4 +20,4 @@ class UsuarioModel(Base):
     device_id = Column(String)
     
     # Relacionamento dentro da classe
-    projetos_gerenciados = relationship("ProjetoModel", back_populates="gerente")
+
