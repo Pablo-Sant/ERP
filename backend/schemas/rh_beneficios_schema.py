@@ -11,8 +11,19 @@ class BeneficioCreate(BeneficioBase):
     pass
 
 
-class BeneficioRead(BeneficioBase):
+class BeneficioResponse(BeneficioBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Corrigido: de orm_mode para from_attributes
+
+
+# ADICIONE ESTA CLASSE
+class BeneficioUpdate(BaseModel):
+    """Schema para atualização parcial de benefício"""
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    valor: Optional[float] = None
+    
+    class Config:
+        from_attributes = True

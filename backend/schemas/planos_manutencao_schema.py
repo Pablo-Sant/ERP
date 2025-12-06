@@ -26,3 +26,21 @@ class PlanosManutencaoResponse(PlanosManutencaoBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class PlanosManutencaoUpdate(BaseModel):
+    """Schema para atualização parcial de planos de manutenção"""
+    id_organizacao: Optional[int] = None
+    nome: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
+    descricao: Optional[str] = None
+    tipo_manutencao: Optional[str] = Field(None, pattern=r"^(preventiva|corretiva|preditiva|condicional)?$")
+    tipo_frequencia: Optional[str] = Field(None, pattern=r"^(diaria|semanal|mensal|trimestral|anual|base_medidor)?$")
+    valor_frequencia: Optional[int] = None
+    duracao_estimada_minutos: Optional[int] = None
+    custo_estimado: Optional[Decimal] = None
+    procedimentos: Optional[str] = None
+    ativo: Optional[bool] = None
+    
+    class Config:
+        from_attributes = True

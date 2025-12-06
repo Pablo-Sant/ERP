@@ -20,4 +20,18 @@ class RelatorioRead(RelatorioBase):
     id_relatorio: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Corrigido: de orm_mode para from_attributes
+
+
+# ADICIONE ESTA CLASSE
+class RelatorioUpdate(BaseModel):
+    """Schema para atualização parcial de relatório"""
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    sql_query: Optional[str] = None
+    tipo: Optional[str] = None
+    status: Optional[str] = None
+    data_criacao: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True

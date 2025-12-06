@@ -6,7 +6,7 @@ from typing import List, Optional
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 
-from core.deps import get_session
+from core.database import get_db
 from api.auth import get_current_user
 from models.usuario import UsuarioModel
 
@@ -60,7 +60,7 @@ router = APIRouter(prefix="/fi", tags=["Financeiro"])
 
 @router.get("/contas", response_model=List[FinanceiroContasResponse])
 async def listar_contas(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     tipo: Optional[str] = Query(None),
     ativo: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0),
@@ -84,7 +84,7 @@ async def listar_contas(
 @router.get("/contas/{conta_id}", response_model=FinanceiroContasResponse)
 async def get_conta(
     conta_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém uma conta financeira específica"""
@@ -103,7 +103,7 @@ async def get_conta(
 @router.post("/contas", response_model=FinanceiroContasResponse, status_code=status.HTTP_201_CREATED)
 async def criar_conta(
     conta: FinanceiroContasCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova conta financeira"""
@@ -135,7 +135,7 @@ async def criar_conta(
 async def atualizar_conta(
     conta_id: int,
     conta_update: FinanceiroContasUpdate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza uma conta financeira existente"""
@@ -181,7 +181,7 @@ async def atualizar_conta(
 @router.delete("/contas/{conta_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_conta(
     conta_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui uma conta financeira"""
@@ -220,7 +220,7 @@ async def deletar_conta(
 
 @router.get("/lancamentos", response_model=List[FinanceiroLancamentosResponse])
 async def listar_lancamentos(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     conta_id: Optional[int] = Query(None),
     tipo: Optional[str] = Query(None),
     data_inicio: Optional[date] = Query(None),
@@ -250,7 +250,7 @@ async def listar_lancamentos(
 @router.get("/lancamentos/{lancamento_id}", response_model=FinanceiroLancamentosResponse)
 async def get_lancamento(
     lancamento_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém um lançamento financeiro específico"""
@@ -269,7 +269,7 @@ async def get_lancamento(
 @router.post("/lancamentos", response_model=FinanceiroLancamentosResponse, status_code=status.HTTP_201_CREATED)
 async def criar_lancamento(
     lancamento: FinanceiroLancamentosCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo lançamento financeiro"""
@@ -301,7 +301,7 @@ async def criar_lancamento(
 async def atualizar_lancamento(
     lancamento_id: int,
     lancamento_update: FinanceiroLancamentosUpdate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza um lançamento financeiro existente"""
@@ -344,7 +344,7 @@ async def atualizar_lancamento(
 @router.delete("/lancamentos/{lancamento_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_lancamento(
     lancamento_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui um lançamento financeiro"""
@@ -372,7 +372,7 @@ async def deletar_lancamento(
 
 @router.get("/extratos", response_model=List[FinanceiroExtratosBancariosResponse])
 async def listar_extratos(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     conta_id: Optional[int] = Query(None),
     tipo: Optional[str] = Query(None),
     conciliado: Optional[bool] = Query(None),
@@ -405,7 +405,7 @@ async def listar_extratos(
 @router.post("/extratos", response_model=FinanceiroExtratosBancariosResponse, status_code=status.HTTP_201_CREATED)
 async def criar_extrato(
     extrato: FinanceiroExtratosBancariosCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo extrato bancário"""
@@ -437,7 +437,7 @@ async def criar_extrato(
 
 @router.get("/orcamentos", response_model=List[FinanceiroOrcamentosResponse])
 async def listar_orcamentos(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     ano: Optional[int] = Query(None),
     mes: Optional[int] = Query(None),
     conta_id: Optional[int] = Query(None),
@@ -466,7 +466,7 @@ async def listar_orcamentos(
 @router.post("/orcamentos", response_model=FinanceiroOrcamentosResponse, status_code=status.HTTP_201_CREATED)
 async def criar_orcamento(
     orcamento: FinanceiroOrcamentosCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo orçamento"""
@@ -513,7 +513,7 @@ async def criar_orcamento(
 
 @router.get("/fluxo-caixa", response_model=List[FinanceiroFluxoCaixaResponse])
 async def listar_fluxo_caixa(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     data_inicio: Optional[date] = Query(None),
     data_fim: Optional[date] = Query(None),
     skip: int = Query(0, ge=0),
@@ -538,7 +538,7 @@ async def listar_fluxo_caixa(
 async def gerar_fluxo_caixa(
     data_inicio: date,
     data_fim: date,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Gera fluxo de caixa para um período"""
@@ -637,7 +637,7 @@ async def gerar_fluxo_caixa(
 
 @router.get("/plano-contas", response_model=List[ContabilidadePlanoContasResponse])
 async def listar_plano_contas(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     tipo: Optional[str] = Query(None),
     nivel: Optional[int] = Query(None),
     skip: int = Query(0, ge=0),
@@ -661,7 +661,7 @@ async def listar_plano_contas(
 @router.post("/plano-contas", response_model=ContabilidadePlanoContasResponse, status_code=status.HTTP_201_CREATED)
 async def criar_conta_plano(
     conta: ContabilidadePlanoContasCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova conta no plano de contas"""
@@ -693,7 +693,7 @@ async def criar_conta_plano(
 
 @router.get("/notas-fiscais", response_model=List[FiscalNotasFiscaisResponse])
 async def listar_notas_fiscais(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     tipo: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     data_inicio: Optional[date] = Query(None),
@@ -723,7 +723,7 @@ async def listar_notas_fiscais(
 @router.post("/notas-fiscais", response_model=FiscalNotasFiscaisResponse, status_code=status.HTTP_201_CREATED)
 async def criar_nota_fiscal(
     nota: FiscalNotasFiscaisCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova nota fiscal"""
@@ -756,7 +756,7 @@ async def criar_nota_fiscal(
 @router.post("/impostos", response_model=FiscalImpostosResponse, status_code=status.HTTP_201_CREATED)
 async def criar_imposto(
     imposto: FiscalImpostosCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo imposto"""
@@ -788,7 +788,7 @@ async def criar_imposto(
 
 @router.get("/dashboard")
 async def dashboard_financeiro(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Dashboard do módulo Financeiro"""
@@ -887,7 +887,7 @@ async def dashboard_financeiro(
 async def relatorio_receitas_despesas(
     data_inicio: date,
     data_fim: date,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Relatório de receitas e despesas por período"""

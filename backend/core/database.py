@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
 from core.configs import settings
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Engine do banco
 engine: AsyncEngine = create_async_engine(settings.DB_URL)
@@ -35,3 +37,11 @@ async def create_tables():
         # Mostrar tabelas criadas
         tables = list(Base.metadata.tables.keys())
         print(f"📋 Tabelas disponíveis: {tables}")
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Alias para get_session para compatibilidade com código existente.
+    """
+    from core.deps import get_session
+    async for session in get_session():
+        yield session

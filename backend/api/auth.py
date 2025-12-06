@@ -19,51 +19,65 @@ async def login(
     db: AsyncSession = Depends(get_session)
 ):
     async with db as session:
-        # Buscar usuário pelo email (já que não temos username no modelo)
-        query = select(UsuarioModel).filter(
+        # BUSCAR APENAS OS CAMPOS NECESSÁRIOS PARA LOGIN
+        query = select(
+            UsuarioModel.id,
+            UsuarioModel.email,
+            UsuarioModel.nome,
+            UsuarioModel.senha_hash,
+            UsuarioModel.ativo,
+            UsuarioModel.tipo_usuario
+        ).filter(
             or_(
                 UsuarioModel.email == login_data.username,
-                UsuarioModel.nome == login_data.username  # Também permitir login pelo nome
+                UsuarioModel.nome == login_data.username
             )
         )
+        
         result = await session.execute(query)
-        usuario: UsuarioModel = result.scalar_one_or_none()
-
-        if not usuario:
+        usuario_data = result.first()  # Retorna uma tupla, não o objeto completo
+        
+        if not usuario_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Usuário não encontrado"
             )
 
-        # Verificar senha - note que a coluna é 'senha_hash'
-        if not verificar_senha(login_data.password, usuario.senha_hash):
+        # Desempacotar os dados
+        user_id, email, nome, senha_hash, ativo, tipo_usuario = usuario_data
+
+        # Verificar senha
+        if not verificar_senha(login_data.password, senha_hash):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Senha incorreta"
             )
 
-        if not usuario.ativo:
+        if not ativo:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Usuário inativo"
             )
 
-        # Atualizar último login
+        # Atualizar último login (usando query direta)
         from datetime import datetime
-        usuario.ultimo_login = datetime.utcnow()
+        update_query = select(UsuarioModel).where(UsuarioModel.id == user_id)
+        update_result = await session.execute(update_query)
+        usuario_obj = update_result.scalar_one()
+        usuario_obj.ultimo_login = datetime.utcnow()
         await session.commit()
 
         # Criar token JWT
-        token = criar_token_jwt(usuario.id)
+        token = criar_token_jwt(user_id)
 
         return {
             "access_token": token,
             "token_type": "bearer",
             "user": {
-                "id": usuario.id,
-                "email": usuario.email,
-                "nome": usuario.nome,
-                "tipo_usuario": usuario.tipo_usuario
+                "id": user_id,
+                "email": email,
+                "nome": nome,
+                "tipo_usuario": tipo_usuario
             }
         }
 

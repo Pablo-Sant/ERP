@@ -20,3 +20,16 @@ class FiscalImpostosResponse(FiscalImpostosBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class FiscalImpostosUpdate(BaseModel):
+    """Schema para atualização parcial de impostos"""
+    id_nota: Optional[int] = None
+    tipo_imposto: Optional[Annotated[str, StringConstraints(max_length=20)]] = None
+    base_calculo: Optional[Decimal] = None
+    aliquota: Optional[Decimal] = None
+    valor: Optional[Decimal] = None
+    
+    class Config:
+        from_attributes = True

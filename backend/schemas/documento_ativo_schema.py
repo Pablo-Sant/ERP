@@ -10,12 +10,28 @@ class DocumentoAtivoBase(BaseModel):
     caminho_arquivo: Optional[str]
     tamanho_arquivo: Optional[int]
 
+
 class DocumentoAtivoCreate(DocumentoAtivoBase):
     pass
+
 
 class DocumentoAtivoResponse(DocumentoAtivoBase):
     id: int
     data_envio: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Corrigido: de orm_mode para from_attributes
+
+
+# ADICIONE ESTA CLASSE
+class DocumentoAtivoUpdate(BaseModel):
+    """Schema para atualização parcial de documento de ativo"""
+    id_ativo: Optional[int] = None
+    tipo_documento: Optional[str] = None
+    nome_documento: Optional[str] = None
+    nome_arquivo: Optional[str] = None
+    caminho_arquivo: Optional[str] = None
+    tamanho_arquivo: Optional[int] = None
+    
+    class Config:
+        from_attributes = True

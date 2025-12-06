@@ -20,3 +20,15 @@ class FinanceiroContasResponse(FinanceiroContasBase):
 
     class Config:
         from_attributes = True
+
+
+class FinanceiroContasUpdate(BaseModel):
+    """Schema para atualização parcial de contas financeiras"""
+    nome: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
+    tipo: Optional[Annotated[str, StringConstraints(max_length=50)]] = None
+    saldo_inicial: Optional[Decimal] = None
+    data_abertura: Optional[date] = None
+    ativo: Optional[bool] = None
+    
+    class Config:
+        from_attributes = True

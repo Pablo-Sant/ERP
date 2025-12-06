@@ -50,3 +50,6 @@ from models.vc_vendedor_model import Vendedor
 from models.usuario import UsuarioModel
 from models.rh_funcoes_model import Funcao
 from models.rh_colaboradores_model import Colaborador
+from models.rh_colaboradores_model import atendente
+from models.rh_colaboradores_model import atendente
+from models.rh_colaboradores_model import solicitacaoTroca

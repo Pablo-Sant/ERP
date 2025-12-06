@@ -8,7 +8,7 @@ const Header = ({ onLogout, onToggleSidebar }) => {
         <button className="sidebar-toggle" onClick={onToggleSidebar}>
           <span>☰</span>
         </button>
-        <h1 className="logo">ERP System</h1>
+        <h1 className="logo">BluERP</h1>
       </div>
       <div className="header-right">
         <div className="user-info">

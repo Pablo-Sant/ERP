@@ -23,3 +23,19 @@ class RegistrosDepreciacaoResponse(RegistrosDepreciacaoBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class RegistrosDepreciacaoUpdate(BaseModel):
+    """Schema para atualização parcial de registros de depreciação"""
+    id_ativo: Optional[int] = None
+    ano_fiscal: Optional[int] = None
+    periodo: Optional[int] = None
+    valor_depreciacao: Optional[Decimal] = None
+    depreciacao_acumulada: Optional[Decimal] = None
+    valor_liquido_contabil: Optional[Decimal] = None
+    data_calculo: Optional[date] = None
+    referencia_lancamento: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
+    
+    class Config:
+        from_attributes = True

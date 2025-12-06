@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from core.database import get_db
+from core.deps import get_db
 from schemas.ativo_schema import AtivoCreate, AtivoResponse, AtivoUpdate
-from backend.services.ativo_service import AtivoService
+from services.ativo_service import AtivoService
 
 router = APIRouter(prefix="/ativos", tags=["ativos"])
 

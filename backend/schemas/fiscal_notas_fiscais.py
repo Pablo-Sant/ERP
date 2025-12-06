@@ -21,3 +21,17 @@ class FiscalNotasFiscaisResponse(FiscalNotasFiscaisBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class FiscalNotasFiscaisUpdate(BaseModel):
+    """Schema para atualização parcial de notas fiscais"""
+    numero_nota: Optional[Annotated[str, StringConstraints(max_length=50)]] = None
+    tipo: Optional[Annotated[str, StringConstraints(max_length=10)]] = None
+    valor_total: Optional[Decimal] = None
+    data_emissao: Optional[date] = None
+    chave_acesso: Optional[str] = None
+    status: Optional[Annotated[str, StringConstraints(max_length=20)]] = None
+    
+    class Config:
+        from_attributes = True
