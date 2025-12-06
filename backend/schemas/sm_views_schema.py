@@ -1,4 +1,3 @@
-# sm_views_schemas.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, date
@@ -10,6 +9,10 @@ class DashboardServicosResponse(BaseModel):
     trocas_pendentes: int
     total_atendentes: int
     tempo_medio_resolucao_30_dias: Optional[float] = None
+    
+    class Config:
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwTicketsAbertos
 class TicketAbertoResponse(BaseModel):
@@ -22,8 +25,8 @@ class TicketAbertoResponse(BaseModel):
     tempo_aberto: str
     
     class Config:
-        orm_mode = True
-        from_attributes = True
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwTrocasPendentes
 class TrocaPendenteResponse(BaseModel):
@@ -37,8 +40,8 @@ class TrocaPendenteResponse(BaseModel):
     vendedor_original: Optional[str] = None
     
     class Config:
-        orm_mode = True
-        from_attributes = True
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwHistoricoCliente
 class HistoricoClienteResponse(BaseModel):
@@ -52,8 +55,8 @@ class HistoricoClienteResponse(BaseModel):
     ultimo_ticket: Optional[datetime] = None
     
     class Config:
-        orm_mode = True
-        from_attributes = True
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwMetricasMensais
 class MetricasMensaisResponse(BaseModel):
@@ -67,8 +70,8 @@ class MetricasMensaisResponse(BaseModel):
     taxa_resolucao_percentual: Optional[float] = None
     
     class Config:
-        orm_mode = True
-        from_attributes = True
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwAnaliseTiposAtendimento
 class AnaliseTiposAtendimentoResponse(BaseModel):
@@ -78,8 +81,8 @@ class AnaliseTiposAtendimentoResponse(BaseModel):
     percentual: Optional[float] = None
     
     class Config:
-        orm_mode = True
-        from_attributes = True
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwTempoResolucao
 class TempoResolucaoResponse(BaseModel):
@@ -90,8 +93,8 @@ class TempoResolucaoResponse(BaseModel):
     tempo_medio_horas: Optional[float] = None
     
     class Config:
-        orm_mode = True
-        from_attributes = True
+        from_attributes = True  # Remova orm_mode
+
 
 # Schemas para VwPerformanceAtendentes
 class PerformanceAtendentesResponse(BaseModel):
@@ -101,5 +104,19 @@ class PerformanceAtendentesResponse(BaseModel):
     observacao: str
     
     class Config:
-        orm_mode = True
+        from_attributes = True  # Remova orm_mode
+
+
+# ADICIONE ESTAS CLASSES UPDATE (se necessário para operações PUT)
+class DashboardServicosUpdate(BaseModel):
+    """Schema para atualização (se aplicável)"""
+    
+    class Config:
+        from_attributes = True
+
+
+class TicketAbertoUpdate(BaseModel):
+    """Schema para atualização (se aplicável)"""
+    
+    class Config:
         from_attributes = True

@@ -1,5 +1,6 @@
 # bi_api.py
-from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks,date
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
+from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from typing import List, Optional, Dict, Any

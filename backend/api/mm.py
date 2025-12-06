@@ -5,7 +5,7 @@ from sqlalchemy import select, or_, and_, func
 from typing import List, Optional
 from datetime import datetime
 
-from core.deps import get_session
+from core.database import get_db
 from models.mm_produto_model import Produto
 from models.mm_empresas_model import Empresa
 from models.mm_categorias_model import Categoria
@@ -31,7 +31,7 @@ router = APIRouter(prefix="/mm", tags=["Material Management"])
 
 @router.get("/produtos", response_model=List[ProdutoResponse])
 async def listar_produtos(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     empresa_id: Optional[int] = Query(None),
     categoria_id: Optional[int] = Query(None),
     search: Optional[str] = Query(None),
@@ -63,7 +63,7 @@ async def listar_produtos(
 @router.get("/produtos/{produto_id}", response_model=ProdutoResponse)
 async def get_produto(
     produto_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém um produto específico"""
@@ -82,7 +82,7 @@ async def get_produto(
 @router.post("/produtos", response_model=ProdutoResponse, status_code=status.HTTP_201_CREATED)
 async def criar_produto(
     produto: ProdutoCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo produto"""
@@ -123,7 +123,7 @@ async def criar_produto(
 async def atualizar_produto(
     produto_id: int,
     produto_update: ProdutoUpdate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza um produto existente"""
@@ -178,7 +178,7 @@ async def atualizar_produto(
 @router.delete("/produtos/{produto_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_produto(
     produto_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui um produto"""
@@ -206,7 +206,7 @@ async def deletar_produto(
 
 @router.get("/empresas", response_model=List[EmpresaResponse])
 async def listar_empresas(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     current_user: UsuarioModel = Depends(get_current_user)
@@ -220,7 +220,7 @@ async def listar_empresas(
 @router.get("/empresas/{empresa_id}", response_model=EmpresaResponse)
 async def get_empresa(
     empresa_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém uma empresa específica"""
@@ -239,7 +239,7 @@ async def get_empresa(
 @router.post("/empresas", response_model=EmpresaResponse, status_code=status.HTTP_201_CREATED)
 async def criar_empresa(
     empresa: EmpresaCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova empresa"""
@@ -272,7 +272,7 @@ async def criar_empresa(
 async def atualizar_empresa(
     empresa_id: int,
     empresa_update: EmpresaUpdate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza uma empresa existente"""
@@ -318,7 +318,7 @@ async def atualizar_empresa(
 @router.delete("/empresas/{empresa_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_empresa(
     empresa_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui uma empresa"""
@@ -355,7 +355,7 @@ async def deletar_empresa(
 
 @router.get("/categorias", response_model=List[CategoriaResponse])
 async def listar_categorias(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     current_user: UsuarioModel = Depends(get_current_user)
@@ -369,7 +369,7 @@ async def listar_categorias(
 @router.get("/categorias/{categoria_id}", response_model=CategoriaResponse)
 async def get_categoria(
     categoria_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém uma categoria específica"""
@@ -388,7 +388,7 @@ async def get_categoria(
 @router.post("/categorias", response_model=CategoriaResponse, status_code=status.HTTP_201_CREATED)
 async def criar_categoria(
     categoria: CategoriaCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova categoria"""
@@ -421,7 +421,7 @@ async def criar_categoria(
 async def atualizar_categoria(
     categoria_id: int,
     categoria_update: CategoriaUpdate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza uma categoria existente"""
@@ -471,7 +471,7 @@ async def atualizar_categoria(
 @router.delete("/categorias/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_categoria(
     categoria_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui uma categoria"""
@@ -517,7 +517,7 @@ async def deletar_categoria(
 
 @router.get("/armazens", response_model=List[ArmazemResponse])
 async def listar_armazens(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     empresa_id: Optional[int] = Query(None),
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -546,7 +546,7 @@ async def listar_armazens(
 @router.get("/armazens/{armazem_id}", response_model=ArmazemResponse)
 async def get_armazem(
     armazem_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém um armazém específico"""
@@ -565,7 +565,7 @@ async def get_armazem(
 @router.post("/armazens", response_model=ArmazemResponse, status_code=status.HTTP_201_CREATED)
 async def criar_armazem(
     armazem: ArmazemCreate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo armazém"""
@@ -597,7 +597,7 @@ async def criar_armazem(
 async def atualizar_armazem(
     armazem_id: int,
     armazem_update: ArmazemUpdate,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza um armazém existente"""
@@ -640,7 +640,7 @@ async def atualizar_armazem(
 @router.delete("/armazens/{armazem_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_armazem(
     armazem_id: int,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui um armazém"""
@@ -668,7 +668,7 @@ async def deletar_armazem(
 
 @router.get("/dashboard")
 async def mm_dashboard(
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
     current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Dashboard do módulo de Materiais"""

@@ -26,3 +26,22 @@ class RegistrosCalibracaoResponse(RegistrosCalibracaoBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class RegistrosCalibracaoUpdate(BaseModel):
+    """Schema para atualização parcial de registros de calibração"""
+    id_ativo: Optional[int] = None
+    data_calibracao: Optional[date] = None
+    data_proxima_calibracao: Optional[date] = None
+    calibrado_por: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
+    numero_certificado: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
+    padrao_utilizado: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
+    condicao_encontrada: Optional[str] = Field(None, pattern=r"^(dentro_especificacao|fora_especificacao|ajustado)?$")
+    condicao_final: Optional[str] = Field(None, pattern=r"^(dentro_especificacao|fora_especificacao)?$")
+    incerteza: Optional[Decimal] = None
+    calibracao_aprovada: Optional[bool] = None
+    observacoes: Optional[str] = None
+    
+    class Config:
+        from_attributes = True

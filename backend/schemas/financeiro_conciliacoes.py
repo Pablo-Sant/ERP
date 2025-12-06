@@ -18,3 +18,14 @@ class FinanceiroConciliacoesResponse(FinanceiroConciliacoesBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class FinanceiroConciliacoesUpdate(BaseModel):
+    """Schema para atualização parcial de conciliações financeiras"""
+    id_extrato: Optional[int] = None
+    id_lancamento: Optional[int] = None
+    data_conciliacao: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True

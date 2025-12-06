@@ -22,3 +22,18 @@ class ContabilidadeLancamentosResponse(ContabilidadeLancamentosBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class ContabilidadeLancamentosUpdate(BaseModel):
+    """Schema para atualização parcial de lançamentos contábeis"""
+    data: Optional[date] = None
+    historico: Optional[str] = None
+    valor: Optional[Decimal] = None
+    debito_conta_id: Optional[int] = None
+    credito_conta_id: Optional[int] = None
+    origem_modulo: Optional[str] = None
+    origem_id: Optional[int] = None
+    
+    class Config:
+        from_attributes = True

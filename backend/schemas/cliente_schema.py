@@ -1,20 +1,42 @@
-# models/cliente.py
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime
-from core.database import Base
+# schemas/cliente_schema.py - Versão completa e corrigida
+from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
-class ClienteModel(Base):
-    __tablename__ = "clientes"
-    # Se clientes estiver em schema diferente:
-    # __table_args__ = {'schema': 'seu_schema'}
+class ClienteBase(BaseModel):
+    nome: Optional[str] = None
+    nome_fantasia: Optional[str] = None
+    cnpj: Optional[str] = None
+    email: Optional[str] = None
+    telefone: Optional[str] = None
+    endereco: Optional[str] = None
+    ativo: Optional[bool] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class ClienteCreate(ClienteBase):
+    nome: str
+    cnpj: str
+
+
+class ClienteRead(ClienteBase):
+    id: int
+
+    class Config:
+        from_attributes = True  # Corrigido
+
+
+# ADICIONE ESTA CLASSE
+class ClienteUpdate(BaseModel):
+    """Schema para atualização parcial de cliente"""
+    nome: Optional[str] = None
+    nome_fantasia: Optional[str] = None
+    cnpj: Optional[str] = None
+    email: Optional[str] = None
+    telefone: Optional[str] = None
+    endereco: Optional[str] = None
+    ativo: Optional[bool] = None
     
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String(200), nullable=False)
-    nome_fantasia = Column(String(200))
-    cnpj = Column(String(20), unique=True)
-    email = Column(String(200))
-    telefone = Column(String(20))
-    endereco = Column(Text)
-    ativo = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    class Config:
+        from_attributes = True

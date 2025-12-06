@@ -21,3 +21,17 @@ class FinanceiroExtratosBancariosResponse(FinanceiroExtratosBancariosBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class FinanceiroExtratosBancariosUpdate(BaseModel):
+    """Schema para atualização parcial de extratos bancários"""
+    id_conta: Optional[int] = None
+    data_movimento: Optional[date] = None
+    descricao: Optional[str] = None
+    valor: Optional[Decimal] = None
+    tipo: Optional[Annotated[str, StringConstraints(max_length=10)]] = None
+    conciliado: Optional[bool] = None
+    
+    class Config:
+        from_attributes = True

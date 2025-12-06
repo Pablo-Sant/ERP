@@ -1,5 +1,6 @@
 # sm_api.py
-from fastapi import APIRouter, Depends, HTTPException, status, Query, case
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import case
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, extract
 from typing import List, Optional

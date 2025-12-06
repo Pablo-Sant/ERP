@@ -19,3 +19,15 @@ class ContabilidadePlanoContasResponse(ContabilidadePlanoContasBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class ContabilidadePlanoContasUpdate(BaseModel):
+    """Schema para atualização parcial de plano de contas"""
+    codigo: Optional[Annotated[str, StringConstraints(max_length=20)]] = None
+    nome: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
+    tipo: Optional[Annotated[str, StringConstraints(max_length=20)]] = None
+    nivel: Optional[int] = None
+    
+    class Config:
+        from_attributes = True

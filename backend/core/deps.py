@@ -1,4 +1,3 @@
-# core/deps.py
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends, HTTPException, status
@@ -6,7 +5,6 @@ from fastapi.security import OAuth2PasswordBearer
 from security import verificar_token_jwt
 from models.usuario import UsuarioModel
 from sqlalchemy.future import select
-
 from core.database import Session
 
 # Configuração do OAuth2
@@ -19,9 +17,12 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         finally:
             await session.close()
 
+# ADICIONE ESTA LINHA - Alias para compatibilidade
+get_db = get_session
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_session)
+    db: AsyncSession = Depends(get_session)  # Pode usar get_session ou get_db
 ) -> UsuarioModel:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

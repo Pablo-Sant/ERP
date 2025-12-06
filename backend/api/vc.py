@@ -430,3 +430,4 @@ def relatorio_clientes_ativos(db: Session = Depends(get_db)):
         }
         for c in clientes
     ]
+

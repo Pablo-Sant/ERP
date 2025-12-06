@@ -21,3 +21,17 @@ class PecasOrdemServicoResponse(PecasOrdemServicoBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class PecasOrdemServicoUpdate(BaseModel):
+    """Schema para atualização parcial de peças de ordem de serviço"""
+    id_ordem_servico: Optional[int] = None
+    numero_peca: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
+    nome_peca: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
+    quantidade: Optional[Decimal] = None
+    custo_unitario: Optional[Decimal] = None
+    custo_total: Optional[Decimal] = None
+    
+    class Config:
+        from_attributes = True

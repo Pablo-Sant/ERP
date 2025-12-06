@@ -23,3 +23,17 @@ class FinanceiroLancamentosResponse(FinanceiroLancamentosBase):
 
     class Config:
         from_attributes = True
+
+class FinanceiroLancamentosUpdate(BaseModel):
+    """Schema para atualização parcial de lançamentos financeiros"""
+    id_conta: Optional[int] = None
+    tipo: Optional[Annotated[str, StringConstraints(max_length=10)]] = None
+    valor: Optional[Decimal] = None
+    descricao: Optional[str] = None
+    data_lancamento: Optional[date] = None
+    origem_modulo: Optional[str] = None
+    origem_id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True        

@@ -25,4 +25,23 @@ class VendedorResponse(VendedorBase):
     vendedorid: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Corrigido: de orm_mode para from_attributes
+
+
+# ADICIONE ESTA CLASSE
+class VendedorUpdate(BaseModel):
+    """Schema para atualização parcial de vendedor"""
+    nome: Optional[str] = None
+    cpf_cnpj: Optional[str] = None
+    inscricao_estadual: Optional[str] = None
+    email: Optional[str] = None
+    telefone: Optional[str] = None
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    estado: Optional[str] = None
+    site: Optional[str] = None
+    status: Optional[str] = None
+    data_cadastro: Optional[date] = None
+    
+    class Config:
+        from_attributes = True

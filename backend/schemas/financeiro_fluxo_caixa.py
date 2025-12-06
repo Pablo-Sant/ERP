@@ -20,3 +20,16 @@ class FinanceiroFluxoCaixaResponse(FinanceiroFluxoCaixaBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class FinanceiroFluxoCaixaUpdate(BaseModel):
+    """Schema para atualização parcial de fluxo de caixa"""
+    data: Optional[date] = None
+    saldo_inicial: Optional[Decimal] = None
+    entradas: Optional[Decimal] = None
+    saidas: Optional[Decimal] = None
+    saldo_final: Optional[Decimal] = None
+    
+    class Config:
+        from_attributes = True

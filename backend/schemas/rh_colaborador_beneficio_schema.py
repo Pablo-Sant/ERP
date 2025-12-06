@@ -31,7 +31,7 @@ class ColaboradorBase(BaseModel):
             raise ValueError('Data de recrutamento não pode ser posterior à data de contratação')
         return v
 
-class ColaboradorCreate(ColaboradorBase):
+class ColaboradorBeneficioCreate(ColaboradorBase):
     pass
 
 class ColaboradorUpdate(BaseModel):
@@ -43,7 +43,7 @@ class ColaboradorUpdate(BaseModel):
     salario: Optional[float] = Field(None, ge=0)
     ativo: Optional[int] = Field(None, ge=0, le=1)
 
-class ColaboradorResponse(ColaboradorBase):
+class ColaboradorBeneficioResponse(ColaboradorBase):
     id: int
     # Campos virtuais que não existem no banco mas são retornados
     data_criacao: Optional[datetime] = None

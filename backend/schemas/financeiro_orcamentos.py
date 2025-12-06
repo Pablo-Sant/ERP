@@ -20,3 +20,16 @@ class FinanceiroOrcamentosResponse(FinanceiroOrcamentosBase):
 
     class Config:
         from_attributes = True
+
+
+# ADICIONE ESTA CLASSE
+class FinanceiroOrcamentosUpdate(BaseModel):
+    """Schema para atualização parcial de orçamentos"""
+    ano: Optional[int] = None
+    mes: Optional[int] = None
+    id_conta: Optional[int] = None
+    valor_previsto: Optional[Decimal] = None
+    valor_realizado: Optional[Decimal] = None
+    
+    class Config:
+        from_attributes = True

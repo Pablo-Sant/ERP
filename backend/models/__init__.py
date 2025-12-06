@@ -12,6 +12,8 @@ from .sm_views_models import (
     VwTempoResolucao,
     VwPerformanceAtendentes
 )
+from .usuario import UsuarioModel
+from .projeto_model import ProjetoModel
 
 __all__ = [
     "Atendente",
@@ -24,5 +26,6 @@ __all__ = [
     "VwMetricasMensais",
     "VwAnaliseTiposAtendimento",
     "VwTempoResolucao",
-    "VwPerformanceAtendentes"
+    "VwPerformanceAtendentes",
+    "UsuarioModel", "ProjetoModel"
 ]

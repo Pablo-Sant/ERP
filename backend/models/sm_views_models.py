@@ -6,7 +6,10 @@ from datetime import datetime, date
 # View: vw_dashboard_servicos
 class VwDashboardServicos(DBBaseModel):
     __tablename__ = "vw_dashboard_servicos"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}  # APENAS um dicionário, não uma tupla
+    
+    # Adicionada chave primária artificial para view de dashboard
+    id = Column(Integer, primary_key=True, default=1)
     
     tickets_abertos = Column(Integer)
     tickets_hoje = Column(Integer)
@@ -17,7 +20,7 @@ class VwDashboardServicos(DBBaseModel):
 # View: vw_tickets_abertos
 class VwTicketsAbertos(DBBaseModel):
     __tablename__ = "vw_tickets_abertos"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     id_ticket = Column(Integer, primary_key=True)
     cliente = Column(String(100))
@@ -30,7 +33,7 @@ class VwTicketsAbertos(DBBaseModel):
 # View: vw_trocas_pendentes
 class VwTrocasPendentes(DBBaseModel):
     __tablename__ = "vw_trocas_pendentes"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     id_solicitacao = Column(Integer, primary_key=True)
     cliente = Column(String(100))
@@ -44,7 +47,7 @@ class VwTrocasPendentes(DBBaseModel):
 # View: vw_historico_cliente
 class VwHistoricoCliente(DBBaseModel):
     __tablename__ = "vw_historico_cliente"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     cliente_finalid = Column(Integer, primary_key=True)
     cliente = Column(String(100))
@@ -58,7 +61,7 @@ class VwHistoricoCliente(DBBaseModel):
 # View: vw_metricas_mensais
 class VwMetricasMensais(DBBaseModel):
     __tablename__ = "vw_metricas_mensais"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     mes = Column(DateTime, primary_key=True)
     ano = Column(Integer)
@@ -72,7 +75,7 @@ class VwMetricasMensais(DBBaseModel):
 # View: vw_analise_tipos_atendimento
 class VwAnaliseTiposAtendimento(DBBaseModel):
     __tablename__ = "vw_analise_tipos_atendimento"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     tipo = Column(String(50), primary_key=True)
     total_tickets = Column(Integer)
@@ -82,7 +85,7 @@ class VwAnaliseTiposAtendimento(DBBaseModel):
 # View: vw_tempo_resolucao
 class VwTempoResolucao(DBBaseModel):
     __tablename__ = "vw_tempo_resolucao"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     prioridade = Column(String(20), primary_key=True)
     total_tickets = Column(Integer)
@@ -93,7 +96,7 @@ class VwTempoResolucao(DBBaseModel):
 # View: vw_performance_atendentes
 class VwPerformanceAtendentes(DBBaseModel):
     __tablename__ = "vw_performance_atendentes"
-    __table_args__ = {"schema": "sm"}
+    __table_args__ = {'schema': 'sm'}
     
     id_atendente = Column(Integer, primary_key=True)
     atendente = Column(String(100))
