@@ -1386,6 +1386,215 @@ async def relatorio_receitas_despesas(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao gerar relatório: {str(e)}"
         )
+    
+@router.get("/dashboard/data")
+async def get_dashboard_data(
+    db: AsyncSession = Depends(get_db),
+    # current_user: UsuarioModel = Depends(get_current_user)
+):
+    """Obtém dados reais do banco para o dashboard"""
+    try:
+        print("=== GET /fi/dashboard/data ===")
+        
+        from sqlalchemy import text
+        from datetime import datetime, timedelta
+        
+        # 1. ESTATÍSTICAS BÁSICAS
+        estatisticas = {}
+        
+        # Total de contas
+        query_contas = "SELECT COUNT(*) FROM fi.financeiro_contas WHERE ativo = true"
+        result = await db.execute(text(query_contas))
+        estatisticas['contas_ativas'] = result.scalar() or 0
+        
+        query_total_contas = "SELECT COUNT(*) FROM fi.financeiro_contas"
+        result = await db.execute(text(query_total_contas))
+        estatisticas['total_contas'] = result.scalar() or 0
+        
+        # Total de lançamentos
+        query_lancamentos = "SELECT COUNT(*) FROM fi.financeiro_lancamentos"
+        result = await db.execute(text(query_lancamentos))
+        estatisticas['total_lancamentos'] = result.scalar() or 0
+        
+        # 2. RECEITAS E DESPESAS DO MÊS ATUAL
+        mes_atual = datetime.now().month
+        ano_atual = datetime.now().year
+        
+        # Receitas do mês
+        query_receitas = """
+        SELECT COALESCE(SUM(valor), 0) 
+        FROM fi.financeiro_lancamentos 
+        WHERE tipo = 'receita' 
+        AND EXTRACT(MONTH FROM data_lancamento) = :mes
+        AND EXTRACT(YEAR FROM data_lancamento) = :ano
+        """
+        result = await db.execute(text(query_receitas), {"mes": mes_atual, "ano": ano_atual})
+        estatisticas['receitas_mes'] = float(result.scalar() or 0)
+        
+        # Despesas do mês
+        query_despesas = """
+        SELECT COALESCE(SUM(valor), 0) 
+        FROM fi.financeiro_lancamentos 
+        WHERE tipo = 'despesa' 
+        AND EXTRACT(MONTH FROM data_lancamento) = :mes
+        AND EXTRACT(YEAR FROM data_lancamento) = :ano
+        """
+        result = await db.execute(text(query_despesas), {"mes": mes_atual, "ano": ano_atual})
+        estatisticas['despesas_mes'] = float(result.scalar() or 0)
+        
+        # Resultado do mês
+        estatisticas['resultado_mes'] = estatisticas['receitas_mes'] - estatisticas['despesas_mes']
+        
+        # 3. SALDO TOTAL (soma dos saldos iniciais das contas)
+        query_saldo = "SELECT COALESCE(SUM(saldo_inicial), 0) FROM fi.financeiro_contas WHERE ativo = true"
+        result = await db.execute(text(query_saldo))
+        estatisticas['saldo_total'] = float(result.scalar() or 0)
+        
+        # 4. ÚLTIMOS LANÇAMENTOS (últimos 10)
+        query_ultimos_lancamentos = """
+        SELECT 
+            id_lancamento,
+            descricao,
+            tipo,
+            valor,
+            data_lancamento,
+            created_at
+        FROM fi.financeiro_lancamentos 
+        ORDER BY data_lancamento DESC, created_at DESC 
+        LIMIT 10
+        """
+        
+        result = await db.execute(text(query_ultimos_lancamentos))
+        rows = result.fetchall()
+        
+        ultimos_lancamentos = []
+        for row in rows:
+            lancamento = {
+                "id": row[0],
+                "descricao": row[1],
+                "tipo": row[2],
+                "valor": float(row[3]) if row[3] else 0,
+                "data": row[4].isoformat() if row[4] else None,
+                "created_at": row[5].isoformat() if row[5] else None
+            }
+            ultimos_lancamentos.append(lancamento)
+        
+        # 5. DADOS PARA GRÁFICO (últimos 6 meses)
+        seis_meses_atras = datetime.now() - timedelta(days=180)
+        
+        query_dados_grafico = """
+        SELECT 
+            EXTRACT(MONTH FROM data_lancamento) as mes,
+            EXTRACT(YEAR FROM data_lancamento) as ano,
+            tipo,
+            SUM(valor) as total
+        FROM fi.financeiro_lancamentos 
+        WHERE data_lancamento >= :data_inicio
+        GROUP BY EXTRACT(YEAR FROM data_lancamento), EXTRACT(MONTH FROM data_lancamento), tipo
+        ORDER BY ano, mes
+        """
+        
+        result = await db.execute(text(query_dados_grafico), {"data_inicio": seis_meses_atras})
+        rows_grafico = result.fetchall()
+        
+        # Organizar dados para gráfico
+        dados_grafico = {
+            "receitas": [],
+            "despesas": [],
+            "meses": []
+        }
+        
+        meses_unicos = set()
+        for row in rows_grafico:
+            mes_num = int(row[0])
+            ano_num = int(row[1])
+            tipo = row[2]
+            total = float(row[3]) if row[3] else 0
+            
+            # Formatar mês/ano para exibição
+            mes_formatado = f"{mes_num:02d}/{str(ano_num)[-2:]}"
+            meses_unicos.add(mes_formatado)
+            
+            if tipo == 'receita':
+                dados_grafico["receitas"].append({
+                    "mes": mes_formatado,
+                    "valor": total
+                })
+            elif tipo == 'despesa':
+                dados_grafico["despesas"].append({
+                    "mes": mes_formatado,
+                    "valor": total
+                })
+        
+        dados_grafico["meses"] = sorted(list(meses_unicos))
+        
+        # 6. TOP CATEGORIAS DE ORÇAMENTOS
+        query_top_categorias = """
+        SELECT 
+            categoria,
+            SUM(valor_previsto) as total_previsto,
+            SUM(valor_realizado) as total_realizado
+        FROM fi.financeiro_orcamentos
+        WHERE categoria IS NOT NULL AND categoria != ''
+        GROUP BY categoria
+        ORDER BY total_previsto DESC
+        LIMIT 5
+        """
+        
+        result = await db.execute(text(query_top_categorias))
+        rows_categorias = result.fetchall()
+        
+        top_categorias = []
+        for row in rows_categorias:
+            categoria = {
+                "nome": row[0],
+                "previsto": float(row[1]) if row[1] else 0,
+                "realizado": float(row[2]) if row[2] else 0,
+                "percentual": round((float(row[2]) / float(row[1]) * 100) if row[1] > 0 else 0, 1)
+            }
+            top_categorias.append(categoria)
+        
+        return {
+            "status": "success",
+            "timestamp": datetime.now().isoformat(),
+            "estatisticas": estatisticas,
+            "ultimos_lancamentos": ultimos_lancamentos,
+            "dados_grafico": dados_grafico,
+            "top_categorias": top_categorias,
+            "endpoints": {
+                "contas": "/api/fi/contas",
+                "lancamentos": "/api/fi/lancamentos",
+                "orcamentos": "/api/fi/orcamentos",
+                "fluxo_caixa": "/api/fi/fluxo-caixa",
+                "notas_fiscais": "/api/fi/notas-fiscais"
+            }
+        }
+        
+    except Exception as e:
+        print(f"ERRO em /dashboard/data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            "status": "error",
+            "message": str(e),
+            "estatisticas": {
+                "total_contas": 0,
+                "contas_ativas": 0,
+                "total_lancamentos": 0,
+                "receitas_mes": 0,
+                "despesas_mes": 0,
+                "saldo_total": 0,
+                "resultado_mes": 0
+            },
+            "ultimos_lancamentos": [],
+            "dados_grafico": {
+                "receitas": [],
+                "despesas": [],
+                "meses": []
+            },
+            "top_categorias": []
+        }
 
 # ========== HEALTH CHECK ==========
 
