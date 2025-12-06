@@ -33,7 +33,7 @@ class TicketAtendimento(DBBaseModel):
     # Relationships
     cliente_final = relationship("ClienteFinal", backref="tickets_atendimento")
     pedido = relationship("PedidoVenda", backref="tickets")
-    solicitacoes_troca = relationship(
+    solicitacaoTroca = relationship(
         "SolicitacaoTroca", 
         back_populates="ticket",
         cascade="all, delete-orphan"

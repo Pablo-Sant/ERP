@@ -7,6 +7,7 @@ from models.ativos_model import Ativo
 
 class RegistrosDepreciacao(DBBaseModel):
     __tablename__ = "registros_depreciacao"
+    
     __table_args__ = (
         CheckConstraint("depreciacao_acumulada >= 0", name="registros_depreciacao_depreciacao_acumulada_check"),
         CheckConstraint("valor_depreciacao >= 0", name="registros_depreciacao_valor_depreciacao_check"),
