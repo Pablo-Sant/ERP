@@ -17,4 +17,6 @@ class FolhaPagamento(DBBaseModel):
     salario_base = Column(Float, nullable=False)
     descontos = Column(Float)
     salario_liquido = Column(Float, nullable=False)
-        
+    
+    # Adicione o relacionamento
+    colaborador = relationship("Colaborador", back_populates="folhas_pagamento")

@@ -12,3 +12,6 @@ class Recrutamento(DBBaseModel):
     data_recrutamento = Column(Date, nullable=False)
     status = Column(String(50), nullable=False)
     observacoes = Column(String(200))
+    
+    # Adicione o relacionamento
+    colaborador = relationship("Colaborador", back_populates="recrutamentos")

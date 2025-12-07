@@ -50,7 +50,7 @@ async def listar_colaboradores(
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista todos os colaboradores com filtros"""
     query = select(Colaborador).options(
@@ -87,7 +87,7 @@ async def listar_colaboradores(
 async def get_colaborador(
     colaborador_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém um colaborador específico com seus relacionamentos"""
     query = select(Colaborador).where(Colaborador.id == colaborador_id).options(
@@ -113,7 +113,7 @@ async def get_colaborador(
 async def criar_colaborador(
     colaborador: ColaboradorCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo colaborador"""
     try:
@@ -162,7 +162,7 @@ async def atualizar_colaborador(
     colaborador_id: int,
     colaborador_update: ColaboradorUpdate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza um colaborador existente"""
     query = select(Colaborador).where(Colaborador.id == colaborador_id)
@@ -218,7 +218,7 @@ async def atualizar_colaborador(
 async def deletar_colaborador(
     colaborador_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Remove um colaborador (soft delete - marca como inativo)"""
     query = select(Colaborador).where(Colaborador.id == colaborador_id)
@@ -250,7 +250,7 @@ async def listar_funcoes(
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista todas as funções"""
     query = select(Funcao)
@@ -272,7 +272,7 @@ async def listar_funcoes(
 async def get_funcao(
     funcao_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém uma função específica"""
     query = select(Funcao).where(Funcao.id == funcao_id)
@@ -291,7 +291,7 @@ async def get_funcao(
 async def criar_funcao(
     funcao: FuncaoCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova função"""
     try:
@@ -312,7 +312,7 @@ async def atualizar_funcao(
     funcao_id: int,
     funcao_update: FuncaoUpdate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza uma função existente"""
     query = select(Funcao).where(Funcao.id == funcao_id)
@@ -345,7 +345,7 @@ async def atualizar_funcao(
 async def deletar_funcao(
     funcao_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Exclui uma função"""
     query = select(Funcao).where(Funcao.id == funcao_id)
@@ -387,7 +387,7 @@ async def listar_folhas_pagamento(
     ano: Optional[int] = Query(None, ge=2000, le=2100),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista folhas de pagamento com filtros"""
     query = select(FolhaPagamento)
@@ -413,7 +413,7 @@ async def listar_folhas_pagamento(
 async def get_folha_pagamento(
     folha_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Obtém uma folha de pagamento específica"""
     query = select(FolhaPagamento).where(FolhaPagamento.id == folha_id)
@@ -432,7 +432,7 @@ async def get_folha_pagamento(
 async def criar_folha_pagamento(
     folha: FolhaPagamentoCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova folha de pagamento"""
     try:
@@ -490,7 +490,7 @@ async def atualizar_folha_pagamento(
     folha_id: int,
     folha_update: FolhaPagamentoUpdate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Atualiza uma folha de pagamento existente"""
     query = select(FolhaPagamento).where(FolhaPagamento.id == folha_id)
@@ -545,7 +545,7 @@ async def listar_recrutamentos(
     data_fim: Optional[date] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista recrutamentos com filtros"""
     query = select(Recrutamento)
@@ -573,7 +573,7 @@ async def listar_recrutamentos(
 async def criar_recrutamento(
     recrutamento: RecrutamentoCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo registro de recrutamento"""
     try:
@@ -609,7 +609,7 @@ async def listar_avaliacoes(
     data_fim: Optional[date] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista avaliações de desempenho com filtros"""
     query = select(AvaliacaoDesempenho)
@@ -637,7 +637,7 @@ async def listar_avaliacoes(
 async def criar_avaliacao(
     avaliacao: AvaliacaoDesempenhoCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria uma nova avaliação de desempenho"""
     try:
@@ -679,7 +679,7 @@ async def listar_beneficios(
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista todos os benefícios"""
     query = select(Beneficio)
@@ -701,7 +701,7 @@ async def listar_beneficios(
 async def criar_beneficio(
     beneficio: BeneficioCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Cria um novo benefício"""
     try:
@@ -723,7 +723,7 @@ async def criar_beneficio(
 async def listar_beneficios_colaborador(
     colaborador_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Lista todos os benefícios de um colaborador"""
     # Verificar se colaborador existe
@@ -749,7 +749,7 @@ async def adicionar_beneficio_colaborador(
     colaborador_id: int,
     beneficio_colaborador: ColaboradorBeneficioCreate,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Associa um benefício a um colaborador"""
     if beneficio_colaborador.colaborador_id != colaborador_id:
@@ -808,7 +808,7 @@ async def remover_beneficio_colaborador(
     colaborador_id: int,
     beneficio_id: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Remove a associação de um benefício com um colaborador"""
     query = select(ColaboradorBeneficio).where(
@@ -839,7 +839,7 @@ async def remover_beneficio_colaborador(
 @router.get("/dashboard")
 async def rh_dashboard(
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Dashboard do módulo de Recursos Humanos"""
     try:
@@ -848,7 +848,7 @@ async def rh_dashboard(
         total_colaboradores_result = await db.execute(total_colaboradores_query)
         total_colaboradores = total_colaboradores_result.scalar() or 0
         
-        # Colaboradores ativos
+        # Colaboradores ativos (usando campo ativo)
         ativos_query = select(func.count()).select_from(Colaborador).where(Colaborador.ativo == 1)
         ativos_result = await db.execute(ativos_query)
         ativos = ativos_result.scalar() or 0
@@ -881,6 +881,32 @@ async def rh_dashboard(
         media_avaliacoes_result = await db.execute(media_avaliacoes_query)
         media_avaliacoes = media_avaliacoes_result.scalar() or 0
         
+        # Últimos colaboradores contratados - COM selectinload
+        ultimos_contratados_query = select(Colaborador).options(
+            selectinload(Colaborador.funcao_rel)
+        ).order_by(
+            Colaborador.data_contratacao.desc()
+        ).limit(5)
+        
+        ultimos_contratados_result = await db.execute(ultimos_contratados_query)
+        ultimos_contratados = ultimos_contratados_result.scalars().all()
+        
+        # Colaboradores por função - Query correta
+        colaboradores_por_funcao_query = select(
+            Funcao.nome,
+            func.count(Colaborador.id).label('quantidade')
+        ).outerjoin(
+            Colaborador, Colaborador.funcao_id == Funcao.id
+        ).where(
+            Colaborador.ativo == 1
+        ).group_by(Funcao.id, Funcao.nome)
+        
+        colaboradores_por_funcao_result = await db.execute(colaboradores_por_funcao_query)
+        colaboradores_por_funcao = [
+            {"funcao": row[0] or "Sem função", "quantidade": row[1]}
+            for row in colaboradores_por_funcao_result.all()
+        ]
+        
         # Folha de pagamento do último mês
         ultimo_mes = datetime.now().month
         ultimo_ano = datetime.now().year
@@ -891,27 +917,6 @@ async def rh_dashboard(
         )
         folha_ultimo_mes_result = await db.execute(folha_ultimo_mes_query)
         total_folha_ultimo_mes = folha_ultimo_mes_result.scalar() or 0
-        
-        # Últimos colaboradores contratados
-        ultimos_contratados_query = select(Colaborador).order_by(
-            Colaborador.data_contratacao.desc()
-        ).limit(5)
-        ultimos_contratados_result = await db.execute(ultimos_contratados_query)
-        ultimos_contratados = ultimos_contratados_result.scalars().all()
-        
-        # Colaboradores por função
-        colaboradores_por_funcao_query = select(
-            Funcao.nome,
-            func.count(Colaborador.id).label('quantidade')
-        ).outerjoin(
-            Colaborador, Colaborador.funcao_id == Funcao.id
-        ).group_by(Funcao.id, Funcao.nome)
-        
-        colaboradores_por_funcao_result = await db.execute(colaboradores_por_funcao_query)
-        colaboradores_por_funcao = [
-            {"funcao": row[0] or "Sem função", "quantidade": row[1]}
-            for row in colaboradores_por_funcao_result.all()
-        ]
         
         return {
             "status": "ativo",
@@ -933,8 +938,8 @@ async def rh_dashboard(
                     "id": c.id,
                     "nome": c.nome,
                     "funcao": c.funcao_rel.nome if c.funcao_rel else "Sem função",
-                    "data_contratacao": c.data_contratacao.isoformat(),
-                    "salario": float(c.salario)
+                    "data_contratacao": c.data_contratacao.isoformat() if c.data_contratacao else None,
+                    "salario": float(c.salario) if c.salario else 0
                 }
                 for c in ultimos_contratados
             ],
@@ -948,6 +953,11 @@ async def rh_dashboard(
             }
         }
     except Exception as e:
+        # Log detalhado do erro
+        print(f"ERROR in rh_dashboard: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao gerar dashboard: {str(e)}"
@@ -960,7 +970,7 @@ async def relatorio_folha_pagamento_mensal(
     ano: int,
     mes: int,
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Relatório consolidado da folha de pagamento de um mês específico"""
     try:
@@ -1022,7 +1032,7 @@ async def relatorio_folha_pagamento_mensal(
 @router.get("/relatorios/colaboradores-por-funcao")
 async def relatorio_colaboradores_por_funcao(
     db: AsyncSession = Depends(get_session),
-    current_user: UsuarioModel = Depends(get_current_user)
+    #current_user: UsuarioModel = Depends(get_current_user)
 ):
     """Relatório: Distribuição de colaboradores por função"""
     try:

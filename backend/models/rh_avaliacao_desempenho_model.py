@@ -12,3 +12,6 @@ class AvaliacaoDesempenho(DBBaseModel):
     data_avaliacao = Column(Date, nullable=False)
     nota = Column(Integer, nullable=False)
     comentarios = Column(String(200))
+    
+    # Adicione o relacionamento
+    colaborador = relationship("Colaborador", back_populates="avaliacoes")

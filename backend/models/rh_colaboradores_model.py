@@ -32,3 +32,21 @@ class Colaborador(DBBaseModel):
     folhas_pagamento = relationship("FolhaPagamento", back_populates="colaborador")
     recrutamentos = relationship("Recrutamento", back_populates="colaborador")
     avaliacoes = relationship("AvaliacaoDesempenho", back_populates="colaborador")
+
+    folhas_pagamento = relationship(
+    "FolhaPagamento", 
+    back_populates="colaborador",
+    primaryjoin="and_(Colaborador.id==FolhaPagamento.colaborador_id)"
+)
+
+recrutamentos = relationship(
+    "Recrutamento", 
+    back_populates="colaborador",
+    primaryjoin="and_(Colaborador.id==Recrutamento.colaborador_id)"
+)
+
+avaliacoes = relationship(
+    "AvaliacaoDesempenho", 
+    back_populates="colaborador",
+    primaryjoin="and_(Colaborador.id==AvaliacaoDesempenho.colaborador_id)"
+)
