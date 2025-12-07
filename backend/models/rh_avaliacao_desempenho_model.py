@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, Date, String, Sequence
+from sqlalchemy import Column, Integer, Date, String, Sequence, ForeignKey
+from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
 
 class AvaliacaoDesempenho(DBBaseModel):
@@ -7,7 +8,11 @@ class AvaliacaoDesempenho(DBBaseModel):
 
     id = Column(Integer, Sequence("rh.avaliacao_desempenho_id_seq"), primary_key=True)
 
-    colaborador_id = Column(Integer, nullable=False)
+    # CORRIJA: Adicione ForeignKey
+    colaborador_id = Column(Integer, ForeignKey("rh.colaboradores.id"), nullable=False)
     data_avaliacao = Column(Date, nullable=False)
     nota = Column(Integer, nullable=False)
     comentarios = Column(String(200))
+    
+    # Adicione o relacionamento
+    colaborador = relationship("Colaborador", back_populates="avaliacoes")

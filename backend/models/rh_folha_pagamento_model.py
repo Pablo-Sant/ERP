@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, Float, Sequence
+from sqlalchemy import Column, Integer, Float, Sequence, ForeignKey
+from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
 
 class FolhaPagamento(DBBaseModel):
@@ -7,11 +8,14 @@ class FolhaPagamento(DBBaseModel):
 
     id = Column(Integer, Sequence("rh.folha_pagamento_id_seq"), primary_key=True)
 
-    colaborador_id = Column(Integer, nullable=False)
+    # CORRIJA: Adicione ForeignKey
+    colaborador_id = Column(Integer, ForeignKey("rh.colaboradores.id"), nullable=False)
     mes = Column(Integer, nullable=False)
     ano = Column(Integer, nullable=False)
 
     salario_base = Column(Float, nullable=False)
     descontos = Column(Float)
     salario_liquido = Column(Float, nullable=False)
-        
+    
+    # Adicione o relacionamento
+    colaborador = relationship("Colaborador", back_populates="folhas_pagamento")

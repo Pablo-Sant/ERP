@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
 
@@ -11,5 +11,5 @@ class Beneficio(DBBaseModel):
     descricao = Column(String(200))
     valor = Column(Float)
 
-    # Relacionamentos
+    # Relacionamentos (já está correto)
     colaboradores = relationship("ColaboradorBeneficio", back_populates="beneficio")
