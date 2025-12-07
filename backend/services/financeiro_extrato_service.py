@@ -6,8 +6,8 @@ from sqlalchemy.future import select
 from models.financeiro_extrato import FinanceiroExtratosBancarios
 from models.financeiro_conta import FinanceiroContas
 from schemas.financeiro_extratos_bancarios import (
-    FinanceiroExtratoCreate,
-    FinanceiroExtratoUpdate
+    FinanceiroExtratosBancariosCreate,
+    FinanceiroExtratosBancariosUpdate
 )
 
 
@@ -74,7 +74,7 @@ class FinanceiroExtratoService:
 
     
     @staticmethod
-    async def criar(dto: FinanceiroExtratoCreate, db: AsyncSession):
+    async def criar(dto: FinanceiroExtratosBancariosCreate, db: AsyncSession):
         FinanceiroExtratoService._validar_dados(dto)
         await FinanceiroExtratoService._validar_relacionamentos(dto, db)
 
@@ -88,7 +88,7 @@ class FinanceiroExtratoService:
 
     
     @staticmethod
-    async def atualizar(id_extrato: int, dto: FinanceiroExtratoUpdate, db: AsyncSession):
+    async def atualizar(id_extrato: int, dto: FinanceiroExtratosBancariosUpdate, db: AsyncSession):
         existente = await FinanceiroExtratoService.obter_por_id(id_extrato, db)
 
         if existente.conciliado:

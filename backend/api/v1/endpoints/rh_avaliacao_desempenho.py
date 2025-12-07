@@ -11,27 +11,27 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from schemas.rh_avaliacao_desempenho_schema import AvaliacaoDesempenhoCreate
-from schemas.rh_avaliacao_desempenho_schema import AvaliacaoDesempenhoRead
+from schemas.rh_avaliacao_desempenho_schema import AvaliacaoDesempenhoResponse
 from services.rh_avaliacao_desempenho_service import AvaliacaoDesempenhoService
 
 router = APIRouter()
 
-@router.get('/', status=200, response_model=AvaliacaoDesempenhoRead)
+@router.get('/', status_code=200, response_model=AvaliacaoDesempenhoResponse)
 async def get_all(db: AsyncSession = Depends(get_session)):
     return AvaliacaoDesempenhoService.get_all(db)
 
 
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=AvaliacaoDesempenhoRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=AvaliacaoDesempenhoResponse)
 async def post_cliente(colaborador:AvaliacaoDesempenhoCreate, db:AsyncSession = Depends(get_session)):
     return AvaliacaoDesempenhoService.post(colaborador, db)
 
 
-@router.get('/{id}', response_model=AvaliacaoDesempenhoRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=AvaliacaoDesempenhoResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     return AvaliacaoDesempenhoService.get_by_id(id, db)
         
 
-@router.put('/{id}', response_model=AvaliacaoDesempenhoRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=AvaliacaoDesempenhoResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(colaborador:AvaliacaoDesempenhoCreate, id:int, db:AsyncSession = Depends(get_session)):
     return AvaliacaoDesempenhoService.update(id, colaborador, db)
         

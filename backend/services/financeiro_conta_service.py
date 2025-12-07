@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.financeiro_conta import FinanceiroContas
-from schemas.financeiro_contas_financeiras import FinanceiroContaCreate, FinanceiroContaUpdate
+from schemas.financeiro_contas_financeiras import FinanceiroContasCreate, FinanceiroContasUpdate
 
 
 class FinanceiroContaService:
@@ -54,7 +54,7 @@ class FinanceiroContaService:
 
     
     @staticmethod
-    async def criar(dto: FinanceiroContaCreate, db: AsyncSession):
+    async def criar(dto: FinanceiroContasCreate, db: AsyncSession):
         FinanceiroContaService._validar_dados(dto)
 
         nova = FinanceiroContas(**dto.model_dump())
@@ -67,7 +67,7 @@ class FinanceiroContaService:
 
     
     @staticmethod
-    async def atualizar(id_conta: int, dto: FinanceiroContaUpdate, db: AsyncSession):
+    async def atualizar(id_conta: int, dto: FinanceiroContasUpdate, db: AsyncSession):
         existente = await FinanceiroContaService.obter_por_id(id_conta, db)
 
         FinanceiroContaService._validar_dados(dto)

@@ -11,12 +11,12 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from models.vc_cliente_final_model import ClienteFinal
-from schemas.vc_cliente_final_schema import ClienteFinalRead
+from schemas.vc_cliente_final_schema import ClienteFinalResponse
 from schemas.vc_cliente_final_schema import ClienteFinalCreate
 
 router = APIRouter()
 
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[ClienteFinalRead])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[ClienteFinalResponse])
 async def get_cliente_final(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ClienteFinal)
@@ -26,7 +26,7 @@ async def get_cliente_final(db: AsyncSession = Depends(get_session)):
         return clientes
     
     
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=ClienteFinalRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=ClienteFinalResponse)
 async def post_cliente(cliente:ClienteFinalCreate, db:AsyncSession = Depends(get_session)):
     novo_cliente = ClienteFinal(
         nome = cliente.nome,
@@ -46,7 +46,7 @@ async def post_cliente(cliente:ClienteFinalCreate, db:AsyncSession = Depends(get
     return novo_cliente
 
 
-@router.get('/{id}', response_model=ClienteFinalRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=ClienteFinalResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ClienteFinal).filter(ClienteFinal.id == id)
@@ -59,7 +59,7 @@ async def get_cliente(db:AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Cliente não encontrado', status_code=status.HTTP_404_NOT_FOUND)
         
 
-@router.put('/{id}', response_model=ClienteFinalRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=ClienteFinalResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(cliente:ClienteFinalCreate, id:int, db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ClienteFinal).filter(ClienteFinal.id == id)

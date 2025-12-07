@@ -10,5 +10,5 @@ class Funcao(DBBaseModel):
     nome = Column(String(50), nullable=False)
     descricao = Column(String(200))
 
-    # Relacionamentos
+    
     colaboradores = relationship("Colaborador", back_populates="funcao_rel")

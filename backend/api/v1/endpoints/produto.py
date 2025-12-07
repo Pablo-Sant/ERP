@@ -10,12 +10,12 @@ from sqlalchemy.future import select
 
 from core.deps import get_session
 
-from schemas.mm_produto_schema import ProdutoCreate, ProdutoRead, ProdutoUpdate
+from schemas.mm_produto_schema import ProdutoCreate, ProdutoResponse, ProdutoUpdate
 from models.mm_produto_model import Produto
 
 router = APIRouter()
 
-@router.get('/', status_code = status.HTTP_200_OK, response_model=List[ProdutoRead])
+@router.get('/', status_code = status.HTTP_200_OK, response_model=List[ProdutoResponse])
 async def get_cursos(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Produto)
@@ -24,7 +24,7 @@ async def get_cursos(db: AsyncSession = Depends(get_session)):
         
         return produtos 
     
-@router.post('/{id}', status_code = status.HTTP_201_CREATED, response_model=ProdutoRead)
+@router.post('/{id}', status_code = status.HTTP_201_CREATED, response_model=ProdutoResponse)
 async def post_curso(id:int, produto:ProdutoCreate, db: AsyncSession = Depends(get_session)):
     async with db as session:
         novo_produto = Produto(
@@ -43,7 +43,7 @@ async def post_curso(id:int, produto:ProdutoCreate, db: AsyncSession = Depends(g
         return novo_produto
     
 
-@router.get('/{id}', response_model=ProdutoRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=ProdutoResponse, status_code=status.HTTP_200_OK)
 async def get_produto(id:int, db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Produto).filter(Produto.id == id)
@@ -56,7 +56,7 @@ async def get_produto(id:int, db: AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Produto não encontrado', status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.put('/{id}', response_model=ProdutoRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=ProdutoResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_produto(id:int, produto:ProdutoCreate, db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Produto).filter(Produto.id == id)

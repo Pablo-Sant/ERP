@@ -10,12 +10,12 @@ from sqlalchemy.future import select
 
 from core.deps import get_session
 
-from schemas.vc_contrato_schema import ContratoCreate, ContratoRead
+from schemas.vc_contrato_schema import ContratoCreate, ContratoResponse
 from models.vc_contrato_model import Contrato
 
 router = APIRouter()
 
-@router.get('/', status_code = status.HTTP_200_OK, response_model=List[ContratoRead])
+@router.get('/', status_code = status.HTTP_200_OK, response_model=List[ContratoResponse])
 async def get_cursos(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Contrato)
@@ -24,7 +24,7 @@ async def get_cursos(db: AsyncSession = Depends(get_session)):
         
         return contratos
     
-@router.post('/{id}', status_code = status.HTTP_201_CREATED, response_model=ContratoRead)
+@router.post('/{id}', status_code = status.HTTP_201_CREATED, response_model=ContratoResponse)
 async def post_curso(id:int, contrato:ContratoCreate, db: AsyncSession = Depends(get_session)):
     async with db as session:
         novo_contrato = Contrato(
@@ -42,7 +42,7 @@ async def post_curso(id:int, contrato:ContratoCreate, db: AsyncSession = Depends
         return novo_contrato
     
 
-@router.get('/{id}', response_model=ContratoRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=ContratoResponse, status_code=status.HTTP_200_OK)
 async def get_produto(id:int, db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Contrato).filter(Contrato.contratoid == id)
@@ -55,7 +55,7 @@ async def get_produto(id:int, db: AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Produto não encontrado', status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.put('/{id}', response_model=ContratoRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=ContratoResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_produto(id:int, produto:ContratoCreate, db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Contrato).filter(Contrato.contratoid == id)

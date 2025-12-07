@@ -11,11 +11,11 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from models.rh_colaboradores_model import Colaborador
-from schemas.rh_colaborador_schema import ColaboradorCreate, ColaboradorRead
+from schemas.rh_colaborador_schema import ColaboradorCreate, ColaboradorResponse
 
 router = APIRouter()
 
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[ColaboradorRead])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[ColaboradorResponse])
 async def get_cliente_final(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Colaborador)
@@ -25,7 +25,7 @@ async def get_cliente_final(db: AsyncSession = Depends(get_session)):
         return colaborador
     
     
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=ColaboradorRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=ColaboradorResponse)
 async def post_cliente(colaborador:ColaboradorCreate, db:AsyncSession = Depends(get_session)):
     novo_colaborador = Colaborador(
         nome = colaborador.nome,
@@ -46,7 +46,7 @@ async def post_cliente(colaborador:ColaboradorCreate, db:AsyncSession = Depends(
     return novo_colaborador
 
 
-@router.get('/{id}', response_model=ColaboradorRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=ColaboradorResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Colaborador).filter(Colaborador.id == id)
@@ -59,7 +59,7 @@ async def get_cliente(db:AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Colaborador não encontrado', status_code=status.HTTP_404_NOT_FOUND)
         
 
-@router.put('/{id}', response_model=ColaboradorRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=ColaboradorResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(colaborador:ColaboradorCreate, id:int, db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Colaborador).filter(Colaborador.id == id)

@@ -11,11 +11,11 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from models.rh_recrutamento_model import Recrutamento
-from schemas.rh_recrutamento_schema import RecrutamentoCreate, RecrutamentoRead
+from schemas.rh_recrutamento_schema import RecrutamentoCreate, RecrutamentoResponse
 
 router = APIRouter()
 
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[RecrutamentoRead])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[RecrutamentoResponse])
 async def get_cliente_final(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Recrutamento)
@@ -25,7 +25,7 @@ async def get_cliente_final(db: AsyncSession = Depends(get_session)):
         return colaborador
     
     
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=RecrutamentoRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=RecrutamentoResponse)
 async def post_cliente(folha_pagamento:RecrutamentoCreate, db:AsyncSession = Depends(get_session)):
     nova_folha_pagamento = Recrutamento(
         colaborador_id = folha_pagamento.colaborador_id,
@@ -41,7 +41,7 @@ async def post_cliente(folha_pagamento:RecrutamentoCreate, db:AsyncSession = Dep
     return nova_folha_pagamento
 
 
-@router.get('/{id}', response_model=RecrutamentoRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=RecrutamentoResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Recrutamento).filter(Recrutamento.id == id)
@@ -54,7 +54,7 @@ async def get_cliente(db:AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Recrutamento não encontrado', status_code=status.HTTP_404_NOT_FOUND)
         
 
-@router.put('/{id}', response_model=RecrutamentoRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=RecrutamentoResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(colaborador:RecrutamentoCreate, id:int, db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Recrutamento).filter(Recrutamento.id == id)

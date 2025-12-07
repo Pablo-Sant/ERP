@@ -43,7 +43,7 @@ async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
     return await get_plano_conta_or_404(id, db)
 
 
-@router.put('/{id}', response_model=Auditoria)
+@router.put('/{id}', response_model=AuditoriaResponse)
 async def put_plano_conta(id: int, payload: AuditoriaCreate, db: AsyncSession = Depends(get_session)):
     plano = await get_plano_conta_or_404(id, db)
     data = payload.model_dump()

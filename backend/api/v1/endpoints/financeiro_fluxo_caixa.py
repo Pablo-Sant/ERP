@@ -28,7 +28,7 @@ async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
     return await FinanceiroFluxoCaixaService.get_by_id(id, db)
 
 
-@router.put('/{id}', response_model=FinanceiroFluxoCaixa)
+@router.put('/{id}', response_model=FinanceiroFluxoCaixaResponse)
 async def put_plano_conta(id: int, payload: FinanceiroFluxoCaixaCreate, db: AsyncSession = Depends(get_session)):
     return await FinanceiroFluxoCaixaService.update(id, payload, db)
 

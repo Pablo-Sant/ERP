@@ -11,11 +11,11 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from models.rh_colaborador_beneficio_model import ColaboradorBeneficio
-from schemas.rh_colaborador_beneficio_schema import ColaboradorBeneficioCreate, ColaboradorBeneficioRead
+from schemas.rh_colaborador_beneficio_schema import ColaboradorBeneficioCreate, ColaboradorBeneficioResponse
 
 router = APIRouter()
 
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[ColaboradorBeneficioRead])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[ColaboradorBeneficioResponse])
 async def get_cliente_final(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ColaboradorBeneficio)
@@ -25,7 +25,7 @@ async def get_cliente_final(db: AsyncSession = Depends(get_session)):
         return colaborador
     
     
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=ColaboradorBeneficioRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=ColaboradorBeneficioResponse)
 async def post_cliente(colaborador:ColaboradorBeneficioCreate, db:AsyncSession = Depends(get_session)):
     novo_colaborador = ColaboradorBeneficio(
         colaborador_id = colaborador.colaborador_id,
@@ -39,7 +39,7 @@ async def post_cliente(colaborador:ColaboradorBeneficioCreate, db:AsyncSession =
     return novo_colaborador
 
 
-@router.get('/{id}', response_model=ColaboradorBeneficioRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=ColaboradorBeneficioResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ColaboradorBeneficio).filter(ColaboradorBeneficio.id == id)
@@ -52,7 +52,7 @@ async def get_cliente(db:AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Colaborador não encontrado', status_code=status.HTTP_404_NOT_FOUND)
         
 
-@router.put('/{id}', response_model=ColaboradorBeneficioRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=ColaboradorBeneficioResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(colaborador:ColaboradorBeneficioCreate, id:int, db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ColaboradorBeneficio).filter(ColaboradorBeneficio.id == id)

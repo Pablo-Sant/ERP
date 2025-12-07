@@ -1,24 +1,44 @@
-from models.cliente_model import ClienteModel
+# --- Módulo ATIVOS / AM ---
 from models.am_pecas_ordem_servico import PecasOrdemServico
 from models.am_planos_manutencao_model import PlanosManutencao
 from models.am_registro_calibracao import RegistrosCalibracao
 from models.ativos_model import Ativo
+from models.documento_ativo_model import DocumentoAtivo
+from models.localizacao_model import Localizacao
+from models.movimentacao_ativo_model import MovimentacaoAtivo
+from models.metrica_ativo_model import MetricaAtivo
+
+# --- Módulo BI ---
 from models.bi_cache_dados_model import CacheDadosBI
 from models.bi_dashboard_model import Dashboard
 from models.bi_metrica_kpi_model import MetricaKPI
-from models.categoria_ativo_model import CategoriaAtivo
+
+# --- Módulo CONTABILIDADE ---
 from models.contabilidade_lancamento import ContabilidadeLancamentos
 from models.contabilidade_plano_conta import ContabilidadePlanoContas
-from models.documento_ativo_model import DocumentoAtivo
+
+# --- Módulo CLIENTES/VC ---
+from models.cliente_model import ClienteModel
+from models.vc_cliente_final_model import ClienteFinal
+from models.vc_vendedor_model import Vendedor
+from models.vc_historico_compra_model import HistoricoCompra
+from models.vc_pedido_venda_model import PedidoVenda
+from models.vc_prospecto_model import Prospecto
+from models.vc_contrato_model import Contrato
+
+# --- Módulo FISCAL ---
+from models.fiscal_impostos import FiscalImpostos
+from models.fiscal_notas_fiscais import FiscalNotasFiscais
+
+# --- Módulo FINANCEIRO ---
 from models.financeiro_conciliacoes import FinanceiroConciliacoes
 from models.financeiro_conta import FinanceiroContas
 from models.financeiro_extrato import FinanceiroExtratosBancarios
 from models.financeiro_fluxo_caixa import FinanceiroFluxoCaixa
 from models.financeiro_lancamentos import FinanceiroLancamentos
 from models.financeiro_orcamento import FinanceiroOrcamentos
-from models.fiscal_impostos import FiscalImpostos
-from models.fiscal_notas_fiscais import FiscalNotasFiscais
-from models.fornecedor_model import Fornecedor
+
+# --- Módulo GRC ---
 from models.grc_audotorias_model import Auditoria
 from models.grc_categorias_risco_model import CategoriaRisco
 from models.grc_controles_internos_model import ControleInterno
@@ -29,27 +49,30 @@ from models.grc_risco_controle import RiscoControle
 from models.grc_riscos_corporativos_model import RiscoCorporativo
 from models.grc_segregacao_funcoes import SegregacaoFuncoes
 from models.grc_violacoes_sod import ViolacaoSoD
-from models.localizacao_model import Localizacao
-from models.metrica_ativo_model import MetricaAtivo
+
+# --- Módulo MM ---
 from models.mm_armazens_model import Armazem
 from models.mm_categorias_model import Categoria
 from models.mm_empresas_model import Empresa
 from models.mm_produto_model import Produto
-from models.movimentacao_ativo_model import MovimentacaoAtivo
+
+# --- Módulo ORDEM DE SERVIÇO / PRODUÇÃO ---
 from models.ordens_servicos_model import OrdemServico
 from models.pp_ordens_producao_model import OrdemProducao
+
+# --- Módulo PROJETOS / PS ---
 from models.ps_riscos_projetos_model import RiscoProjeto
+
+# --- Módulo QM ---
 from models.qm_ordem_inspecao_model import OrdemInspecao
-from models.registro_depreciacao import RegistrosDepreciacao
-from models.vc_cliente_final_model import ClienteFinal
-from models.vc_contrato_model import Contrato
-from models.vc_historico_compra_model import HistoricoCompra
-from models.vc_pedido_venda_model import PedidoVenda
-from models.vc_prospecto_model import Prospecto
-from models.vc_vendedor_model import Vendedor
+
+# --- Módulo SM (Suporte) ---
+from models.sm_ticket_atendimento_model import TicketAtendimento
+from models.sm_solicitacao_troca_model import SolicitacaoTroca
+
+# --- Módulo USUÁRIOS ---
 from models.usuario import UsuarioModel
+
+# --- Módulo RH ---
 from models.rh_funcoes_model import Funcao
 from models.rh_colaboradores_model import Colaborador
-from models.rh_colaboradores_model import atendente
-from models.rh_colaboradores_model import atendente
-from models.rh_colaboradores_model import solicitacaoTroca

@@ -21,12 +21,12 @@ class Colaborador(DBBaseModel):
     
     salario = Column(Float, nullable=False)
     
-    # Campos adicionais para controle (não existem no banco mas são úteis)
-    ativo = Column(Integer, default=1, server_default="1")  # Campo virtual
+    
+    ativo = Column(Integer, default=1, server_default="1")  
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
     data_atualizacao = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # Relacionamentos
+    
     funcao_rel = relationship("Funcao", back_populates="colaboradores")
     beneficios = relationship("ColaboradorBeneficio", back_populates="colaborador")
     folhas_pagamento = relationship("FolhaPagamento", back_populates="colaborador")

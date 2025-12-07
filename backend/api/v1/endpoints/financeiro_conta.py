@@ -5,7 +5,6 @@ from sqlalchemy.future import select
 
 from core.deps import get_session
 
-from models.financeiro_conta import FinanceiroContas
 from schemas.financeiro_contas_financeiras import FinanceiroContasCreate, FinanceiroContasResponse
 from services.financeiro_conta_service import FinanceiroContaService
 
@@ -28,7 +27,7 @@ async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
     return await FinanceiroContaService.obter_por_id(id, db)
 
 
-@router.put('/{id}', response_model=FinanceiroContas)
+@router.put('/{id}', response_model=FinanceiroContasResponse)
 async def put_plano_conta(id: int, payload: FinanceiroContasCreate, db: AsyncSession = Depends(get_session)):
     return await FinanceiroContaService.atualizar(id, payload, db)
 

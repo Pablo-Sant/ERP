@@ -11,11 +11,11 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from models.rh_beneficios_model import Beneficio
-from schemas.rh_beneficios_schema import BeneficioCreate, BeneficioRead
+from schemas.rh_beneficios_schema import BeneficioCreate, BeneficioResponse
 
 router = APIRouter()
 
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[BeneficioRead])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[BeneficioResponse])
 async def get_cliente_final(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Beneficio)
@@ -25,7 +25,7 @@ async def get_cliente_final(db: AsyncSession = Depends(get_session)):
         return colaborador
     
     
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=BeneficioRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=BeneficioResponse)
 async def post_cliente(colaborador:BeneficioCreate, db:AsyncSession = Depends(get_session)):
     nova_avaliacao_desempenho = Beneficio(
         nome = colaborador.nome,
@@ -41,7 +41,7 @@ async def post_cliente(colaborador:BeneficioCreate, db:AsyncSession = Depends(ge
     return nova_avaliacao_desempenho
 
 
-@router.get('/{id}', response_model=BeneficioRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=BeneficioResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Beneficio).filter(Beneficio.id == id)
@@ -54,7 +54,7 @@ async def get_cliente(db:AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Beneficio não encontrado', status_code=status.HTTP_404_NOT_FOUND)
         
 
-@router.put('/{id}', response_model=BeneficioRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=BeneficioResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(colaborador:BeneficioCreate, id:int, db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(Beneficio).filter(Beneficio.id == id)

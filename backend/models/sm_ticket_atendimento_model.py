@@ -1,5 +1,5 @@
 # sm_ticket_atendimento_model.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey,Sequence
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from core.configs import DBBaseModel
@@ -30,11 +30,12 @@ class TicketAtendimento(DBBaseModel):
     data_abertura = Column(DateTime, default=func.now())
     data_resolucao = Column(DateTime)
     
-    # Relationships
-    cliente_final = relationship("ClienteFinal", backref="tickets_atendimento")
+    cliente_final = relationship("ClienteFinal", backref="tickets")
     pedido = relationship("PedidoVenda", backref="tickets")
+
+    
     solicitacoes_troca = relationship(
-        "SolicitacaoTroca", 
+        "SolicitacaoTroca",
         back_populates="ticket",
         cascade="all, delete-orphan"
     )

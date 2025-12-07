@@ -11,11 +11,11 @@ from sqlalchemy.future import select
 from core.deps import get_session
 
 from models.rh_folha_pagamento_model import FolhaPagamento
-from schemas.rh_folha_pagamento_schema import FolhaPagamentoCreate, FolhaPagamentoRead
+from schemas.rh_folha_pagamento_schema import FolhaPagamentoCreate, FolhaPagamentoResponse
 
 router = APIRouter()
 
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[FolhaPagamentoRead])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[FolhaPagamentoResponse])
 async def get_cliente_final(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(FolhaPagamento)
@@ -25,7 +25,7 @@ async def get_cliente_final(db: AsyncSession = Depends(get_session)):
         return colaborador
     
     
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=FolhaPagamentoRead)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=FolhaPagamentoResponse)
 async def post_cliente(folha_pagamento:FolhaPagamentoCreate, db:AsyncSession = Depends(get_session)):
     nova_folha_pagamento = FolhaPagamento(
         colaborador_id = folha_pagamento.colaborador_id,
@@ -43,7 +43,7 @@ async def post_cliente(folha_pagamento:FolhaPagamentoCreate, db:AsyncSession = D
     return nova_folha_pagamento
 
 
-@router.get('/{id}', response_model=FolhaPagamentoRead, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=FolhaPagamentoResponse, status_code=status.HTTP_200_OK)
 async def get_cliente(db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(FolhaPagamento).filter(FolhaPagamento.id == id)
@@ -56,7 +56,7 @@ async def get_cliente(db:AsyncSession = Depends(get_session)):
             raise HTTPException(detail='Folha de pagamento não encontrada', status_code=status.HTTP_404_NOT_FOUND)
         
 
-@router.put('/{id}', response_model=FolhaPagamentoRead, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/{id}', response_model=FolhaPagamentoResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_cliente(colaborador:FolhaPagamentoCreate, id:int, db:AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(FolhaPagamento).filter(FolhaPagamento.id == id)

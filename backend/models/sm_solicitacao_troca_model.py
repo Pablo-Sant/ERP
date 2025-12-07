@@ -22,6 +22,6 @@ class SolicitacaoTroca(DBBaseModel):
     motivo = Column(String(100))
     status = Column(String(20), default="SOLICITADA")
     data_solicitacao = Column(DateTime, default=func.now())
+
     
-    # Relationships
-    ticket = relationship("TicketAtendimento", back_populates="solicitacaoTroca")
+    ticket = relationship("TicketAtendimento", back_populates="solicitacoes_troca")

@@ -2,7 +2,6 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from security import verificar_token_jwt
 from models.usuario import UsuarioModel
 from sqlalchemy.future import select
 from core.database import Session
