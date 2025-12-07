@@ -14,4 +14,4 @@ class Recrutamento(DBBaseModel):
     observacoes = Column(String(200))
     
     # Adicione o relacionamento
-    colaborador = relationship("Colaborador", back_populates="recrutamentos")
+    colaborador = orm.relationship("Colaborador", back_populates="recrutamentos")

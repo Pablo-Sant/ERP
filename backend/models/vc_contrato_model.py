@@ -1,3 +1,4 @@
+# models/vc_contrato_model.py
 from sqlalchemy import (
     Column, Integer, String, Date, Numeric, ForeignKey, Time,
     DateTime, Sequence
@@ -5,8 +6,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.configs import DBBaseModel
-
-
 
 class Contrato(DBBaseModel):
     __tablename__ = "contratos"
@@ -18,6 +17,6 @@ class Contrato(DBBaseModel):
     data_inicio = Column(DateTime, default=datetime.now)
     vencimento = Column(Date)
 
-    
+    # Use apenas o nome da classe
     cliente_final = relationship("ClienteFinal", back_populates="contratos", lazy="joined")
-    vendedor = relationship("Vendedor", back_populates="contratos", lazy="joined")
+    vendedor = relationship("Vendedor", back_populates="contratos")

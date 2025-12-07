@@ -1,12 +1,12 @@
 # api/auth.py
-from fastapi import APIRouter, Depends, HTTPException, status
+"""from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import or_
 from core.deps import get_session, get_current_user
 from models.usuario import UsuarioModel
 from schemas.auth_schema import LoginSchema, TokenSchema, UserResponseSchema
-from security import criar_token_jwt, verificar_senha
+#from security import criar_token_jwt, verificar_senha
 import logging
 
 logger = logging.getLogger(__name__)
@@ -94,4 +94,4 @@ async def get_current_user_info(
 
 @router.post("/logout")
 async def logout():
-    return {"message": "Logout realizado com sucesso"}
+    return {"message": "Logout realizado com sucesso"}"""

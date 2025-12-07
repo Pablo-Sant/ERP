@@ -19,4 +19,4 @@ class FolhaPagamento(DBBaseModel):
     salario_liquido = Column(Float, nullable=False)
     
     # Adicione o relacionamento
-    colaborador = relationship("Colaborador", back_populates="folhas_pagamento")
+    colaborador = orm.relationship("Colaborador", back_populates="folhas_pagamento")

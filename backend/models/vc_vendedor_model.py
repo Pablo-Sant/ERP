@@ -1,3 +1,4 @@
+# models/vc_vendedor_model.py
 from sqlalchemy import (
     Column, Integer, String, Date, Numeric, ForeignKey, Time,
     DateTime, Sequence
@@ -5,7 +6,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.configs import DBBaseModel
-
 
 class Vendedor(DBBaseModel):
     __tablename__ = "vendedor"
@@ -23,11 +23,7 @@ class Vendedor(DBBaseModel):
     site = Column(String(100))
     status = Column(String(20))
     data_cadastro = Column(Date, default=datetime.now)
-    #contrato_id = Column(Integer, ForeignKey("contratos.id")) Errado, pois é uma relação de 1 -> N
-    #pedido_id = Column(Integer, ForeignKey("pedidos_de_venda.id"))
     
-    # Em relações 1 -> N a chave estrangeira sempre vai na tabela N
-    # Mas o relacionamento vai nas duas
     
-    contratos = relationship("Contrato", back_populates="vendedor", lazy="joined")
+    contratos = relationship("Contrato", back_populates="vendedor")
     pedidos = relationship("PedidoVenda", back_populates="vendedor", lazy="joined")
