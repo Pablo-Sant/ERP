@@ -1,207 +1,165 @@
-import React, { useState } from 'react';
+// src/pages/modules/Financial.jsx
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import api from '../../services/api';
 import "../../styles/Module.css";
+import FinancialDashboard from '../../components/financial/FinancialDashboard';
+import FinancialAccounts from '../../components/financial/FinancialAccounts';
+import FinancialTransactions from '../../components/financial/FinancialTransactions';
+import FinancialBudgets from '../../components/financial/FinancialBudgets';
+import FinancialReports from '../../components/financial/FinancialReports';
 
 const Financial = () => {
-  const [accounts, setAccounts] = useState([
-    {
-      id: 1,
-      type: 'Pagar',
-      description: 'Aluguel',
-      value: 'R$ 2.500',
-      dueDate: '2024-01-05',
-      status: 'Pendente'
-    },
-    {
-      id: 2,
-      type: 'Receber',
-      description: 'Venda Cliente A',
-      value: 'R$ 8.750',
-      dueDate: '2024-01-10',
-      status: 'Recebido'
-    },
-    {
-      id: 3,
-      type: 'Pagar',
-      description: 'Fornecedor X',
-      value: 'R$ 1.200',
-      dueDate: '2024-01-08',
-      status: 'Pago'
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Buscar dados do dashboard
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/fi/dashboard');
+      setDashboardData(response.data);
+      setError(null);
+    } catch (error) {
+      console.error('Erro ao carregar dashboard:', error);
+      setError('Não foi possível carregar os dados financeiros');
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  const [newAccount, setNewAccount] = useState({
-    type: 'Pagar',
-    description: '',
-    value: '',
-    dueDate: '',
-    status: 'Pendente'
-  });
-
-  const addAccount = () => {
-    if (newAccount.description && newAccount.value) {
-      const account = {
-        ...newAccount,
-        id: Date.now()
-      };
-      setAccounts([...accounts, account]);
-      setNewAccount({
-        type: 'Pagar',
-        description: '',
-        value: '',
-        dueDate: '',
-        status: 'Pendente'
+  // Buscar dados do relatório de receitas/despesas
+  const fetchIncomeExpenseReport = async (startDate, endDate) => {
+    try {
+      const response = await api.get('/fi/relatorios/receitas-despesas', {
+        params: {
+          data_inicio: startDate,
+          data_fim: endDate
+        }
       });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao carregar relatório:', error);
+      throw error;
     }
   };
 
-  const deleteAccount = (id) => {
-    setAccounts(accounts.filter(account => account.id !== id));
+  // Carregar dados iniciais
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'accounts', label: 'Contas', icon: '🏦' },
+    { id: 'transactions', label: 'Transações', icon: '💳' },
+    { id: 'budgets', label: 'Orçamentos', icon: '📋' },
+    { id: 'reports', label: 'Relatórios', icon: '📈' },
+    { id: 'invoices', label: 'Notas Fiscais', icon: '🧾' },
+    { id: 'taxes', label: 'Impostos', icon: '💰' }
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <FinancialDashboard 
+            data={dashboardData}
+            loading={loading}
+            error={error}
+            onRefresh={fetchDashboardData}
+          />
+        );
+      case 'accounts':
+        return <FinancialAccounts />;
+      case 'transactions':
+        return <FinancialTransactions />;
+      case 'budgets':
+        return <FinancialBudgets />;
+      case 'reports':
+        return (
+          <FinancialReports 
+            onGenerateReport={fetchIncomeExpenseReport}
+          />
+        );
+      case 'invoices':
+        return <div className="card"><h3>Notas Fiscais</h3><p>Em desenvolvimento...</p></div>;
+      case 'taxes':
+        return <div className="card"><h3>Impostos</h3><p>Em desenvolvimento...</p></div>;
+      default:
+        return <div>Selecione uma opção</div>;
+    }
   };
-
-  const updateStatus = (id, newStatus) => {
-    setAccounts(accounts.map(account => 
-      account.id === id ? { ...account, status: newStatus } : account
-    ));
-  };
-
-  const totalReceber = accounts
-    .filter(acc => acc.type === 'Receber' && acc.status === 'Pendente')
-    .reduce((sum, acc) => sum + parseFloat(acc.value.replace('R$ ', '').replace('.', '').replace(',', '.')), 0);
-
-  const totalPagar = accounts
-    .filter(acc => acc.type === 'Pagar' && acc.status === 'Pendente')
-    .reduce((sum, acc) => sum + parseFloat(acc.value.replace('R$ ', '').replace('.', '').replace(',', '.')), 0);
 
   return (
-    <div className="module">
-      <div className="module-header">
-        <h1>Financeiro</h1>
-        <p>Contas a pagar/receber e orçamento</p>
-      </div>
-
-      <div className="module-content">
-        <div className="financial-summary">
-          <div className="summary-card receber">
-            <h3>A Receber</h3>
-            <p className="amount">R$ {totalReceber.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-          </div>
-          <div className="summary-card pagar">
-            <h3>A Pagar</h3>
-            <p className="amount">R$ {totalPagar.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-          </div>
-          <div className="summary-card saldo">
-            <h3>Saldo</h3>
-            <p className="amount">R$ {(totalReceber - totalPagar).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-          </div>
-        </div>
-
-        <div className="card">
-          <h2>Nova Conta</h2>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Tipo</label>
-              <select
-                value={newAccount.type}
-                onChange={(e) => setNewAccount({...newAccount, type: e.target.value})}
+    <div className="financial-module">
+      {/* Cabeçalho do Módulo */}
+      <div className="module-fi-header">
+        <div className="header-content">
+          <h1>
+            <span className="module-icon">💰</span>
+            Módulo Financeiro
+          </h1>
+          <p className="module-subtitle">Gestão completa das finanças da empresa</p>
+          
+          <div className="module-user-info">
+            <div className="user-role-badge">
+              <span className="role-icon">👤</span>
+              <span className="role-name">{user?.nome || 'Usuário'}</span>
+              <span className="role-permission">Financeiro</span>
+            </div>
+            <div className="module-actions">
+              <button 
+                className="action-btn refresh-btn"
+                onClick={fetchDashboardData}
+                disabled={loading}
               >
-                <option value="Pagar">Conta a Pagar</option>
-                <option value="Receber">Conta a Receber</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Descrição</label>
-              <input
-                type="text"
-                value={newAccount.description}
-                onChange={(e) => setNewAccount({...newAccount, description: e.target.value})}
-                placeholder="Descrição da conta"
-              />
-            </div>
-            <div className="form-group">
-              <label>Valor</label>
-              <input
-                type="text"
-                value={newAccount.value}
-                onChange={(e) => setNewAccount({...newAccount, value: e.target.value})}
-                placeholder="R$ 0,00"
-              />
-            </div>
-            <div className="form-group">
-              <label>Data Vencimento</label>
-              <input
-                type="date"
-                value={newAccount.dueDate}
-                onChange={(e) => setNewAccount({...newAccount, dueDate: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Status</label>
-              <select
-                value={newAccount.status}
-                onChange={(e) => setNewAccount({...newAccount, status: e.target.value})}
-              >
-                <option value="Pendente">Pendente</option>
-                <option value="Pago">Pago</option>
-                <option value="Recebido">Recebido</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <button onClick={addAccount} className="btn btn-primary">
-                Adicionar Conta
+                {loading ? '🔄 Atualizando...' : '🔄 Atualizar'}
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="card">
-          <h2>Contas</h2>
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Tipo</th>
-                  <th>Descrição</th>
-                  <th>Valor</th>
-                  <th>Vencimento</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accounts.map(account => (
-                  <tr key={account.id}>
-                    <td>
-                      <span className={`type-badge type-${account.type.toLowerCase()}`}>
-                        {account.type}
-                      </span>
-                    </td>
-                    <td>{account.description}</td>
-                    <td><strong>{account.value}</strong></td>
-                    <td>{account.dueDate}</td>
-                    <td>
-                      <select
-                        value={account.status}
-                        onChange={(e) => updateStatus(account.id, e.target.value)}
-                        className={`status-select status-${account.status.toLowerCase()}`}
-                      >
-                        <option value="Pendente">Pendente</option>
-                        <option value="Pago">Pago</option>
-                        <option value="Recebido">Recebido</option>
-                      </select>
-                    </td>
-                    <td>
-                      <button 
-                        onClick={() => deleteAccount(account.id)}
-                        className="btn btn-danger btn-sm"
-                      >
-                        Excluir
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Navegação por Abas */}
+      <div className="module-tabs">
+        <div className="tabs-container">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span className="tab-icon">{tab.icon}</span>
+              <span className="tab-label">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Conteúdo Principal */}
+      <div className="module-content">
+        {renderTabContent()}
+      </div>
+
+      {/* Rodapé */}
+      <div className="module-footer">
+        <div className="footer-info">
+          <span className="timestamp">
+            Última atualização: {new Date().toLocaleString('pt-BR')}
+          </span>
+          <span className="module-version">v1.0.0</span>
+        </div>
+        <div className="footer-links">
+          <a href="/api/fi/health" target="_blank" rel="noopener noreferrer">
+            🔍 Verificar Saúde da API
+          </a>
+          <a href="/docs#/Financeiro" target="_blank" rel="noopener noreferrer">
+            📚 Documentação
+          </a>
         </div>
       </div>
     </div>

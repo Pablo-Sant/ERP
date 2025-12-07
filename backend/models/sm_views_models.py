@@ -6,9 +6,9 @@ from datetime import datetime, date
 # View: vw_dashboard_servicos
 class VwDashboardServicos(DBBaseModel):
     __tablename__ = "vw_dashboard_servicos"
-    __table_args__ = {'schema': 'sm'}  # APENAS um dicionário, não uma tupla
+    __table_args__ = {'schema': 'sm'}  
     
-    # Adicionada chave primária artificial para view de dashboard
+ 
     id = Column(Integer, primary_key=True, default=1)
     
     tickets_abertos = Column(Integer)

@@ -1,6 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.api_router import api_router  
+from api.auth import router as auth_router
+from api.projects import router as projects_router
+from api.mm import router as mm_router
+from api.fi import router as fi_router
+#from api.am import router as ativos_router
+#from api.rh import router as rh_router
+from api.vc import router as vc_router
+from api.sm import router as sm_router
+from api.bi import router as bi_router
 
 def create_app() -> FastAPI:
     app = FastAPI(

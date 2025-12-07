@@ -2,13 +2,6 @@
 from models.am_pecas_ordem_servico import PecasOrdemServico
 from models.am_planos_manutencao_model import PlanosManutencao
 from models.am_registro_calibracao import RegistrosCalibracao
-from models.ativos_model import Ativo
-from models.documento_ativo_model import DocumentoAtivo
-from models.localizacao_model import Localizacao
-from models.movimentacao_ativo_model import MovimentacaoAtivo
-from models.metrica_ativo_model import MetricaAtivo
-
-# --- Módulo BI ---
 from models.bi_cache_dados_model import CacheDadosBI
 from models.bi_dashboard_model import Dashboard
 from models.bi_metrica_kpi_model import MetricaKPI
@@ -71,8 +64,20 @@ from models.sm_ticket_atendimento_model import TicketAtendimento
 from models.sm_solicitacao_troca_model import SolicitacaoTroca
 
 # --- Módulo USUÁRIOS ---
+from models.vc_cliente_final_model import ClienteFinal
+from models.vc_contrato_model import Contrato
+from models.vc_historico_compra_model import HistoricoCompra
+from models.vc_pedido_venda_model import PedidoVenda
+from models.vc_prospecto_model import Prospecto
+from models.vc_vendedor_model import Vendedor
 from models.usuario import UsuarioModel
 
 # --- Módulo RH ---
 from models.rh_funcoes_model import Funcao
 from models.rh_colaboradores_model import Colaborador
+from models.sm_atendente_model import atendente
+from models.sm_ticket_atendimento_model import TicketAtendimento
+from models.sm_solicitacao_troca_model import solicitacaoTroca
+from models.sm_ticket_atendimento_model import vw_dashboard_servicos
+from models.ativos_model import Ativo
+from models.registro_depreciacao import RegistrosDepreciacao

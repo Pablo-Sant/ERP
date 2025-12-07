@@ -32,8 +32,8 @@ router = APIRouter(prefix="/mm", tags=["Material Management"])
 @router.get("/produtos", response_model=List[ProdutoResponse])
 async def listar_produtos(
     db: AsyncSession = Depends(get_db),
-    empresa_id: Optional[int] = Query(None),
-    categoria_id: Optional[int] = Query(None),
+    empresa_id: Optional[str] = Query(None),
+    categoria_id: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -363,8 +363,38 @@ async def listar_categorias(
     """Lista todas as categorias"""
     query = select(Categoria).offset(skip).limit(limit).order_by(Categoria.nome)
     result = await db.execute(query)
-    categorias = result.scalars().all()
-    return categorias
+    categorias_db = result.scalars().all()
+    
+    # Converter para lista de dicionários, garantindo que categoria_pai_id seja None quando apropriado
+    categorias_list = []
+    for cat in categorias_db:
+        # Criar dicionário manualmente para garantir tipos corretos
+        cat_dict = {
+            "id": cat.id,
+            "nome": cat.nome,
+            "descricao": cat.descricao,
+            # Garantir que None seja usado, não 0 ou outro valor
+            "categoria_pai_id": None if cat.categoria_pai_id is None else int(cat.categoria_pai_id),
+            "status": getattr(cat, 'status', 'ativo'),
+            "data_criacao": getattr(cat, 'data_criacao', None),
+            "data_atualizacao": getattr(cat, 'data_atualizacao', None)
+        }
+        categorias_list.append(cat_dict)
+    
+    # Validar cada item individualmente
+    categorias_validated = []
+    for cat_dict in categorias_list:
+        try:
+            categoria = CategoriaResponse(**cat_dict)
+            categorias_validated.append(categoria)
+        except Exception as e:
+            print(f"Erro ao validar categoria {cat_dict['id']}: {e}")
+            # Tentar sem categoria_pai_id se estiver causando problemas
+            cat_dict['categoria_pai_id'] = None
+            categoria = CategoriaResponse(**cat_dict)
+            categorias_validated.append(categoria)
+    
+    return categorias_validated
 
 @router.get("/categorias/{categoria_id}", response_model=CategoriaResponse)
 async def get_categoria(

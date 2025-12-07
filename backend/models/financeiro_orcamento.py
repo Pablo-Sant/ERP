@@ -5,7 +5,6 @@ from models.financeiro_conta import FinanceiroContas
 
 class FinanceiroOrcamentos(DBBaseModel):
     __tablename__ = "financeiro_orcamentos"
-    __table_args__ = {'schema': 'fi'}
 
     id_orcamento = Column(Integer, primary_key=True, autoincrement=True)
     ano = Column(Integer, nullable=False)
