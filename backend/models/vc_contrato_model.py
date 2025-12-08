@@ -19,4 +19,4 @@ class Contrato(DBBaseModel):
 
     # Use apenas o nome da classe
     cliente_final = relationship("ClienteFinal", back_populates="contratos", lazy="joined")
-    vendedor = relationship("Vendedor", back_populates="contratos")
+    #vendedor = relationship("Vendedor", back_populates="contratos")

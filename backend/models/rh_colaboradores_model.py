@@ -16,7 +16,7 @@ class Colaborador(DBBaseModel):
     data_contratacao = Column(Date, nullable=False)
     carga_horaria = Column(Integer, nullable=False)
     
-    data_de_nascimento = Column(Date)
+    data_de_nascimento = Column(Date, nullable=False)
     data_de_recrutamento = Column(Date, nullable=False)
     
     salario = Column(Float, nullable=False)

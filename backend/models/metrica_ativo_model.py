@@ -11,8 +11,8 @@ class MetricaAtivo(DBBaseModel):
     __table_args__ = {"schema": "am"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_organizacao = Column(Integer, nullable=False)
-    organizacao = orm.relationship('Organizacao', lazy='joined')
+    #id_organizacao = Column(Integer, ForeignKey('organizacao.id'), nullable=False)
+    #organizacao = orm.relationship('Organizacao', lazy='joined')
     data_metrica = Column(Date, nullable=False)
     tipo_metrica = Column(String(50), nullable=False)
     valor = Column(Numeric(18, 4), nullable=False)

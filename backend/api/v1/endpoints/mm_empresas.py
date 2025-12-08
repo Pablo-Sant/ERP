@@ -1,68 +1,82 @@
-from typing import List
-from fastapi import APIRouter, status, Depends, HTTPException, Response
+# api/v1/endpoints/empresa.py
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
 from core.deps import get_session
-
-from models.mm_empresas_model import Empresa
 from schemas.mm_empresas_schema import EmpresaCreate, EmpresaResponse, EmpresaUpdate
+from services.mm_empresas_services import EmpresaService
 
 router = APIRouter()
 
+@router.post("/", response_model=EmpresaResponse, status_code=status.HTTP_201_CREATED)
+async def criar_empresa(
+    empresa: EmpresaCreate,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        nova_empresa = await EmpresaService.criar(empresa, db)
+        return nova_empresa
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
-async def get_plano_conta_or_404(id: int, db: AsyncSession):
-    query = select(Empresa).filter(Empresa.id == id)
-    result = await db.execute(query)
-    obj = result.scalar_one_or_none()
+@router.get("/", response_model=list[EmpresaResponse])
+async def listar_empresas(
+    db: AsyncSession = Depends(get_session)
+):
+    empresas = await EmpresaService.get_all(db)
+    return empresas
 
-    if not obj:
-        raise HTTPException(status_code=404, detail="Empresa não encontrada")
-    return obj
+@router.get("/{empresa_id}", response_model=EmpresaResponse)
+async def buscar_empresa(
+    empresa_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    empresa = await EmpresaService.get_by_id(empresa_id, db)
+    if not empresa:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Empresa com ID {empresa_id} não encontrada"
+        )
+    return empresa
 
+@router.put("/{empresa_id}", response_model=EmpresaResponse)
+async def atualizar_empresa(
+    empresa_id: int,
+    empresa_update: EmpresaUpdate,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        empresa_atualizada = await EmpresaService.update(
+            empresa_id, empresa_update, db
+        )
+        if not empresa_atualizada:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Empresa com ID {empresa_id} não encontrada"
+            )
+        return empresa_atualizada
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
-@router.get('/', response_model=List[EmpresaResponse])
-async def get_planos_conta(db: AsyncSession = Depends(get_session)):
-    result = await db.execute(select(Empresa))
-    return result.scalars().all()
-
-
-@router.post('/', response_model=EmpresaResponse, status_code=201)
-async def post_plano_conta(payload: EmpresaCreate, db: AsyncSession = Depends(get_session)):
-    novo = Empresa(**payload.model_dump())
-    db.add(novo)
-
-    await db.commit()
-    await db.refresh(novo)
-
-    return novo
-
-
-@router.get('/{id}', response_model=EmpresaResponse)
-async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    return await get_plano_conta_or_404(id, db)
-
-
-@router.put('/{id}', response_model=EmpresaResponse)
-async def put_plano_conta(id: int, payload: EmpresaUpdate, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-    data = payload.model_dump()
-
-    
-    for attr, value in data.items():
-        setattr(plano, attr, value)
-
-    await db.commit()
-    await db.refresh(plano)
-
-    return plano
-
-
-@router.delete('/{id}', status_code=204)
-async def delete_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-
-    await db.delete(plano)
-    await db.commit()
-
-    return Response(status_code=204)
+@router.delete("/{empresa_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def excluir_empresa(
+    empresa_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        sucesso = await EmpresaService.delete(empresa_id, db)
+        if not sucesso:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Empresa com ID {empresa_id} não encontrada"
+            )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )

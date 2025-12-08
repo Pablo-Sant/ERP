@@ -20,5 +20,5 @@ class PedidoVenda(DBBaseModel):
 
     
     cliente_final = relationship("ClienteFinal", back_populates="pedidos", lazy="joined")
-    vendedor = relationship("Vendedor", back_populates="pedidos", lazy="joined")
-    historicos = relationship("HistoricoCompra", back_populates="pedido", lazy="joined")
+    #vendedor = relationship("Vendedor", back_populates="pedidos", lazy="joined")
+    # = relationship("HistoricoCompra", back_populates="pedido", lazy="joined")

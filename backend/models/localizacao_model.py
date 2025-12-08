@@ -30,7 +30,7 @@ class Localizacao(DBBaseModel):
     caminho_string = Column(Text)
 
     # Relacionamentos
-    ativos = relationship("Ativo", back_populates="localizacao")
+    #ativos = relationship("Ativo", back_populates="localizacao")
     local_pai = relationship(
         "Localizacao",
         remote_side=[id],
@@ -40,13 +40,13 @@ class Localizacao(DBBaseModel):
         "Localizacao",
         back_populates="local_pai"
     )
-    movimentacoes_origem = relationship(
+    """movimentacoes_origem = relationship(
         "MovimentacaoAtivo",
         foreign_keys="[MovimentacaoAtivo.id_local_origem]",
-        back_populates="local_origem_rel"
+        back_populates="local_origem"
     )
     movimentacoes_destino = relationship(
         "MovimentacaoAtivo",
         foreign_keys="[MovimentacaoAtivo.id_local_destino]",
-        back_populates="local_destino_rel"
-    )
+        back_populates="local_destino"
+    )"""

@@ -18,4 +18,4 @@ class FinanceiroOrcamentos(DBBaseModel):
         {'schema': 'fi'}
     )
 
-    conta = relationship("FinanceiroContas", back_populates="orcamentos")
+    #conta = relationship("FinanceiroContas", back_populates="orcamentos")

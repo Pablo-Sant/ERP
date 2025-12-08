@@ -1,4 +1,4 @@
-# models/financeiro_conta.py
+
 from sqlalchemy import Column, Integer, String, Numeric, Boolean, Date, CheckConstraint
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
@@ -22,6 +22,6 @@ class FinanceiroContas(DBBaseModel):
     ativo = Column(Boolean, default=True)
     
     # Relacionamentos
-    orcamentos = relationship("FinanceiroOrcamentos", back_populates="conta")
-    lancamentos = relationship("FinanceiroLancamentos", back_populates="conta")
-    extratos = relationship("FinanceiroExtratosBancarios", back_populates="conta")
+   # orcamentos = relationship("FinanceiroOrcamentos", back_populates="conta", lazy='dynamic')
+   # lancamentos = relationship("FinanceiroLancamentos", back_populates="conta", lazy='dynamic')
+   # extratos = relationship("FinanceiroExtratosBancarios", back_populates="conta", lazy='dynamic')

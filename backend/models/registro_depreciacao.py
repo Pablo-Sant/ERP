@@ -26,5 +26,5 @@ class RegistrosDepreciacao(DBBaseModel):
     data_calculo = Column(Date, nullable=False)
     referencia_lancamento = Column(String(100))
 
-    # CORREÇÃO: Use string literal para evitar import circular
-    #ativo = relationship("Ativo", back_populates="registros_depreciacao")
+    
+   # ativo = relationship("Ativo", back_populates="registros_depreciacao")

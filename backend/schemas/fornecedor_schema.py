@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 
 class FornecedorBase(BaseModel):
-    id_organizacao: Optional[int] = Field(default=1)
     codigo: str = Field(..., max_length=20)
     nome: str = Field(..., max_length=255)
     tipo_fornecedor: Optional[str] = Field(

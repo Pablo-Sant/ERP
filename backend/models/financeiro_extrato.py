@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, Text, Numeric, Boolean, ForeignKey, CheckConstraint, TIMESTAMP
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
-#from models.financeiro_conta import FinanceiroContas
-#from models.financeiro_conciliacoes import FinanceiroConciliacoes
+
 
 
 class FinanceiroExtratosBancarios(DBBaseModel):
@@ -22,5 +21,5 @@ class FinanceiroExtratosBancarios(DBBaseModel):
         {'schema': 'fi'}
     )
 
-    conta = relationship("FinanceiroContas", back_populates="extratos")
-    conciliacoes = relationship("FinanceiroConciliacoes", back_populates="extrato")
+    #conta = relationship("FinanceiroContas", back_populates="extratos")
+   # conciliacoes = relationship("FinanceiroConciliacoes", back_populates="extrato")

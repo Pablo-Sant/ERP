@@ -24,10 +24,10 @@ class Ativo(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_organizacao = Column(Integer, nullable=False, default=1)
-    id_categoria = Column(Integer, ForeignKey("am.categorias_ativos.id"), nullable=False)
-    id_localizacao = Column(Integer, ForeignKey("am.localizacoes.id"), nullable=False)
-    id_fornecedor = Column(Integer, ForeignKey("am.fornecedores.id"))
+    #id_organizacao = Column(Integer, nullable=False, default=1)
+    #id_categoria = Column(Integer, ForeignKey("categorias_ativos.id"), nullable=False)
+    #id_localizacao = Column(Integer, ForeignKey("localizacoes.id"), nullable=False)
+    #id_fornecedor = Column(Integer, ForeignKey("fornecedores.id"))
     
     numero_tag = Column(String(100), nullable=False, unique=True)
     numero_serie = Column(String(100))
@@ -55,15 +55,16 @@ class Ativo(DBBaseModel):
     data_atualizacao = Column(DateTime(timezone=True), server_default=func.now())
 
     # CORREÇÃO: Use string literals para todos os relacionamentos
-    categoria = relationship("CategoriaAtivo", back_populates="ativos")
-    localizacao = relationship("Localizacao", back_populates="ativos")
-    fornecedor = relationship("Fornecedor", back_populates="ativos")
+    #categoria = relationship("CategoriaAtivo", back_populates="ativos")
+    #localizacao = relationship("Localizacao", back_populates="ativos")
+    #fornecedor = relationship("Fornecedor", back_populates="ativos")
     
     # String literal com o nome da classe
-    registros_depreciacao = relationship(
+    """registros_depreciacao = relationship(
         "RegistrosDepreciacao",  # ← String literal, não import
         back_populates="ativo",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy='select'
     )
     
     # Se outras classes também causam problemas, use string literals:
@@ -85,4 +86,4 @@ class Ativo(DBBaseModel):
     movimentacoes = relationship(
         "MovimentacaoAtivo",  # ← String literal
         back_populates="ativo"
-    )
+    )"""

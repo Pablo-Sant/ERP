@@ -23,6 +23,7 @@ async def create_tables() -> None:
         await conn.execute(text("CREATE SCHEMA IF NOT EXISTS pp"))
         await conn.execute(text("CREATE SCHEMA IF NOT EXISTS ps"))
         await conn.execute(text("CREATE SCHEMA IF NOT EXISTS qm"))
+        await conn.execute(text("CREATE SCHEMA IF NOT EXISTS rh"))
         await conn.run_sync(DBBaseModel.metadata.create_all)
     print("Tabelas criadas com sucesso")
 

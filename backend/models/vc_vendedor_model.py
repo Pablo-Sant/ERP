@@ -26,4 +26,4 @@ class Vendedor(DBBaseModel):
     
     
     contratos = relationship("Contrato", back_populates="vendedor")
-    pedidos = relationship("PedidoVenda", back_populates="vendedor", lazy="joined")
+    #pedidos = relationship("PedidoVenda", back_populates="vendedor", lazy="joined")

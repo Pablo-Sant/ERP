@@ -5,7 +5,13 @@ api_router = APIRouter()
 # ==================== ATIVOS ====================
 from api.v1.endpoints import (
     categoria_ativo, documento_ativo, localizacao, 
-    metrica_ativo, movimentacao_ativo
+    metrica_ativo, movimentacao_ativo, ativos
+)
+
+api_router.include_router(
+    ativos.router,
+    prefix="/ativos",
+    tags=["Ativos - ativos"]
 )
 
 api_router.include_router(

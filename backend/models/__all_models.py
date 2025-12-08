@@ -7,7 +7,7 @@ from models.registro_depreciacao import RegistrosDepreciacao
 
 # ------------------- BI -------------------
 from models.bi_cache_dados_model import CacheDadosBI
-from models.bi_dashboard_model import Dashboard
+from models.bi_dashboard_model import Dashboard 
 from models.bi_metrica_kpi_model import MetricaKPI
 
 # ------------------- CONTABILIDADE -------------------
@@ -28,8 +28,8 @@ from models.fiscal_impostos import FiscalImpostos
 from models.fiscal_notas_fiscais import FiscalNotasFiscais
 
 # ------------------- FINANCEIRO -------------------
-from models.financeiro_conciliacoes import FinanceiroConciliacoes
 from models.financeiro_conta import FinanceiroContas
+from models.financeiro_conciliacoes import FinanceiroConciliacoes
 from models.financeiro_extrato import FinanceiroExtratosBancarios
 from models.financeiro_fluxo_caixa import FinanceiroFluxoCaixa
 from models.financeiro_lancamentos import FinanceiroLancamentos

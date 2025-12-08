@@ -34,8 +34,8 @@ async def post_cliente(colaborador:ColaboradorCreate, db:AsyncSession = Depends(
         funcao_id = colaborador.funcao_id,
         data_contratacao = colaborador.data_contratacao,
         carga_horaria = colaborador.carga_horaria,
-        data_nascimento = colaborador.data_de_nascimento,
-        data_recrutamento = colaborador.data_de_recrutamento,
+        data_de_nascimento = colaborador.data_de_nascimento,
+        data_de_recrutamento = colaborador.data_de_recrutamento,
         salario = colaborador.salario
     )
     

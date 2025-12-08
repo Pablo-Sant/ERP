@@ -87,12 +87,7 @@ class FinanceiroContaService:
     async def deletar(id_conta: int, db: AsyncSession):
         existente = await FinanceiroContaService.obter_por_id(id_conta, db)
 
-        # Regra de negócio comum
-        if existente.lancamentos and len(existente.lancamentos) > 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Não é possível excluir uma conta que possui lançamentos financeiros."
-            )
+ 
 
         await db.delete(existente)
         await db.commit()

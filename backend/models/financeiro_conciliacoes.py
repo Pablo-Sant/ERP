@@ -11,5 +11,5 @@ class FinanceiroConciliacoes(DBBaseModel):
     id_lancamento = Column(Integer, ForeignKey("fi.financeiro_lancamentos.id_lancamento"))
     data_conciliacao = Column(TIMESTAMP, default=None)
 
-    extrato = relationship("FinanceiroExtratosBancarios", back_populates="conciliacoes")
-    lancamento = relationship("FinanceiroLancamentos", back_populates="conciliacoes")
+    #extrato = relationship("FinanceiroExtratosBancarios", lazy='joined')
+    #lancamento = relationship("FinanceiroLancamentos", lazy='joined')

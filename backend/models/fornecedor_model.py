@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, Text, Boolean,
-    CheckConstraint, text
+    CheckConstraint, text, ForeignKey
 )
 from sqlalchemy.orm import relationship
 from core.configs import DBBaseModel
@@ -15,7 +15,7 @@ class Fornecedor(DBBaseModel):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    id_organizacao = Column(Integer, nullable=False, default=1)
+    #id_organizacao = Column(Integer, ForeignKey('or'), nullable=False, default=1)
     codigo = Column(String(20), nullable=False, unique=True)
     nome = Column(String(255), nullable=False)
     tipo_fornecedor = Column(String(50))
@@ -28,4 +28,4 @@ class Fornecedor(DBBaseModel):
     ativo = Column(Boolean, server_default=text("true"))
 
     # Relacionamentos
-    ativos = relationship("Ativo", back_populates="fornecedor")
+    #ativos = relationship("Ativo", back_populates="fornecedor")

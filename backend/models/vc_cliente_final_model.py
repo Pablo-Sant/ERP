@@ -23,5 +23,5 @@ class ClienteFinal(DBBaseModel):
 
     
     contratos = relationship("Contrato", back_populates="cliente_final", lazy="joined")
-    historicos_compra = relationship("HistoricoCompra", back_populates="cliente_final", lazy="joined")
+    #historicos_compra = relationship("HistoricoCompra", back_populates="cliente_final", lazy="joined")
     pedidos = relationship("PedidoVenda", back_populates="cliente_final", lazy="joined")

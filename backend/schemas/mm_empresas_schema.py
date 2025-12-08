@@ -1,27 +1,23 @@
-from pydantic import BaseModel
-from typing import Optional
+# schemas/empresa_schema.py
+from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
 
 class EmpresaBase(BaseModel):
-    id: int
-    nome: str
-    cpf_cnpj: str
-    data_criacao: Optional[str] = None
+    nome: str = Field(..., min_length=2, max_length=255, description="Nome da empresa")
+    cpf_cnpj: Optional[str] = Field(None, min_length=11, max_length=14, description="CPF/CNPJ")
 
 class EmpresaCreate(EmpresaBase):
     pass
 
 class EmpresaUpdate(BaseModel):
-    id: Optional[int] = None
-    nome: Optional[str] = None
-    cpf_cnpj: Optional[str] = None
+    nome: Optional[str] = Field(None, min_length=2, max_length=255, description="Nome da empresa")
+    cpf_cnpj: Optional[str] = Field(None, min_length=11, max_length=14, description="CPF/CNPJ")
 
 class EmpresaResponse(EmpresaBase):
+    """Schema para resposta da empresa"""
     id: int
-    nome: str
-    cpf_cnpj: str
     data_criacao: datetime
     
-
     class Config:
-        orm_mode = True
+        from_attributes = True
