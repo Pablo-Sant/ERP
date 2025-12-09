@@ -271,11 +271,10 @@ api_router.include_router(
 # ==================== VENDAS E COMPRAS (VC) ====================
 from api.v1.endpoints import (
     vc_cliente_final, vc_contrato, 
-    vc_historico_compra, vc_pedido_venda
+    vc_historico_compra, vc_pedido_venda, vc_vendedor
 )
 
-# NOTA: Removi o roteador "cliente_final" que estava duplicado
-# e mantive apenas "vc_cliente_final" para consistência
+
 
 api_router.include_router(
     vc_cliente_final.router,
@@ -299,6 +298,12 @@ api_router.include_router(
     vc_pedido_venda.router,
     prefix="/vendas-compras/pedidos-venda",
     tags=["Vendas e Compras - Pedidos de Venda"]
+)
+
+api_router.include_router(
+    vc_vendedor.router,
+    prefix="/vendas-compras/vendedor",
+    tags=["Vendas e Compras - Vendedor"]
 )
 
 # ==================== FORNECEDORES ====================

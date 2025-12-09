@@ -22,6 +22,6 @@ class ClienteFinal(DBBaseModel):
     valor_compra = Column(Numeric(10, 2))
 
     
-    contratos = relationship("Contrato", back_populates="cliente_final", lazy="joined")
+    contratos = relationship("Contrato", lazy="select")
     #historicos_compra = relationship("HistoricoCompra", back_populates="cliente_final", lazy="joined")
-    pedidos = relationship("PedidoVenda", back_populates="cliente_final", lazy="joined")
+    pedidos = relationship("PedidoVenda", lazy="select")

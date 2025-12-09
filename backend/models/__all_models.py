@@ -15,13 +15,13 @@ from models.contabilidade_lancamento import ContabilidadeLancamentos
 from models.contabilidade_plano_conta import ContabilidadePlanoContas
 
 # ------------------- CLIENTES / VC -------------------
-from models.cliente_model import ClienteModel
-from models.vc_cliente_final_model import ClienteFinal
+from models.vc_contrato_model import Contrato
 from models.vc_vendedor_model import Vendedor
+from models.vc_cliente_final_model import ClienteFinal
 from models.vc_historico_compra_model import HistoricoCompra
 from models.vc_pedido_venda_model import PedidoVenda
 from models.vc_prospecto_model import Prospecto
-from models.vc_contrato_model import Contrato
+
 
 # ------------------- FISCAL -------------------
 from models.fiscal_impostos import FiscalImpostos
