@@ -25,5 +25,5 @@ class Vendedor(DBBaseModel):
     data_cadastro = Column(Date, default=datetime.now)
     
     
-    contratos = relationship("Contrato", back_populates="vendedor")
-    #pedidos = relationship("PedidoVenda", back_populates="vendedor", lazy="joined")
+    contratos = relationship("Contrato", lazy='select')
+    pedidos = relationship("PedidoVenda", lazy="select")

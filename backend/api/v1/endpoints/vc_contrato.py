@@ -1,68 +1,116 @@
-from typing import List
-from fastapi import APIRouter, status, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
+from typing import List
+from datetime import date
 from core.deps import get_session
-
-from models.vc_contrato_model import Contrato
-from schemas.vc_contrato_schema import ContratoCreate, ContratoResponse
+from schemas.vc_contrato_schema import ContratoCreate, ContratoUpdate, ContratoResponse
+from services.vc_contrato_service import ContratoService
 
 router = APIRouter()
 
+@router.post("/", response_model=ContratoResponse, status_code=status.HTTP_201_CREATED)
+async def criar_contrato(
+    contrato: ContratoCreate,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.criar(contrato, db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-async def get_plano_conta_or_404(id: int, db: AsyncSession):
-    query = select(Contrato).filter(Contrato.contratoid == id)
-    result = await db.execute(query)
-    obj = result.scalar_one_or_none()
+@router.get("/", response_model=List[ContratoResponse])
+async def listar_contratos(
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.get_all(db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    if not obj:
-        raise HTTPException(status_code=404, detail="Contrato não encontrado")
-    return obj
+@router.get("/{contrato_id}", response_model=ContratoResponse)
+async def buscar_contrato_por_id(
+    contrato_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.get_by_id(contrato_id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
+@router.get("/cliente/{cliente_finalid}", response_model=List[ContratoResponse])
+async def buscar_contratos_por_cliente(
+    cliente_finalid: int,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.buscar_por_cliente(cliente_finalid, db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-@router.get('/', response_model=List[ContratoResponse])
-async def get_planos_conta(db: AsyncSession = Depends(get_session)):
-    result = await db.execute(select(Contrato))
-    return result.scalars().all()
+@router.get("/vendedor/{vendedorid}", response_model=List[ContratoResponse])
+async def buscar_contratos_por_vendedor(
+    vendedorid: int,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.buscar_por_vendedor(vendedorid, db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
+@router.get("/vencimento/em", response_model=List[ContratoResponse])
+async def buscar_contratos_vencendo_em(
+    data_vencimento: date = Query(..., description="Data de vencimento (YYYY-MM-DD)"),
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.buscar_vencendo_em(data_vencimento, db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-@router.post('/', response_model=ContratoResponse, status_code=201)
-async def post_plano_conta(payload: ContratoCreate, db: AsyncSession = Depends(get_session)):
-    novo = Contrato(**payload.model_dump())
-    db.add(novo)
+@router.get("/vencimento/proximos", response_model=List[ContratoResponse])
+async def buscar_contratos_a_vencer(
+    dias: int = Query(30, ge=1, le=365, description="Número de dias para buscar"),
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.buscar_a_vencer(db, dias)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-    await db.commit()
-    await db.refresh(novo)
+@router.put("/{contrato_id}", response_model=ContratoResponse)
+async def atualizar_contrato(
+    contrato_id: int,
+    contrato_update: ContratoUpdate,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.update(contrato_id, contrato_update, db)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND if "não encontrado" in str(e).lower() 
+            else status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
-    return novo
+@router.patch("/{contrato_id}/renovar", response_model=ContratoResponse)
+async def renovar_contrato(
+    contrato_id: int,
+    nova_data_vencimento: date = Query(..., description="Nova data de vencimento (YYYY-MM-DD)"),
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        return await ContratoService.renovar_contrato(contrato_id, nova_data_vencimento, db)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-
-@router.get('/{id}', response_model=ContratoResponse)
-async def get_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    return await get_plano_conta_or_404(id, db)
-
-
-@router.put('/{id}', response_model=ContratoResponse)
-async def put_plano_conta(id: int, payload: ContratoCreate, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-    data = payload.model_dump()
-
-    
-    for attr, value in data.items():
-        setattr(plano, attr, value)
-
-    await db.commit()
-    await db.refresh(plano)
-
-    return plano
-
-
-@router.delete('/{id}', status_code=204)
-async def delete_plano_conta(id: int, db: AsyncSession = Depends(get_session)):
-    plano = await get_plano_conta_or_404(id, db)
-
-    await db.delete(plano)
-    await db.commit()
-
-    return Response(status_code=204)
+@router.delete("/{contrato_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def excluir_contrato(
+    contrato_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    try:
+        sucesso = await ContratoService.delete(contrato_id, db)
+        if not sucesso:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contrato não encontrado")
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

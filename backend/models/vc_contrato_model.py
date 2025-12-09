@@ -17,6 +17,6 @@ class Contrato(DBBaseModel):
     data_inicio = Column(DateTime, default=datetime.now)
     vencimento = Column(Date)
 
-    # Use apenas o nome da classe
-    cliente_final = relationship("ClienteFinal", back_populates="contratos", lazy="joined")
-    #vendedor = relationship("Vendedor", back_populates="contratos")
+    
+    cliente_final = relationship("ClienteFinal", lazy="select")
+    vendedor = relationship("Vendedor", lazy="select")
