@@ -6,18 +6,17 @@ const Sales = () => {
   // Estados para dados do banco
   const [sales, setSales] = useState([]);
   const [clients, setClients] = useState([]);
-  const [vendedores, setVendedores] = useState([]);
+  const [contracts, setContracts] = useState([]); // Adicionando contratos
   const [loading, setLoading] = useState({
     sales: true,
     clients: true,
-    vendedores: true
+    contracts: true
   });
   const [error, setError] = useState(null);
 
   // Estados para formulários
   const [newSale, setNewSale] = useState({
     cliente_finalid: '',
-    vendedorid: '',
     produto: '',
     valor_total: '',
     data_prevista_entrega: '',
@@ -34,6 +33,15 @@ const Sales = () => {
     status: 'Ativo'
   });
 
+  const [newContract, setNewContract] = useState({
+    cliente_finalid: '',
+    descricao: '',
+    valor: '',
+    data_inicio: '',
+    data_fim: '',
+    status: 'Ativo'
+  });
+
   // Carregar dados da API
   useEffect(() => {
     const loadInitialData = async () => {
@@ -44,55 +52,89 @@ const Sales = () => {
         // Carregar clientes
         console.log('Carregando clientes...');
         const clientesResponse = await salesApi.getClients();
-        const clientesData = clientesResponse.data || clientesResponse;
-        console.log('Clientes carregados:', clientesData);
+        console.log('Resposta de clientes:', clientesResponse);
+        
+        // Ajuste para lidar com diferentes formatos de resposta
+        let clientesData;
+        if (Array.isArray(clientesResponse)) {
+          clientesData = clientesResponse;
+        } else if (clientesResponse && Array.isArray(clientesResponse.data)) {
+          clientesData = clientesResponse.data;
+        } else if (clientesResponse && clientesResponse.results) {
+          clientesData = clientesResponse.results;
+        } else {
+          console.error('Formato de resposta inesperado:', clientesResponse);
+          clientesData = [];
+        }
+        
+        console.log('Dados formatados de clientes:', clientesData);
         
         const formattedClients = clientesData.map(cliente => ({
-          id: cliente.cliente_finalid,
-          name: cliente.nome,
-          contact: cliente.contato || cliente.nome,
-          email: cliente.email,
-          phone: cliente.telefone || '',
+          id: cliente.id || cliente.cliente_finalid,
+          nome: cliente.nome || cliente.name,
+          email: cliente.email || '',
+          telefone: cliente.telefone || cliente.phone || '',
+          endereco: cliente.endereco || '',
+          cnpj: cliente.cnpj || '',
           status: cliente.status || 'Ativo'
         }));
         
         setClients(formattedClients);
         setLoading(prev => ({ ...prev, clients: false }));
         
-        // Carregar vendedores
-        console.log('Carregando vendedores...');
-        const vendedoresResponse = await salesApi.getSellers();
-        const vendedoresData = vendedoresResponse.data || vendedoresResponse;
-        console.log('Vendedores carregados:', vendedoresData);
+        // Carregar contratos (em vez de vendedores)
+        console.log('Carregando contratos...');
+        const contractsResponse = await salesApi.getContracts();
+        console.log('Resposta de contratos:', contractsResponse);
         
-        setVendedores(vendedoresData);
-        setLoading(prev => ({ ...prev, vendedores: false }));
+        let contractsData;
+        if (Array.isArray(contractsResponse)) {
+          contractsData = contractsResponse;
+        } else if (contractsResponse && Array.isArray(contractsResponse.data)) {
+          contractsData = contractsResponse.data;
+        } else {
+          console.error('Formato de resposta inesperado:', contractsResponse);
+          contractsData = [];
+        }
+        
+        setContracts(contractsData);
+        setLoading(prev => ({ ...prev, contracts: false }));
         
         // Carregar pedidos (vendas)
         console.log('Carregando pedidos...');
         const pedidosResponse = await salesApi.getSales();
-        const pedidosData = pedidosResponse.data || pedidosResponse;
-        console.log('Pedidos carregados:', pedidosData);
+        console.log('Resposta de pedidos:', pedidosResponse);
+        
+        let pedidosData;
+        if (Array.isArray(pedidosResponse)) {
+          pedidosData = pedidosResponse;
+        } else if (pedidosResponse && Array.isArray(pedidosResponse.data)) {
+          pedidosData = pedidosResponse.data;
+        } else {
+          console.error('Formato de resposta inesperado:', pedidosResponse);
+          pedidosData = [];
+        }
         
         // Transformar dados da API para o formato do frontend
         const transformedSales = pedidosData.map(pedido => {
           // Encontrar cliente correspondente
-          const cliente = clientesData.find(c => c.cliente_finalid === pedido.cliente_finalid);
-          // Encontrar vendedor correspondente
-          const vendedor = vendedoresData.find(v => v.vendedorid === pedido.vendedorid);
+          const cliente = formattedClients.find(c => c.id === pedido.cliente_finalid);
           
           return {
-            id: pedido.pedidoid,
+            id: pedido.id || pedido.pedidoid,
             client: cliente?.nome || `Cliente ID: ${pedido.cliente_finalid}`,
             product: pedido.produto || 'Produto não especificado',
-            value: `R$ ${parseFloat(pedido.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+            value: pedido.valor_total 
+              ? salesApi.formatCurrency(pedido.valor_total)
+              : 'R$ 0,00',
             date: pedido.data_prevista_entrega 
-              ? new Date(pedido.data_prevista_entrega).toISOString().split('T')[0]
-              : new Date().toISOString().split('T')[0],
+              ? salesApi.formatDate(pedido.data_prevista_entrega)
+              : salesApi.formatDate(new Date()),
             status: pedido.status || 'Proposta',
-            seller: vendedor?.nome || `Vendedor ID: ${pedido.vendedorid}`,
             cliente_id: pedido.cliente_finalid,
-            vendedor_id: pedido.vendedorid
+            observacoes: pedido.observacoes || '',
+            // Para atualização completa (PUT)
+            pedidoData: pedido
           };
         });
         
@@ -100,11 +142,14 @@ const Sales = () => {
         setLoading(prev => ({ ...prev, sales: false }));
         
         console.log('Dados carregados com sucesso!');
+        console.log('Clientes:', formattedClients.length);
+        console.log('Contratos:', contractsData.length);
+        console.log('Pedidos:', transformedSales.length);
         
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
         setError(`Erro ao carregar dados da API: ${error.message}. Verifique se o servidor está rodando.`);
-        setLoading({ sales: false, clients: false, vendedores: false });
+        setLoading({ sales: false, clients: false, contracts: false });
       }
     };
 
@@ -112,8 +157,8 @@ const Sales = () => {
   }, []);
 
   const addSale = async () => {
-    if (!newSale.cliente_finalid || !newSale.vendedorid || !newSale.produto) {
-      alert('Preencha todos os campos obrigatórios: Cliente, Vendedor e Produto');
+    if (!newSale.cliente_finalid || !newSale.produto) {
+      alert('Preencha todos os campos obrigatórios: Cliente e Produto');
       return;
     }
 
@@ -121,18 +166,11 @@ const Sales = () => {
       // Converter valor para número
       let valorNumerico = 0;
       if (newSale.valor_total) {
-        // Remove "R$ " e converte para número
-        const valorLimpo = newSale.valor_total
-          .replace('R$ ', '')
-          .replace(/\./g, '')
-          .replace(',', '.');
-        valorNumerico = parseFloat(valorLimpo);
-        if (isNaN(valorNumerico)) valorNumerico = 0;
+        valorNumerico = salesApi.parseCurrency(newSale.valor_total);
       }
 
       const pedidoData = {
         cliente_finalid: parseInt(newSale.cliente_finalid),
-        vendedorid: parseInt(newSale.vendedorid),
         produto: newSale.produto,
         valor_total: valorNumerico,
         data_prevista_entrega: newSale.data_prevista_entrega || new Date().toISOString().split('T')[0],
@@ -142,23 +180,24 @@ const Sales = () => {
 
       console.log('Enviando pedido:', pedidoData);
       const response = await salesApi.createSale(pedidoData);
+      console.log('Resposta do servidor:', response);
+      
       const newSaleData = response.data || response;
       console.log('Pedido criado:', newSaleData);
       
-      // Buscar cliente e vendedor selecionados
+      // Buscar cliente selecionado
       const cliente = clients.find(c => c.id === parseInt(newSale.cliente_finalid));
-      const vendedor = vendedores.find(v => v.vendedorid === parseInt(newSale.vendedorid));
       
       const novaVenda = {
-        id: newSaleData.pedidoid,
-        client: cliente?.name || `Cliente ID: ${newSaleData.cliente_finalid}`,
+        id: newSaleData.id || newSaleData.pedidoid,
+        client: cliente?.nome || `Cliente ID: ${newSaleData.cliente_finalid}`,
         product: newSaleData.produto,
-        value: `R$ ${valorNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-        date: newSaleData.data_prevista_entrega,
+        value: salesApi.formatCurrency(newSaleData.valor_total || 0),
+        date: salesApi.formatDate(newSaleData.data_prevista_entrega),
         status: newSaleData.status,
-        seller: vendedor?.nome || `Vendedor ID: ${newSaleData.vendedorid}`,
         cliente_id: newSaleData.cliente_finalid,
-        vendedor_id: newSaleData.vendedorid
+        observacoes: newSaleData.observacoes || '',
+        pedidoData: newSaleData
       };
 
       setSales([...sales, novaVenda]);
@@ -166,7 +205,6 @@ const Sales = () => {
       // Limpar formulário
       setNewSale({
         cliente_finalid: '',
-        vendedorid: '',
         produto: '',
         valor_total: '',
         data_prevista_entrega: '',
@@ -178,7 +216,7 @@ const Sales = () => {
       
     } catch (error) {
       console.error('Erro ao cadastrar venda:', error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Erro desconhecido';
       alert(`Erro ao cadastrar venda: ${errorMsg}`);
     }
   };
@@ -192,15 +230,18 @@ const Sales = () => {
     try {
       console.log('Criando cliente:', newClient);
       const response = await salesApi.createClient(newClient);
+      console.log('Resposta do servidor:', response);
+      
       const newClientData = response.data || response;
       console.log('Cliente criado:', newClientData);
       
       const novoCliente = {
-        id: newClientData.cliente_finalid,
-        name: newClientData.nome,
-        contact: newClientData.contato || newClientData.nome,
+        id: newClientData.id || newClientData.cliente_finalid,
+        nome: newClientData.nome,
         email: newClientData.email,
-        phone: newClientData.telefone || '',
+        telefone: newClientData.telefone || '',
+        endereco: newClientData.endereco || '',
+        cnpj: newClientData.cnpj || '',
         status: newClientData.status || 'Ativo'
       };
 
@@ -220,8 +261,62 @@ const Sales = () => {
       
     } catch (error) {
       console.error('Erro ao cadastrar cliente:', error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Erro desconhecido';
       alert(`Erro ao cadastrar cliente: ${errorMsg}`);
+    }
+  };
+
+  const addContract = async () => {
+    if (!newContract.cliente_finalid || !newContract.descricao || !newContract.valor) {
+      alert('Preencha todos os campos obrigatórios: Cliente, Descrição e Valor');
+      return;
+    }
+
+    try {
+      const valorNumerico = salesApi.parseCurrency(newContract.valor);
+      
+      const contractData = {
+        cliente_finalid: parseInt(newContract.cliente_finalid),
+        descricao: newContract.descricao,
+        valor: valorNumerico,
+        data_inicio: newContract.data_inicio || new Date().toISOString().split('T')[0],
+        data_fim: newContract.data_fim,
+        status: newContract.status
+      };
+
+      console.log('Criando contrato:', contractData);
+      const response = await salesApi.createContract(contractData);
+      console.log('Contrato criado:', response);
+      
+      // Atualizar lista de contratos
+      const contractsResponse = await salesApi.getContracts();
+      let contractsData;
+      if (Array.isArray(contractsResponse)) {
+        contractsData = contractsResponse;
+      } else if (contractsResponse && Array.isArray(contractsResponse.data)) {
+        contractsData = contractsResponse.data;
+      }
+      
+      if (contractsData) {
+        setContracts(contractsData);
+      }
+
+      // Limpar formulário
+      setNewContract({
+        cliente_finalid: '',
+        descricao: '',
+        valor: '',
+        data_inicio: '',
+        data_fim: '',
+        status: 'Ativo'
+      });
+
+      alert('Contrato cadastrado com sucesso!');
+      
+    } catch (error) {
+      console.error('Erro ao cadastrar contrato:', error);
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Erro desconhecido';
+      alert(`Erro ao cadastrar contrato: ${errorMsg}`);
     }
   };
 
@@ -236,7 +331,7 @@ const Sales = () => {
       alert('Venda excluída com sucesso!');
     } catch (error) {
       console.error('Erro ao excluir venda:', error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Erro desconhecido';
       alert(`Erro ao excluir venda: ${errorMsg}`);
     }
   };
@@ -252,36 +347,76 @@ const Sales = () => {
       alert('Cliente excluído com sucesso!');
     } catch (error) {
       console.error('Erro ao excluir cliente:', error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Erro desconhecido';
       alert(`Erro ao excluir cliente: ${errorMsg}`);
     }
   };
 
+  // Função para atualizar status usando updateSale (PUT completo)
   const updateSaleStatus = async (id, novoStatus) => {
     try {
-      await salesApi.updateSaleStatus(id, novoStatus);
+      // Encontrar o pedido original
+      const pedidoOriginal = sales.find(s => s.id === id);
+      if (!pedidoOriginal || !pedidoOriginal.pedidoData) {
+        throw new Error('Dados do pedido não encontrados');
+      }
+
+      // Criar objeto atualizado
+      const updatedData = {
+        ...pedidoOriginal.pedidoData,
+        status: novoStatus
+      };
+
+      console.log('Atualizando pedido:', updatedData);
       
-      setSales(sales.map(sale => 
-        sale.id === id ? { ...sale, status: novoStatus } : sale
-      ));
+      // Usar updateSale (PUT)
+      const response = await salesApi.updateSale(id, updatedData);
+      const updatedSaleData = response.data || response;
+      console.log('Pedido atualizado:', updatedSaleData);
+      
+      // Atualizar localmente
+      setSales(sales.map(sale => {
+        if (sale.id === id) {
+          // Encontrar cliente
+          const cliente = clients.find(c => c.id === updatedSaleData.cliente_finalid);
+          
+          return {
+            ...sale,
+            status: novoStatus,
+            client: cliente?.nome || `Cliente ID: ${updatedSaleData.cliente_finalid}`,
+            product: updatedSaleData.produto,
+            value: salesApi.formatCurrency(updatedSaleData.valor_total || 0),
+            date: salesApi.formatDate(updatedSaleData.data_prevista_entrega),
+            pedidoData: updatedSaleData
+          };
+        }
+        return sale;
+      }));
       
       alert('Status atualizado com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Erro desconhecido';
       alert(`Erro ao atualizar status: ${errorMsg}`);
     }
   };
 
-  // Calcular total de vendas
+  // Calcular total de vendas fechadas
   const totalSales = sales
     .filter(sale => sale.status === 'Fechada')
     .reduce((sum, sale) => {
-      const valor = parseFloat(sale.value.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
+      const valor = salesApi.parseCurrency(sale.value);
       return sum + (isNaN(valor) ? 0 : valor);
     }, 0);
 
-  if (loading.sales || loading.clients || loading.vendedores) {
+  // Calcular total de contratos ativos
+  const totalActiveContracts = contracts
+    .filter(contract => contract.status === 'Ativo')
+    .reduce((sum, contract) => {
+      return sum + (contract.valor || 0);
+    }, 0);
+
+  if (loading.sales || loading.clients || loading.contracts) {
     return (
       <div className="module">
         <div className="module-header">
@@ -318,12 +453,16 @@ const Sales = () => {
         {/* Cards de Resumo */}
         <div className="sales-summary">
           <div className="summary-card">
-            <h3>Vendas do Mês</h3>
-            <p className="amount">R$ {totalSales.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+            <h3>Vendas Fechadas</h3>
+            <p className="amount">{salesApi.formatCurrency(totalSales)}</p>
           </div>
           <div className="summary-card">
             <h3>Total de Clientes</h3>
             <p className="count">{clients.length}</p>
+          </div>
+          <div className="summary-card">
+            <h3>Contratos Ativos</h3>
+            <p className="amount">{salesApi.formatCurrency(totalActiveContracts)}</p>
           </div>
           <div className="summary-card">
             <h3>Oportunidades</h3>
@@ -331,7 +470,6 @@ const Sales = () => {
           </div>
         </div>
 
-        {/* Resto do seu JSX continua aqui... */}
         {/* Formulário de Nova Venda */}
         <div className="card">
           <h2>Nova Venda/Oportunidade</h2>
@@ -345,22 +483,7 @@ const Sales = () => {
               >
                 <option value="">Selecione um cliente</option>
                 {clients.map(client => (
-                  <option key={client.id} value={client.id}>{client.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Vendedor *</label>
-              <select
-                value={newSale.vendedorid}
-                onChange={(e) => setNewSale({...newSale, vendedorid: e.target.value})}
-                required
-              >
-                <option value="">Selecione um vendedor</option>
-                {vendedores.map(vendedor => (
-                  <option key={vendedor.vendedorid} value={vendedor.vendedorid}>
-                    {vendedor.nome}
-                  </option>
+                  <option key={client.id} value={client.id}>{client.nome}</option>
                 ))}
               </select>
             </div>
@@ -433,7 +556,7 @@ const Sales = () => {
                   <th>Valor</th>
                   <th>Data Prevista</th>
                   <th>Status</th>
-                  <th>Vendedor</th>
+                  <th>Observações</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -464,7 +587,7 @@ const Sales = () => {
                           <option value="Cancelada">Cancelada</option>
                         </select>
                       </td>
-                      <td>{sale.seller}</td>
+                      <td>{sale.observacoes || '-'}</td>
                       <td>
                         <div className="action-buttons">
                           <button 
@@ -561,6 +684,7 @@ const Sales = () => {
               <thead>
                 <tr>
                   <th>Empresa</th>
+                  <th>CNPJ</th>
                   <th>Email</th>
                   <th>Telefone</th>
                   <th>Status</th>
@@ -570,7 +694,7 @@ const Sales = () => {
               <tbody>
                 {clients.length === 0 ? (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
                       Nenhum cliente cadastrado ainda.
                     </td>
                   </tr>
@@ -578,13 +702,12 @@ const Sales = () => {
                   clients.map(client => (
                     <tr key={client.id}>
                       <td>
-                        <strong>{client.name}</strong>
-                        {client.contact !== client.name && (
-                          <div className="contact-name">{client.contact}</div>
-                        )}
+                        <strong>{client.nome}</strong>
+                        <div className="contact-name">{client.endereco || 'Sem endereço'}</div>
                       </td>
+                      <td>{client.cnpj || '-'}</td>
                       <td>{client.email}</td>
-                      <td>{client.phone}</td>
+                      <td>{client.telefone || '-'}</td>
                       <td>
                         <span className={`status-badge status-${(client.status || 'Ativo').toLowerCase()}`}>
                           {client.status || 'Ativo'}
@@ -603,6 +726,78 @@ const Sales = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Formulário de Contratos */}
+        <div className="card">
+          <h2>Cadastro de Contratos</h2>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Cliente *</label>
+              <select
+                value={newContract.cliente_finalid}
+                onChange={(e) => setNewContract({...newContract, cliente_finalid: e.target.value})}
+                required
+              >
+                <option value="">Selecione um cliente</option>
+                {clients.map(client => (
+                  <option key={client.id} value={client.id}>{client.nome}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Descrição *</label>
+              <input
+                type="text"
+                value={newContract.descricao}
+                onChange={(e) => setNewContract({...newContract, descricao: e.target.value})}
+                placeholder="Descrição do contrato"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Valor *</label>
+              <input
+                type="text"
+                value={newContract.valor}
+                onChange={(e) => setNewContract({...newContract, valor: e.target.value})}
+                placeholder="R$ 0,00"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Data Início</label>
+              <input
+                type="date"
+                value={newContract.data_inicio}
+                onChange={(e) => setNewContract({...newContract, data_inicio: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Data Fim</label>
+              <input
+                type="date"
+                value={newContract.data_fim}
+                onChange={(e) => setNewContract({...newContract, data_fim: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                value={newContract.status}
+                onChange={(e) => setNewContract({...newContract, status: e.target.value})}
+              >
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+                <option value="Pendente">Pendente</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <button onClick={addContract} className="btn btn-primary">
+                Adicionar Contrato
+              </button>
+            </div>
           </div>
         </div>
       </div>

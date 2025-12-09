@@ -7,8 +7,8 @@ const MaterialManagement = () => {
   const [produtos, setProdutos] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [armazens, setArmazens] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dashboard, setDashboard] = useState(null);
   const [stockAlerts, setStockAlerts] = useState([]);
 
   // Estados para novo produto
@@ -48,17 +48,17 @@ const MaterialManagement = () => {
   const carregarDados = async () => {
     setLoading(true);
     try {
-      const [produtosData, empresasData, categoriasData, dashboardData] = await Promise.all([
+      const [produtosData, empresasData, categoriasData, armazensData] = await Promise.all([
         MaterialService.getProdutos(),
         MaterialService.getEmpresas(),
         MaterialService.getCategorias(),
-        MaterialService.getDashboard()
+        MaterialService.getArmazens()
       ]);
 
       setProdutos(produtosData || []);
       setEmpresas(empresasData || []);
       setCategorias(categoriasData || []);
-      setDashboard(dashboardData);
+      setArmazens(armazensData || []);
       
       // Calcular alertas de estoque
       if (produtosData) {
@@ -132,7 +132,7 @@ const MaterialManagement = () => {
         status: 'ativo'
       });
 
-      // Recarregar dados para atualizar dashboard
+      // Recarregar dados para atualizar alertas
       carregarDados();
       
       alert('Produto adicionado com sucesso!');
@@ -152,7 +152,7 @@ const MaterialManagement = () => {
       setProdutos(produtos.filter(produto => produto.id !== id));
       alert('Produto excluído com sucesso!');
       
-      // Recarregar dados para atualizar dashboard
+      // Recarregar dados para atualizar alertas
       carregarDados();
     } catch (error) {
       console.error('Erro ao excluir produto:', error);
@@ -191,6 +191,19 @@ const MaterialManagement = () => {
     }
   };
 
+  // Calcular estatísticas localmente (já que não temos endpoint de dashboard)
+  const calcularEstatisticas = () => {
+    return {
+      total_produtos: produtos.length,
+      total_empresas: empresas.length,
+      total_categorias: categorias.length,
+      total_armazens: armazens.length,
+      produtos_baixo_estoque: produtos.filter(p => p.quantidade <= p.quantidade_minima && p.quantidade > 0).length,
+      produtos_esgotados: produtos.filter(p => p.quantidade === 0).length,
+      valor_total_estoque: produtos.reduce((total, p) => total + ((p.quantidade || 0) * (p.preco_unitario || 0)), 0)
+    };
+  };
+
   if (loading) {
     return (
       <div className="material-dashboard">
@@ -201,6 +214,8 @@ const MaterialManagement = () => {
       </div>
     );
   }
+
+  const estatisticas = calcularEstatisticas();
 
   return (
     <div className="material-dashboard">
@@ -213,67 +228,61 @@ const MaterialManagement = () => {
         </header>
 
         {/* Cards de Resumo Dashboard */}
-        {dashboard && (
-          <div className="summary-cards">
-            <div className="summary-card total">
-              <div className="card-icon">📦</div>
-              <h3>Total de Produtos</h3>
-              <p className="value">{dashboard.estatisticas?.total_produtos || 0}</p>
-              <div className="card-trend trend-up">
-                <span style={{ marginRight: '5px' }}>📈</span> {dashboard.ultimos_produtos?.length || 0} novos
-              </div>
-            </div>
-
-            <div className="summary-card empresas">
-              <div className="card-icon">🚚</div>
-              <h3>Empresas</h3>
-              <p className="value">{dashboard.estatisticas?.total_empresas || 0}</p>
-              <div className="card-trend trend-up">
-                <span style={{ marginRight: '5px' }}>📈</span> Ativas
-              </div>
-            </div>
-
-            <div className="summary-card categorias">
-              <div className="card-icon">🗂️</div>
-              <h3>Categorias</h3>
-              <p className="value">{dashboard.estatisticas?.total_categorias || 0}</p>
-              <div className="card-trend trend-neutral">
-                <span style={{ marginRight: '5px' }}>📊</span> Organizadas
-              </div>
-            </div>
-
-            <div className="summary-card armazens">
-              <div className="card-icon">🏠</div>
-              <h3>Armazéns</h3>
-              <p className="value">{dashboard.estatisticas?.total_armazens || 0}</p>
-              <div className="card-trend trend-up">
-                <span style={{ marginRight: '5px' }}>📈</span> Disponíveis
-              </div>
-            </div>
-
-            <div className="summary-card alerta">
-              <div className="card-icon">⚠️</div>
-              <h3>Com Alerta</h3>
-              <p className="value">
-                {produtos.filter(p => p.quantidade <= p.quantidade_minima && p.quantidade > 0).length}
-              </p>
-              <div className="card-trend trend-down">
-                <span style={{ marginRight: '5px' }}>📉</span> Atenção
-              </div>
-            </div>
-
-            <div className="summary-card esgotado">
-              <div className="card-icon">❌</div>
-              <h3>Esgotados</h3>
-              <p className="value">
-                {produtos.filter(p => p.quantidade === 0).length}
-              </p>
-              <div className="card-trend trend-down">
-                <span style={{ marginRight: '5px' }}>📉</span> Urgente
-              </div>
+        <div className="summary-cards">
+          <div className="summary-card total">
+            <div className="card-icon">📦</div>
+            <h3>Total de Produtos</h3>
+            <p className="value">{estatisticas.total_produtos}</p>
+            <div className="card-trend trend-up">
+              <span style={{ marginRight: '5px' }}>📈</span> Ativos
             </div>
           </div>
-        )}
+
+          <div className="summary-card empresas">
+            <div className="card-icon">🏢</div>
+            <h3>Empresas</h3>
+            <p className="value">{estatisticas.total_empresas}</p>
+            <div className="card-trend trend-up">
+              <span style={{ marginRight: '5px' }}>📈</span> Cadastradas
+            </div>
+          </div>
+
+          <div className="summary-card categorias">
+            <div className="card-icon">🗂️</div>
+            <h3>Categorias</h3>
+            <p className="value">{estatisticas.total_categorias}</p>
+            <div className="card-trend trend-neutral">
+              <span style={{ marginRight: '5px' }}>📊</span> Organizadas
+            </div>
+          </div>
+
+          <div className="summary-card armazens">
+            <div className="card-icon">🏠</div>
+            <h3>Armazéns</h3>
+            <p className="value">{estatisticas.total_armazens}</p>
+            <div className="card-trend trend-up">
+              <span style={{ marginRight: '5px' }}>📈</span> Disponíveis
+            </div>
+          </div>
+
+          <div className="summary-card alerta">
+            <div className="card-icon">⚠️</div>
+            <h3>Com Alerta</h3>
+            <p className="value">{estatisticas.produtos_baixo_estoque}</p>
+            <div className="card-trend trend-down">
+              <span style={{ marginRight: '5px' }}>📉</span> Atenção
+            </div>
+          </div>
+
+          <div className="summary-card esgotado">
+            <div className="card-icon">❌</div>
+            <h3>Esgotados</h3>
+            <p className="value">{estatisticas.produtos_esgotados}</p>
+            <div className="card-trend trend-down">
+              <span style={{ marginRight: '5px' }}>📉</span> Urgente
+            </div>
+          </div>
+        </div>
 
         {/* Cards de Ação Rápida */}
         <div className="quick-actions">
@@ -289,9 +298,33 @@ const MaterialManagement = () => {
             <p>Atualize todas as informações do sistema</p>
           </div>
 
-          <div className="action-card" onClick={() => window.print()}>
+          <div className="action-card" onClick={() => {
+            // Gerar CSV simples
+            const csv = [
+              ['Nome', 'Empresa', 'Categoria', 'Quantidade', 'Mínimo', 'Preço', 'Status'],
+              ...produtos.map(p => [
+                p.nome,
+                empresas.find(e => e.id === p.empresa_id)?.nome || '-',
+                categorias.find(c => c.id === p.categoria_id)?.nome || '-',
+                p.quantidade,
+                p.quantidade_minima,
+                p.preco_unitario,
+                getStatusEstoque(p.quantidade, p.quantidade_minima)
+              ])
+            ].map(row => row.join(';')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `relatorio_estoque_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          }}>
             <div className="action-icon">📊</div>
-            <h3>Gerar Relatório</h3>
+            <h3>Exportar CSV</h3>
             <p>Exporte relatórios do estoque</p>
           </div>
 
@@ -632,7 +665,7 @@ const MaterialManagement = () => {
                           </td>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                              📅 {formatarData(produto.data_criacao)}
+                              📅 {formatarData(produto.created_at || produto.data_criacao)}
                             </div>
                           </td>
                           <td>
@@ -656,26 +689,23 @@ const MaterialManagement = () => {
           {/* Estatísticas do Estoque */}
           <div className="chart-card">
             <h2><span style={{ marginRight: '10px' }}>📊</span> Estatísticas do Estoque</h2>
-            <div className="stats-row" style={{ marginTop: '20px' }}>
+            <div className="stats-row" style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
               <div className="stat-item" style={{ textAlign: 'center', padding: '20px', background: '#f8f9fa', borderRadius: '10px' }}>
                 <h3 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>⚠️ Produtos com Estoque Baixo</h3>
                 <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#FF9800', margin: '0' }}>
-                  {produtos.filter(p => p.quantidade <= p.quantidade_minima && p.quantidade > 0).length}
+                  {estatisticas.produtos_baixo_estoque}
                 </p>
               </div>
               <div className="stat-item" style={{ textAlign: 'center', padding: '20px', background: '#f8f9fa', borderRadius: '10px' }}>
                 <h3 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>❌ Produtos Esgotados</h3>
                 <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#F44336', margin: '0' }}>
-                  {produtos.filter(p => p.quantidade === 0).length}
+                  {estatisticas.produtos_esgotados}
                 </p>
               </div>
               <div className="stat-item" style={{ textAlign: 'center', padding: '20px', background: '#f8f9fa', borderRadius: '10px' }}>
                 <h3 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>💰 Valor Total Estoque</h3>
                 <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#4CAF50', margin: '0' }}>
-                  {formatarMoeda(
-                    produtos.reduce((total, p) => 
-                      total + ((p.quantidade || 0) * (p.preco_unitario || 0)), 0
-                  ))}
+                  {formatarMoeda(estatisticas.valor_total_estoque)}
                 </p>
               </div>
             </div>

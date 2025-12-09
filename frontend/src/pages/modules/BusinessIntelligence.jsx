@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import biAPI from '../../services/biAPI'; // Importando a API criada
 import "../../styles/Module.css";
 
 const BusinessIntelligence = () => {
@@ -15,78 +15,125 @@ const BusinessIntelligence = () => {
   const [selectedKpi, setSelectedKpi] = useState('vendas');
   const [selectedPeriodo, setSelectedPeriodo] = useState('mensal');
   const [exportData, setExportData] = useState([]);
+  const [kpiList, setKpiList] = useState([]); // Lista de KPIs do sistema
+  const [selectedDashboard, setSelectedDashboard] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
 
-  const API_URL = 'http://localhost:8000/api/bi';
-
-  // Buscar KPIs principais
+  // Buscar KPIs principais do sistema
   const fetchKpis = async () => {
     setLoading(prev => ({ ...prev, kpis: true }));
     try {
-      const response = await axios.get(`${API_URL}/kpis/calculados`);
-      const kpiData = response.data.kpis;
+      const response = await biAPI.getKPIs({ 
+        tipo: 'principal',
+        ativos: true 
+      });
       
-      // Formatando KPIs para o frontend
-      const formattedKpis = [
-        { 
-          name: 'Faturamento Total', 
-          value: `R$ ${kpiData.total_vendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-          trend: kpiData.total_vendas > 0 ? 'up' : 'down',
-          change: 'Total acumulado'
-        },
-        { 
-          name: 'Ticket Médio', 
-          value: `R$ ${kpiData.ticket_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-          trend: kpiData.ticket_medio > 0 ? 'up' : 'down',
-          change: 'Média por compra'
-        },
-        { 
-          name: 'Clientes Ativos', 
-          value: kpiData.total_clientes.toString(),
-          trend: 'up',
-          change: 'Clientes cadastrados'
-        },
-        { 
-          name: 'Tickets Abertos', 
-          value: kpiData.tickets_abertos.toString(),
-          trend: kpiData.tickets_abertos > 0 ? 'down' : 'up',
-          change: 'Aguardando atendimento'
-        },
-        { 
-          name: 'Vendas Mês Atual', 
-          value: `R$ ${kpiData.vendas_mes_atual.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-          trend: kpiData.vendas_mes_atual > 0 ? 'up' : 'down',
-          change: 'Mês atual'
-        },
-        { 
-          name: 'Taxa Resolução', 
-          value: `${kpiData.taxa_resolucao_tickets.toFixed(1)}%`,
-          trend: kpiData.taxa_resolucao_tickets > 80 ? 'up' : 'down',
-          change: 'Últimos 30 dias'
-        }
-      ];
-      setKpis(formattedKpis);
+      if (response && response.length > 0) {
+        setKpiList(response);
+        
+        // Formatando KPIs para o frontend
+        const formattedKpis = response.slice(0, 6).map(kpi => {
+          let value = '';
+          let trend = 'neutral';
+          
+          if (kpi.tipo_medida === 'monetario') {
+            value = biAPI.formatCurrency(kpi.valor_atual || 0);
+            trend = (kpi.variacao_percentual || 0) >= 0 ? 'up' : 'down';
+          } else if (kpi.tipo_medida === 'percentual') {
+            value = biAPI.formatPercentage(kpi.valor_atual || 0);
+            trend = (kpi.valor_atual || 0) >= (kpi.meta || 0) ? 'up' : 'down';
+          } else {
+            value = biAPI.formatNumber(kpi.valor_atual || 0);
+            trend = (kpi.variacao_percentual || 0) >= 0 ? 'up' : 'down';
+          }
+          
+          return {
+            id: kpi.id,
+            name: kpi.nome,
+            value: value,
+            trend: trend,
+            change: kpi.variacao_percentual ? 
+              `${kpi.variacao_percentual >= 0 ? '+' : ''}${kpi.variacao_percentual.toFixed(1)}%` : 
+              'N/A',
+            description: kpi.descricao
+          };
+        });
+        
+        setKpis(formattedKpis);
+      } else {
+        // Fallback para dados estáticos se não houver KPIs
+        setKpis(getFallbackKpis());
+      }
     } catch (error) {
       console.error('Erro ao buscar KPIs:', error);
       // Fallback para dados estáticos se a API falhar
-      setKpis([
-        { name: 'Faturamento Mensal', value: 'R$ 245.680', trend: 'up', change: '+12%' },
-        { name: 'Ticket Médio', value: 'R$ 1.245', trend: 'up', change: '+5%' },
-        { name: 'Clientes Ativos', value: '156', trend: 'up', change: '+8%' },
-        { name: 'Custos Operacionais', value: 'R$ 98.450', trend: 'down', change: '-3%' }
-      ]);
+      setKpis(getFallbackKpis());
     } finally {
       setLoading(prev => ({ ...prev, kpis: false }));
     }
   };
 
+  // Função para KPIs fallback
+  const getFallbackKpis = () => [
+    { 
+      id: 1, 
+      name: 'Faturamento Mensal', 
+      value: biAPI.formatCurrency(245680), 
+      trend: 'up', 
+      change: '+12%',
+      description: 'Faturamento total do mês' 
+    },
+    { 
+      id: 2, 
+      name: 'Ticket Médio', 
+      value: biAPI.formatCurrency(1245), 
+      trend: 'up', 
+      change: '+5%',
+      description: 'Valor médio por compra' 
+    },
+    { 
+      id: 3, 
+      name: 'Clientes Ativos', 
+      value: '156', 
+      trend: 'up', 
+      change: '+8%',
+      description: 'Clientes com atividade recente' 
+    },
+    { 
+      id: 4, 
+      name: 'Custos Operacionais', 
+      value: biAPI.formatCurrency(98450), 
+      trend: 'down', 
+      change: '-3%',
+      description: 'Custos totais operacionais' 
+    },
+    { 
+      id: 5, 
+      name: 'Taxa Conversão', 
+      value: biAPI.formatPercentage(23.5), 
+      trend: 'up', 
+      change: '+2.1%',
+      description: 'Taxa de conversão de leads' 
+    },
+    { 
+      id: 6, 
+      name: 'Satisfação Cliente', 
+      value: '4.7/5.0', 
+      trend: 'up', 
+      change: '+0.3',
+      description: 'NPS médio' 
+    }
+  ];
+
   // Buscar dashboards
   const fetchDashboards = async () => {
     setLoading(prev => ({ ...prev, dashboards: true }));
     try {
-      const response = await axios.get(`${API_URL}/dashboards/`);
-      setDashboards(response.data);
+      const response = await biAPI.getDashboards();
+      setDashboards(response || []);
     } catch (error) {
       console.error('Erro ao buscar dashboards:', error);
+      setDashboards([]);
     } finally {
       setLoading(prev => ({ ...prev, dashboards: false }));
     }
@@ -95,12 +142,29 @@ const BusinessIntelligence = () => {
   // Buscar tendência de KPIs
   const fetchTendencia = async (kpi, periodo) => {
     try {
-      const response = await axios.get(`${API_URL}/kpis/tendencia`, {
-        params: { kpi, periodo }
-      });
-      setTendenciaData(response.data.tendencia || []);
+      const kpiToCalculate = kpiList.find(k => 
+        k.nome.toLowerCase().includes(kpi.toLowerCase()) || 
+        k.tipo === kpi
+      );
+      
+      if (kpiToCalculate) {
+        const response = await biAPI.calculateKPI(kpiToCalculate.id, {
+          periodo: periodo,
+          agrupamento: 'diario'
+        });
+        setTendenciaData(response.dados || []);
+      } else {
+        // Se não encontrar KPI específico, busca análise geral
+        const response = await biAPI.getTrendAnalysis({
+          metrica: kpi,
+          periodo: periodo,
+          limite: 10
+        });
+        setTendenciaData(response || []);
+      }
     } catch (error) {
       console.error('Erro ao buscar tendência:', error);
+      setTendenciaData([]);
     }
   };
 
@@ -112,26 +176,45 @@ const BusinessIntelligence = () => {
       
       switch(reportType) {
         case 'vendas_vendedor':
-          endpoint = `${API_URL}/relatorios/vendas-por-vendedor`;
+          const kpiVendas = kpiList.find(k => k.nome.toLowerCase().includes('venda'));
+          if (kpiVendas) {
+            const response = await biAPI.calculateKPI(kpiVendas.id, {
+              agrupamento: 'vendedor',
+              periodo: 'mensal'
+            });
+            setExportData(response.dados || []);
+            alert(`Relatório ${reportType} executado! ${response.dados?.length || 0} registros encontrados.`);
+          }
           break;
         case 'vendas_mensais':
-          endpoint = `${API_URL}/relatorios/vendas-mensais`;
-          params = { meses: 12 };
+          const response = await biAPI.getComparativeAnalysis({
+            metrica: 'vendas',
+            periodo: 'mensal',
+            meses: 12
+          });
+          setExportData(response || []);
+          alert(`Relatório ${reportType} executado! ${response?.length || 0} meses analisados.`);
           break;
         case 'clientes_ativos':
-          endpoint = `${API_URL}/relatorios/clientes-ativos`;
-          params = { top_n: 10 };
+          const performanceResponse = await biAPI.getPerformanceReport({
+            tipo: 'clientes',
+            top_n: 10
+          });
+          setExportData(performanceResponse || []);
+          alert(`Relatório ${reportType} executado! ${performanceResponse?.length || 0} clientes encontrados.`);
           break;
         case 'tickets_tipo':
-          endpoint = `${API_URL}/relatorios/tickets-por-tipo`;
+          const analysisResponse = await biAPI.getTrendAnalysis({
+            metrica: 'tickets',
+            agrupamento: 'tipo',
+            periodo: 'mensal'
+          });
+          setExportData(analysisResponse || []);
+          alert(`Relatório ${reportType} executado! ${analysisResponse?.length || 0} tipos analisados.`);
           break;
         default:
           return;
       }
-      
-      const response = await axios.get(endpoint, { params });
-      setExportData(response.data.dados || []);
-      alert(`Relatório ${reportType} executado! ${response.data.total_registros || 0} registros encontrados.`);
     } catch (error) {
       console.error('Erro ao executar relatório:', error);
       alert('Erro ao executar relatório: ' + error.message);
@@ -141,13 +224,28 @@ const BusinessIntelligence = () => {
   // Exportar dados
   const exportDataToFormat = async (formato, tipo) => {
     try {
-      const response = await axios.get(`${API_URL}/exportar/dados`, {
-        params: { formato, tipo }
-      });
+      let dataToExport = exportData;
+      
+      // Se não houver dados específicos para exportar, busca alguns
+      if (!dataToExport || dataToExport.length === 0) {
+        const response = await biAPI.getPerformanceReport({
+          tipo: tipo,
+          limite: 100
+        });
+        dataToExport = response || [];
+      }
       
       if (formato === 'csv') {
         // Criar arquivo CSV para download
-        const blob = new Blob([response.data.dados], { type: 'text/csv' });
+        const headers = Object.keys(dataToExport[0] || {}).join(',');
+        const rows = dataToExport.map(row => 
+          Object.values(row).map(value => 
+            typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+          ).join(',')
+        );
+        const csvContent = [headers, ...rows].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -155,44 +253,99 @@ const BusinessIntelligence = () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
       } else {
-        // Para JSON, podemos mostrar em uma nova janela
-        setExportData(response.data.dados);
-        alert(`Dados exportados em ${formato.toUpperCase()}. Total: ${response.data.total_registros} registros.`);
+        // Para JSON, podemos mostrar em uma nova janela ou baixar
+        const jsonStr = JSON.stringify(dataToExport, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${tipo}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
       }
+      
+      alert(`Dados exportados em ${formato.toUpperCase()}. Total: ${dataToExport.length} registros.`);
     } catch (error) {
       console.error('Erro ao exportar dados:', error);
       alert('Erro ao exportar dados: ' + error.message);
     }
   };
 
-  // Executar query SQL customizada
-  const executeCustomQuery = async (sqlQuery) => {
+  // Executar query SQL customizada (substituído por análise via API)
+  const executeCustomAnalysis = async (analysisType) => {
     try {
-      const response = await axios.get(`${API_URL}/relatorios/executar`, {
-        params: { 
-          sql_query: sqlQuery,
-          usar_cache: true 
-        }
-      });
-      setExportData(response.data.dados || []);
-      alert(`Query executada! ${response.data.total_registros || 0} registros retornados.`);
+      let response;
+      
+      switch(analysisType) {
+        case 'vendedor_performance':
+          response = await biAPI.getPerformanceReport({
+            tipo: 'vendedor',
+            periodo: 'mensal',
+            limite: 5
+          });
+          break;
+        case 'clientes_ticket':
+          response = await biAPI.getComparativeAnalysis({
+            metrica: 'ticket_medio',
+            agrupamento: 'cliente'
+          });
+          break;
+        default:
+          response = await biAPI.getTrendAnalysis({
+            metrica: 'vendas',
+            periodo: 'diario',
+            dias: 30
+          });
+      }
+      
+      setExportData(response || []);
+      alert(`Análise executada! ${response?.length || 0} registros retornados.`);
     } catch (error) {
-      console.error('Erro ao executar query:', error);
-      alert('Erro ao executar query: ' + error.message);
+      console.error('Erro ao executar análise:', error);
+      alert('Erro ao executar análise: ' + error.message);
     }
   };
 
   // Buscar dados de dashboard específico
   const fetchDashboardData = async (dashboardId, atualizarCache = false) => {
     try {
-      const response = await axios.get(`${API_URL}/dashboards/${dashboardId}/dados`, {
-        params: { atualizar_cache: atualizarCache }
+      const response = await biAPI.getDashboardData(dashboardId, {
+        atualizar_cache: atualizarCache,
+        formato: 'json'
       });
-      return response.data;
+      
+      setSelectedDashboard(dashboardId);
+      setDashboardData(response);
+      
+      // Se houver dados exportáveis, atualiza a seção de exportação
+      if (response && response.dados) {
+        setExportData(response.dados.slice(0, 100)); // Limita a 100 registros para visualização
+      }
+      
+      alert(`Dashboard ${dashboardId} carregado! ${response?.dados?.length || 0} registros disponíveis.`);
     } catch (error) {
       console.error('Erro ao buscar dados do dashboard:', error);
-      return null;
+      alert('Erro ao carregar dados do dashboard: ' + error.message);
+    }
+  };
+
+  // Atualizar cache do dashboard
+  const refreshDashboardCache = async (dashboardId) => {
+    try {
+      const response = await biAPI.refreshCache(dashboardId);
+      alert(`Cache do dashboard ${dashboardId} atualizado! ${response?.registros || 0} registros atualizados.`);
+      
+      // Recarrega os dados do dashboard
+      if (selectedDashboard === dashboardId) {
+        fetchDashboardData(dashboardId, false);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar cache:', error);
+      alert('Erro ao atualizar cache: ' + error.message);
     }
   };
 
@@ -200,7 +353,6 @@ const BusinessIntelligence = () => {
   useEffect(() => {
     fetchKpis();
     fetchDashboards();
-    fetchTendencia(selectedKpi, selectedPeriodo);
   }, []);
 
   // Atualizar tendência quando seleção mudar
@@ -208,7 +360,7 @@ const BusinessIntelligence = () => {
     if (selectedKpi && selectedPeriodo) {
       fetchTendencia(selectedKpi, selectedPeriodo);
     }
-  }, [selectedKpi, selectedPeriodo]);
+  }, [selectedKpi, selectedPeriodo, kpiList]);
 
   return (
     <div className="module">
@@ -222,13 +374,28 @@ const BusinessIntelligence = () => {
         <div className="bi-dashboard">
           <div className="section-header">
             <h2>KPIs Principais</h2>
-            <button 
-              onClick={fetchKpis}
-              className="btn btn-secondary btn-sm"
-              disabled={loading.kpis}
-            >
-              {loading.kpis ? 'Atualizando...' : '🔄 Atualizar'}
-            </button>
+            <div className="header-actions">
+              <select 
+                value={selectedKpi}
+                onChange={(e) => setSelectedKpi(e.target.value)}
+                className="form-control-sm"
+                style={{ marginRight: '10px' }}
+              >
+                <option value="">Selecione um KPI</option>
+                {kpiList.slice(0, 10).map(kpi => (
+                  <option key={kpi.id} value={kpi.tipo || kpi.nome.toLowerCase()}>
+                    {kpi.nome}
+                  </option>
+                ))}
+              </select>
+              <button 
+                onClick={fetchKpis}
+                className="btn btn-secondary btn-sm"
+                disabled={loading.kpis}
+              >
+                {loading.kpis ? 'Atualizando...' : '🔄 Atualizar KPIs'}
+              </button>
+            </div>
           </div>
           
           <div className="kpi-grid">
@@ -236,7 +403,7 @@ const BusinessIntelligence = () => {
               <div className="loading">Carregando KPIs...</div>
             ) : (
               kpis.map((kpi, index) => (
-                <div key={index} className="kpi-card">
+                <div key={kpi.id || index} className="kpi-card">
                   <div className="kpi-header">
                     <h3>{kpi.name}</h3>
                     <span className={`trend trend-${kpi.trend}`}>
@@ -245,8 +412,11 @@ const BusinessIntelligence = () => {
                   </div>
                   <div className="kpi-value">{kpi.value}</div>
                   <div className="kpi-trend">
-                    {kpi.trend === 'up' ? '📈' : '📉'} 
-                    {kpi.trend === 'up' ? ' Positivo' : ' Negativo'}
+                    {kpi.trend === 'up' ? '📈' : kpi.trend === 'down' ? '📉' : '➡️'} 
+                    {kpi.trend === 'up' ? ' Positivo' : kpi.trend === 'down' ? ' Negativo' : ' Estável'}
+                  </div>
+                  <div className="kpi-description">
+                    {kpi.description}
                   </div>
                 </div>
               ))
@@ -267,16 +437,24 @@ const BusinessIntelligence = () => {
                 <option value="vendas">Vendas</option>
                 <option value="tickets">Tickets</option>
                 <option value="clientes">Clientes</option>
+                <option value="faturamento">Faturamento</option>
+                <option value="custo">Custos</option>
               </select>
               <select 
                 value={selectedPeriodo}
                 onChange={(e) => setSelectedPeriodo(e.target.value)}
                 className="form-control-sm"
               >
-                <option value="mensal">Mensal</option>
                 <option value="diario">Diário</option>
                 <option value="semanal">Semanal</option>
+                <option value="mensal">Mensal</option>
               </select>
+              <button 
+                onClick={() => fetchTendencia(selectedKpi, selectedPeriodo)}
+                className="btn btn-primary btn-sm"
+              >
+                Atualizar
+              </button>
             </div>
           </div>
           
@@ -285,30 +463,144 @@ const BusinessIntelligence = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Período</th>
-                    <th>Quantidade</th>
-                    <th>Valor Total</th>
-                    <th>Resolvidos</th>
+                    {Object.keys(tendenciaData[0] || {}).map((key, index) => (
+                      <th key={index}>{key.charAt(0).toUpperCase() + key.slice(1)}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {tendenciaData.map((item, index) => (
                     <tr key={index}>
-                      <td>{new Date(item.periodo).toLocaleDateString('pt-BR')}</td>
-                      <td>{item.quantidade}</td>
-                      <td>
-                        {item.valor ? `R$ ${item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'N/A'}
-                      </td>
-                      <td>{item.resolvidos || 'N/A'}</td>
+                      {Object.values(item).map((value, colIndex) => (
+                        <td key={colIndex}>
+                          {typeof value === 'number' 
+                            ? key === 'valor' || key === 'total' 
+                              ? biAPI.formatCurrency(value)
+                              : biAPI.formatNumber(value)
+                            : String(value)}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p>Nenhum dado de tendência disponível</p>
+            <p>Nenhum dado de tendência disponível. Selecione um KPI e período.</p>
           )}
         </div>
+
+        {/* Seção de Dashboards */}
+        <div className="card">
+          <div className="section-header">
+            <h2>Dashboards Disponíveis</h2>
+            <button 
+              onClick={fetchDashboards}
+              className="btn btn-secondary btn-sm"
+              disabled={loading.dashboards}
+            >
+              {loading.dashboards ? 'Carregando...' : '🔄 Atualizar'}
+            </button>
+          </div>
+          
+          {loading.dashboards ? (
+            <p>Carregando dashboards...</p>
+          ) : dashboards.length > 0 ? (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Última Atualização</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboards.map(dashboard => (
+                    <tr key={dashboard.id || dashboard.id_dashboard}>
+                      <td><strong>{dashboard.nome}</strong></td>
+                      <td>{dashboard.descricao || 'Sem descrição'}</td>
+                      <td>
+                        {dashboard.data_atualizacao 
+                          ? biAPI.formatDateTime(dashboard.data_atualizacao)
+                          : 'N/A'}
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button 
+                            onClick={() => fetchDashboardData(dashboard.id || dashboard.id_dashboard, false)}
+                            className="btn btn-primary btn-sm"
+                          >
+                            Ver Dados
+                          </button>
+                          <button 
+                            onClick={() => refreshDashboardCache(dashboard.id || dashboard.id_dashboard)}
+                            className="btn btn-secondary btn-sm"
+                          >
+                            Atualizar Cache
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>Nenhum dashboard disponível</p>
+          )}
+        </div>
+
+        {/* Dados do Dashboard Selecionado */}
+        {dashboardData && selectedDashboard && (
+          <div className="card">
+            <div className="section-header">
+              <h3>Dados do Dashboard</h3>
+              <button 
+                onClick={() => {
+                  setDashboardData(null);
+                  setSelectedDashboard(null);
+                }}
+                className="btn btn-danger btn-sm"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="dashboard-preview">
+              <p><strong>Total de Registros:</strong> {dashboardData.dados?.length || 0}</p>
+              <p><strong>Última Atualização:</strong> {dashboardData.ultima_atualizacao || 'N/A'}</p>
+              
+              {dashboardData.dados && dashboardData.dados.length > 0 && (
+                <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        {Object.keys(dashboardData.dados[0]).map((key, index) => (
+                          <th key={index}>{key}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dashboardData.dados.slice(0, 10).map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                          {Object.values(row).map((value, colIndex) => (
+                            <td key={colIndex}>
+                              {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {dashboardData.dados.length > 10 && (
+                    <p className="text-muted">Mostrando 10 de {dashboardData.dados.length} registros</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Seção de Relatórios Predefinidos */}
         <div className="card">
@@ -327,7 +619,7 @@ const BusinessIntelligence = () => {
             
             <div className="report-card">
               <h4>Vendas Mensais</h4>
-              <p>Vendas totais por mês</p>
+              <p>Vendas totais por mês (últimos 12 meses)</p>
               <button 
                 onClick={() => runPredefinedReport('vendas_mensais')}
                 className="btn btn-primary btn-sm"
@@ -360,62 +652,32 @@ const BusinessIntelligence = () => {
           </div>
         </div>
 
-        {/* Seção de Dashboards */}
+        {/* Seção de Análises Customizadas */}
         <div className="card">
-          <div className="section-header">
-            <h2>Dashboards Disponíveis</h2>
+          <h2>Análises Customizadas</h2>
+          <div className="sql-query-section">
+            <div className="form-group">
+              <label>Selecione o tipo de análise:</label>
+              <select 
+                id="analysisType"
+                className="form-control"
+                defaultValue="vendedor_performance"
+              >
+                <option value="vendedor_performance">Performance de Vendedores</option>
+                <option value="clientes_ticket">Ticket Médio por Cliente</option>
+                <option value="vendas_diarias">Vendas Diárias (30 dias)</option>
+              </select>
+            </div>
             <button 
-              onClick={fetchDashboards}
-              className="btn btn-secondary btn-sm"
-              disabled={loading.dashboards}
+              onClick={() => {
+                const analysisType = document.getElementById('analysisType').value;
+                executeCustomAnalysis(analysisType);
+              }}
+              className="btn btn-primary"
             >
-              {loading.dashboards ? 'Carregando...' : '🔄 Atualizar'}
+              Executar Análise
             </button>
           </div>
-          
-          {loading.dashboards ? (
-            <p>Carregando dashboards...</p>
-          ) : dashboards.length > 0 ? (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nome</th>
-                    <th>Descrição</th>
-                    <th>Última Atualização</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dashboards.map(dashboard => (
-                    <tr key={dashboard.id_dashboard}>
-                      <td><strong>{dashboard.nome}</strong></td>
-                      <td>{dashboard.descricao}</td>
-                      <td>{new Date(dashboard.data_atualizacao).toLocaleDateString('pt-BR')}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button 
-                            onClick={() => fetchDashboardData(dashboard.id_dashboard, false)}
-                            className="btn btn-primary btn-sm"
-                          >
-                            Ver Dados
-                          </button>
-                          <button 
-                            onClick={() => fetchDashboardData(dashboard.id_dashboard, true)}
-                            className="btn btn-secondary btn-sm"
-                          >
-                            Atualizar Cache
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p>Nenhum dashboard disponível</p>
-          )}
         </div>
 
         {/* Seção de Exportação de Dados */}
@@ -427,6 +689,7 @@ const BusinessIntelligence = () => {
                 <option value="vendas">Vendas</option>
                 <option value="clientes">Clientes</option>
                 <option value="tickets">Tickets</option>
+                <option value="dashboard">Dashboard Atual</option>
               </select>
               
               <select id="exportFormat" className="form-control">
@@ -438,7 +701,8 @@ const BusinessIntelligence = () => {
                 onClick={() => {
                   const tipo = document.getElementById('exportType').value;
                   const formato = document.getElementById('exportFormat').value;
-                  exportDataToFormat(formato, tipo);
+                  const finalTipo = tipo === 'dashboard' && selectedDashboard ? 'dashboard_' + selectedDashboard : tipo;
+                  exportDataToFormat(formato, finalTipo);
                 }}
                 className="btn btn-primary"
               >
@@ -460,38 +724,13 @@ const BusinessIntelligence = () => {
                 📊 Exportar Clientes para CSV
               </button>
               <button 
-                onClick={() => exportDataToFormat('json', 'tickets')}
+                onClick={() => exportDataToFormat('json', 'dashboard')}
                 className="btn btn-secondary"
+                disabled={!selectedDashboard}
               >
-                📋 Exportar Tickets para JSON
+                📋 Exportar Dashboard para JSON
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* Seção de Query SQL Customizada */}
-        <div className="card">
-          <h2>Consulta SQL Customizada</h2>
-          <div className="sql-query-section">
-            <div className="form-group">
-              <label>Digite sua query SQL (somente SELECT):</label>
-              <textarea 
-                id="sqlQuery"
-                className="form-control"
-                rows="4"
-                placeholder="SELECT * FROM vc.vendedor LIMIT 10"
-                defaultValue="SELECT v.nome as vendedor, COUNT(p.pedidoid) as total_pedidos FROM vc.vendedor v LEFT JOIN vc.pedidos_de_venda p ON v.vendedorid = p.vendedorid GROUP BY v.vendedorid, v.nome ORDER BY total_pedidos DESC LIMIT 5"
-              />
-            </div>
-            <button 
-              onClick={() => {
-                const query = document.getElementById('sqlQuery').value;
-                executeCustomQuery(query);
-              }}
-              className="btn btn-primary"
-            >
-              Executar Query
-            </button>
           </div>
         </div>
 

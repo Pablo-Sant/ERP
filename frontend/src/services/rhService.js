@@ -14,7 +14,7 @@ export const rhService = {
       if (filtros.skip) params.append('skip', filtros.skip);
       if (filtros.limit) params.append('limit', filtros.limit || 50);
       
-      // Note: usando endpoint correto /rh/colaboradores
+      
       const response = await api.get(`/rh/colaboradores?${params.toString()}`);
       return response.data;
     } catch (error) {
@@ -110,7 +110,7 @@ export const rhService = {
       if (filtros.skip) params.append('skip', filtros.skip);
       if (filtros.limit) params.append('limit', filtros.limit || 100);
       
-      const response = await api.get(`/rh/recrutamentos?${params.toString()}`);
+      const response = await api.get(`/rh/recrutamento?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar recrutamentos:', error);
@@ -130,7 +130,7 @@ export const rhService = {
       if (filtros.skip) params.append('skip', filtros.skip);
       if (filtros.limit) params.append('limit', filtros.limit || 100);
       
-      const response = await api.get(`/rh/avaliacoes?${params.toString()}`);
+      const response = await api.get(`/rh/avaliacoes-desempenho?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar avaliações:', error);
@@ -155,6 +155,24 @@ export const rhService = {
     }
   },
 
+  // ========== BENEFÍCIOS DE COLABORADORES ==========
+  async getColaboradorBeneficios(filtros = {}) {
+    try {
+      const params = new URLSearchParams();
+      
+      if (filtros.colaborador_id) params.append('colaborador_id', filtros.colaborador_id);
+      if (filtros.beneficio_id) params.append('beneficio_id', filtros.beneficio_id);
+      if (filtros.skip) params.append('skip', filtros.skip);
+      if (filtros.limit) params.append('limit', filtros.limit || 100);
+    
+      const response = await api.get(`/rh/colaboradores-beneficios?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar benefícios de colaboradores:', error);
+      throw handleApiError(error);
+    }
+  },
+
   // ========== DASHBOARD ==========
   async getDashboard() {
     try {
@@ -163,10 +181,6 @@ export const rhService = {
     } catch (error) {
       console.error('Erro ao buscar dashboard:', error);
       
-      // Retornar dados mockados para desenvolvimento
-      if (import.meta.env.DEV) {
-        return getMockDashboardData();
-      }
       throw handleApiError(error);
     }
   },
@@ -204,57 +218,4 @@ export const rhService = {
   }
 };
 
-// Dados mockados para desenvolvimento
-function getMockDashboardData() {
-  return {
-    status: "ativo",
-    modulo: "Recursos Humanos (RH)",
-    estatisticas: {
-      total_colaboradores: 3,
-      colaboradores_ativos: 3,
-      colaboradores_inativos: 0,
-      total_funcoes: 3,
-      total_folhas_pagamento: 36,
-      total_beneficios: 5,
-      total_avaliacoes: 9,
-      media_avaliacoes: 8.2,
-      folha_pagamento_ultimo_mes: 45000.00
-    },
-    distribuicao_funcoes: [
-      { funcao: "Desenvolvedor", quantidade: 1, media_salario: 8000.00 },
-      { funcao: "Analista Financeiro", quantidade: 1, media_salario: 6000.00 },
-      { funcao: "Vendedor", quantidade: 1, media_salario: 5000.00 }
-    ],
-    ultimas_contratacoes: [
-      {
-        id: 3,
-        nome: "Pedro Oliveira",
-        funcao: "Vendedor",
-        data_contratacao: "2023-01-10",
-        salario: 5000.00
-      },
-      {
-        id: 1,
-        nome: "João Silva",
-        funcao: "Desenvolvedor",
-        data_contratacao: "2022-03-15",
-        salario: 8000.00
-      },
-      {
-        id: 2,
-        nome: "Maria Santos",
-        funcao: "Analista Financeiro",
-        data_contratacao: "2021-08-20",
-        salario: 6000.00
-      }
-    ],
-    endpoints: {
-      colaboradores: "/api/rh/colaboradores",
-      funcoes: "/api/rh/funcoes",
-      folha_pagamento: "/api/rh/folha-pagamento",
-      recrutamentos: "/api/rh/recrutamentos",
-      avaliacoes: "/api/rh/avaliacoes",
-      beneficios: "/api/rh/beneficios"
-    }
-  };
-}
+

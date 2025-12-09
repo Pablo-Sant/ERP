@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import assetAPI from '../../services/assetAPI'; // Importando a API criada
 import "../../styles/Module.css";
-
-const API_BASE_URL = 'http://localhost:8000/api/ativos';
 
 const AssetManagement = () => {
   const [assets, setAssets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [activeTab, setActiveTab] = useState('ativos');
+  const [statistics, setStatistics] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+  const [maintenanceAlerts, setMaintenanceAlerts] = useState([]);
+  const [warrantyAlerts, setWarrantyAlerts] = useState([]);
 
   const [newAsset, setNewAsset] = useState({
     numero_tag: '',
@@ -37,48 +39,70 @@ const AssetManagement = () => {
 
   // Carregar dados da API
   useEffect(() => {
-    fetchAssets();
-    fetchDashboardData();
-    fetchCategories();
-    fetchLocations();
-    fetchSuppliers();
+    fetchAllData();
   }, []);
 
-  const fetchAssets = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_BASE_URL);
-      if (!response.ok) throw new Error('Erro ao carregar ativos');
-      const data = await response.json();
-      setAssets(data);
+      await Promise.all([
+        fetchAssets(),
+        fetchDashboardData(),
+        fetchCategories(),
+        fetchLocations(),
+        fetchStatistics(),
+        fetchAlerts(),
+        fetchMaintenanceAlerts(),
+        fetchWarrantyAlerts()
+      ]);
       setError(null);
     } catch (err) {
       setError(err.message);
-      console.error('Erro ao buscar ativos:', err);
+      console.error('Erro ao carregar dados:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchAssets = async () => {
+    try {
+      const data = await assetAPI.getAssets({ 
+        limit: 100,
+        order_by: 'data_criacao',
+        order_direction: 'desc'
+      });
+      setAssets(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar ativos:', err);
+      throw err;
+    }
+  };
+
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/dashboard/resumo`);
-      if (response.ok) {
-        const data = await response.json();
-        setDashboardData(data);
-      }
+      const data = await assetAPI.getAssetDashboard();
+      setDashboardData(data);
     } catch (err) {
       console.error('Erro ao buscar dashboard:', err);
+      // Fallback para dados simulados
+      setDashboardData({
+        total_ativos: assets.length,
+        valor_total: assets.reduce((sum, asset) => sum + (asset.valor_atual || asset.custo_aquisicao || 0), 0),
+        total_categorias: categories.length,
+        ativos_por_status: [],
+        ativos_por_categoria: [],
+        ativos_por_criticidade: []
+      });
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/categorias/listar`);
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data);
-      }
+      const data = await assetAPI.getCategories({ 
+        status: 'ativo',
+        order_by: 'nome'
+      });
+      setCategories(data || []);
     } catch (err) {
       console.error('Erro ao buscar categorias:', err);
     }
@@ -86,25 +110,49 @@ const AssetManagement = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/localizacoes/listar`);
-      if (response.ok) {
-        const data = await response.json();
-        setLocations(data);
-      }
+      const data = await assetAPI.getLocations({ 
+        status: 'ativo',
+        order_by: 'nome'
+      });
+      setLocations(data || []);
     } catch (err) {
       console.error('Erro ao buscar localizações:', err);
     }
   };
 
-  const fetchSuppliers = async () => {
+  const fetchStatistics = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/fornecedores/listar`);
-      if (response.ok) {
-        const data = await response.json();
-        setSuppliers(data);
-      }
+      const data = await assetAPI.getAssetStatistics();
+      setStatistics(data);
     } catch (err) {
-      console.error('Erro ao buscar fornecedores:', err);
+      console.error('Erro ao buscar estatísticas:', err);
+    }
+  };
+
+  const fetchAlerts = async () => {
+    try {
+      const data = await assetAPI.getAssetAlerts({ limit: 10 });
+      setAlerts(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar alertas:', err);
+    }
+  };
+
+  const fetchMaintenanceAlerts = async () => {
+    try {
+      const data = await assetAPI.getUpcomingMaintenances(30);
+      setMaintenanceAlerts(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar manutenções:', err);
+    }
+  };
+
+  const fetchWarrantyAlerts = async () => {
+    try {
+      const data = await assetAPI.getExpiringWarranties(90);
+      setWarrantyAlerts(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar garantias:', err);
     }
   };
 
@@ -115,6 +163,13 @@ const AssetManagement = () => {
     }
 
     try {
+      // Validação de tag única
+      const tagValidation = await assetAPI.validateAssetTag(newAsset.numero_tag);
+      if (!tagValidation.available) {
+        alert('Esta tag já está em uso. Por favor, escolha outra.');
+        return;
+      }
+
       const assetToSend = {
         ...newAsset,
         custo_aquisicao: newAsset.custo_aquisicao ? parseFloat(newAsset.custo_aquisicao) : 0,
@@ -125,20 +180,7 @@ const AssetManagement = () => {
         id_fornecedor: newAsset.id_fornecedor || null
       };
 
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(assetToSend),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Erro ao adicionar ativo');
-      }
-
-      const createdAsset = await response.json();
+      const createdAsset = await assetAPI.createAsset(assetToSend);
       setAssets([createdAsset, ...assets]);
       
       // Reset form
@@ -164,7 +206,13 @@ const AssetManagement = () => {
         observacoes: ''
       });
 
-      fetchDashboardData();
+      // Atualizar dados
+      await Promise.all([
+        fetchDashboardData(),
+        fetchStatistics(),
+        fetchAlerts()
+      ]);
+      
       alert('Ativo adicionado com sucesso!');
     } catch (err) {
       setError(err.message);
@@ -178,16 +226,15 @@ const AssetManagement = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao excluir ativo');
-      }
-
+      await assetAPI.deleteAsset(id);
       setAssets(assets.filter(asset => asset.id !== id));
-      fetchDashboardData();
+      
+      // Atualizar dados
+      await Promise.all([
+        fetchDashboardData(),
+        fetchStatistics()
+      ]);
+      
       alert('Ativo excluído com sucesso!');
     } catch (err) {
       setError(err.message);
@@ -195,54 +242,64 @@ const AssetManagement = () => {
     }
   };
 
-  const formatCurrency = (value) => {
-    if (value === null || value === undefined) return 'R$ 0,00';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 2
-    }).format(value);
+  const updateAssetStatus = async (id, newStatus) => {
+    try {
+      await assetAPI.updateAsset(id, { status_ativo: newStatus });
+      
+      // Atualizar localmente
+      setAssets(assets.map(asset => 
+        asset.id === id ? { ...asset, status_ativo: newStatus } : asset
+      ));
+      
+      await fetchDashboardData();
+      alert('Status atualizado com sucesso!');
+    } catch (err) {
+      setError(err.message);
+      alert(`Erro: ${err.message}`);
+    }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-  const formatStatus = (status) => {
-    const statusMap = {
-      'ativo': 'Ativo',
-      'inativo': 'Inativo',
-      'em_manutencao': 'Em Manutenção',
-      'baixado': 'Baixado',
-      'planejado': 'Planejado',
-      'descartado': 'Descartado',
-      'perdido': 'Perdido'
-    };
-    return statusMap[status] || status;
+  const exportAssets = async (format = 'csv') => {
+    try {
+      const data = await assetAPI.exportAssets(format);
+      
+      if (format === 'csv') {
+        const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ativos_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Para JSON
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ativos_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+      
+      alert(`Ativos exportados em ${format.toUpperCase()} com sucesso!`);
+    } catch (err) {
+      setError(err.message);
+      alert(`Erro ao exportar: ${err.message}`);
+    }
   };
 
   const getStatusBadgeClass = (status) => {
-    const classMap = {
-      'ativo': 'status-ativo',
-      'inativo': 'status-inativo',
-      'em_manutencao': 'status-manutencao',
-      'baixado': 'status-baixado',
-      'planejado': 'status-planejado',
-      'descartado': 'status-descartado',
-      'perdido': 'status-perdido'
-    };
-    return classMap[status] || 'status-ativo';
+    return assetAPI.getStatusBadgeClass(status);
   };
 
-  const getCriticidadeClass = (criticidade) => {
-    const classMap = {
-      'baixa': 'criticidade-baixa',
-      'medio': 'criticidade-medio',
-      'alta': 'criticidade-alta',
-      'critico': 'criticidade-critico'
-    };
-    return classMap[criticidade] || 'criticidade-medio';
+  const getCriticalityBadgeClass = (criticality) => {
+    return assetAPI.getCriticalityBadgeClass(criticality);
   };
 
   if (loading) {
@@ -293,29 +350,37 @@ const AssetManagement = () => {
         >
           Novo Ativo
         </button>
+        <button 
+          className={`tab-btn ${activeTab === 'alertas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('alertas')}
+        >
+          Alertas
+        </button>
       </div>
 
       <div className="module-content">
-        {activeTab === 'dashboard' && dashboardData && (
+        {activeTab === 'dashboard' && (
           <>
             {/* Dashboard Cards */}
             <div className="asset-summary">
               <div className="summary-card">
                 <h3>Total de Ativos</h3>
-                <p className="count">{dashboardData.total_ativos}</p>
+                <p className="count">{dashboardData?.total_ativos || assets.length}</p>
               </div>
               <div className="summary-card">
                 <h3>Valor Total</h3>
-                <p className="value">{formatCurrency(dashboardData.valor_total)}</p>
+                <p className="value">{assetAPI.formatCurrency(dashboardData?.valor_total || 
+                  assets.reduce((sum, asset) => sum + (asset.valor_atual || asset.custo_aquisicao || 0), 0))}
+                </p>
               </div>
               <div className="summary-card">
                 <h3>Categorias</h3>
-                <p className="categories">{dashboardData.total_categorias}</p>
+                <p className="categories">{dashboardData?.total_categorias || categories.length}</p>
               </div>
               <div className="summary-card">
                 <h3>Status Ativos</h3>
                 <p className="count">
-                  {dashboardData.ativos_por_status?.find(s => s.status === 'ativo')?.quantidade || 0}
+                  {assets.filter(a => a.status_ativo === 'ativo').length}
                 </p>
               </div>
             </div>
@@ -327,10 +392,15 @@ const AssetManagement = () => {
                 <div className="stats-card">
                   <h4>Ativos por Status</h4>
                   <ul className="stats-list">
-                    {dashboardData.ativos_por_status?.map((item, index) => (
-                      <li key={index}>
-                        <span className="stat-label">{formatStatus(item.status)}:</span>
-                        <span className="stat-value">{item.quantidade} ({formatCurrency(item.valor_total)})</span>
+                    {Object.entries(
+                      assets.reduce((acc, asset) => {
+                        acc[asset.status_ativo] = (acc[asset.status_ativo] || 0) + 1;
+                        return acc;
+                      }, {})
+                    ).map(([status, quantidade]) => (
+                      <li key={status}>
+                        <span className="stat-label">{assetAPI.formatStatus(status)}:</span>
+                        <span className="stat-value">{quantidade}</span>
                       </li>
                     ))}
                   </ul>
@@ -338,23 +408,29 @@ const AssetManagement = () => {
                 <div className="stats-card">
                   <h4>Ativos por Categoria</h4>
                   <ul className="stats-list">
-                    {dashboardData.ativos_por_categoria?.slice(0, 5).map((item, index) => (
-                      <li key={index}>
-                        <span className="stat-label">{item.categoria}:</span>
-                        <span className="stat-value">{item.quantidade} ({formatCurrency(item.valor_total)})</span>
-                      </li>
-                    ))}
+                    {categories.slice(0, 5).map(category => {
+                      const count = assets.filter(a => a.id_categoria === category.id).length;
+                      return count > 0 ? (
+                        <li key={category.id}>
+                          <span className="stat-label">{category.nome}:</span>
+                          <span className="stat-value">{count}</span>
+                        </li>
+                      ) : null;
+                    })}
                   </ul>
                 </div>
                 <div className="stats-card">
                   <h4>Ativos por Criticidade</h4>
                   <ul className="stats-list">
-                    {dashboardData.ativos_por_criticidade?.map((item, index) => (
-                      <li key={index}>
-                        <span className="stat-label">{item.criticidade}:</span>
-                        <span className="stat-value">{item.quantidade} ({formatCurrency(item.valor_total)})</span>
-                      </li>
-                    ))}
+                    {['baixa', 'medio', 'alta', 'critico'].map(criticality => {
+                      const count = assets.filter(a => a.criticidade === criticality).length;
+                      return count > 0 ? (
+                        <li key={criticality}>
+                          <span className="stat-label">{assetAPI.formatCriticality(criticality)}:</span>
+                          <span className="stat-value">{count}</span>
+                        </li>
+                      ) : null;
+                    })}
                   </ul>
                 </div>
               </div>
@@ -409,18 +485,6 @@ const AssetManagement = () => {
                   <option value="">Selecione...</option>
                   {locations.map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.nome}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Fornecedor</label>
-                <select
-                  value={newAsset.id_fornecedor}
-                  onChange={(e) => setNewAsset({...newAsset, id_fornecedor: e.target.value})}
-                >
-                  <option value="">Selecione...</option>
-                  {suppliers.map(sup => (
-                    <option key={sup.id} value={sup.id}>{sup.nome}</option>
                   ))}
                 </select>
               </div>
@@ -575,6 +639,12 @@ const AssetManagement = () => {
                 <button onClick={fetchAssets} className="btn btn-secondary btn-sm mr-2">
                   Atualizar
                 </button>
+                <button onClick={() => exportAssets('csv')} className="btn btn-secondary btn-sm mr-2">
+                  Exportar CSV
+                </button>
+                <button onClick={() => exportAssets('json')} className="btn btn-secondary btn-sm">
+                  Exportar JSON
+                </button>
               </div>
             </div>
             <div className="table-container">
@@ -605,33 +675,160 @@ const AssetManagement = () => {
                           <div>{asset.nome}</div>
                           {asset.modelo && <small className="text-muted">{asset.modelo}</small>}
                         </td>
-                        <td>{asset.categoria_nome || `Categoria ${asset.id_categoria}`}</td>
-                        <td>{asset.localizacao_nome || `Local ${asset.id_localizacao}`}</td>
-                        <td>{formatDate(asset.data_aquisicao)}</td>
-                        <td>{formatCurrency(asset.valor_atual || asset.custo_aquisicao)}</td>
+                        <td>
+                          {categories.find(c => c.id === asset.id_categoria)?.nome || 
+                           `Categoria ${asset.id_categoria}`}
+                        </td>
+                        <td>
+                          {locations.find(l => l.id === asset.id_localizacao)?.nome || 
+                           `Local ${asset.id_localizacao}`}
+                        </td>
+                        <td>{assetAPI.formatDate(asset.data_aquisicao)}</td>
+                        <td>{assetAPI.formatCurrency(asset.valor_atual || asset.custo_aquisicao)}</td>
                         <td>
                           <span className={`status-badge ${getStatusBadgeClass(asset.status_ativo)}`}>
-                            {formatStatus(asset.status_ativo)}
+                            {assetAPI.formatStatus(asset.status_ativo)}
                           </span>
                         </td>
                         <td>
-                          <span className={`criticidade-badge ${getCriticidadeClass(asset.criticidade)}`}>
-                            {asset.criticidade}
+                          <span className={`criticidade-badge ${getCriticalityBadgeClass(asset.criticidade)}`}>
+                            {assetAPI.formatCriticality(asset.criticidade)}
                           </span>
                         </td>
                         <td>
-                          <button 
-                            onClick={() => deleteAsset(asset.id)}
-                            className="btn btn-danger btn-sm"
-                            title="Excluir ativo"
-                          >
-                            Excluir
-                          </button>
+                          <div className="action-buttons">
+                            <select 
+                              value={asset.status_ativo}
+                              onChange={(e) => updateAssetStatus(asset.id, e.target.value)}
+                              className="form-control-sm status-select"
+                            >
+                              <option value="ativo">Ativo</option>
+                              <option value="inativo">Inativo</option>
+                              <option value="em_manutencao">Manutenção</option>
+                              <option value="baixado">Baixado</option>
+                            </select>
+                            <button 
+                              onClick={() => deleteAsset(asset.id)}
+                              className="btn btn-danger btn-sm"
+                              title="Excluir ativo"
+                            >
+                              Excluir
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'alertas' && (
+          <div className="card">
+            <h2>Alertas e Notificações</h2>
+            
+            <div className="alerts-section">
+              <h3>Próximas Manutenções (30 dias)</h3>
+              {maintenanceAlerts.length > 0 ? (
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Ativo</th>
+                        <th>Tag</th>
+                        <th>Última Manutenção</th>
+                        <th>Próxima Manutenção</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {maintenanceAlerts.map(alert => (
+                        <tr key={alert.id}>
+                          <td>{alert.nome_ativo}</td>
+                          <td><strong>{alert.numero_tag}</strong></td>
+                          <td>{assetAPI.formatDate(alert.ultima_manutencao)}</td>
+                          <td>{assetAPI.formatDate(alert.proxima_manutencao)}</td>
+                          <td>
+                            <span className={`status-badge ${getStatusBadgeClass(alert.status_ativo)}`}>
+                              {assetAPI.formatStatus(alert.status_ativo)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p>Nenhuma manutenção programada para os próximos 30 dias.</p>
+              )}
+
+              <h3>Garantias a Vencer (90 dias)</h3>
+              {warrantyAlerts.length > 0 ? (
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Ativo</th>
+                        <th>Tag</th>
+                        <th>Fornecedor</th>
+                        <th>Vencimento</th>
+                        <th>Dias Restantes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {warrantyAlerts.map(alert => (
+                        <tr key={alert.id}>
+                          <td>{alert.nome_ativo}</td>
+                          <td><strong>{alert.numero_tag}</strong></td>
+                          <td>{alert.fornecedor_nome || 'N/A'}</td>
+                          <td>{assetAPI.formatDate(alert.data_vencimento_garantia)}</td>
+                          <td>
+                            <span className={`badge ${parseInt(alert.dias_restantes) < 30 ? 'badge-danger' : 'badge-warning'}`}>
+                              {alert.dias_restantes} dias
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p>Nenhuma garantia vencendo nos próximos 90 dias.</p>
+              )}
+
+              <h3>Outros Alertas</h3>
+              {alerts.length > 0 ? (
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Mensagem</th>
+                        <th>Data</th>
+                        <th>Severidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {alerts.map(alert => (
+                        <tr key={alert.id}>
+                          <td>{alert.tipo}</td>
+                          <td>{alert.mensagem}</td>
+                          <td>{assetAPI.formatDateTime(alert.data_criacao)}</td>
+                          <td>
+                            <span className={`badge ${alert.severidade === 'alta' ? 'badge-danger' : 
+                                              alert.severidade === 'media' ? 'badge-warning' : 'badge-info'}`}>
+                              {alert.severidade}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p>Nenhum alerta recente.</p>
               )}
             </div>
           </div>

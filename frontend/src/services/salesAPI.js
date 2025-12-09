@@ -3,10 +3,10 @@ import api from './api';
 import { handleApiError } from './api';
 
 const salesAPI = {
-  // ========== CLIENTES ==========
+  // ========== CLIENTES FINAIS ==========
   getClients: async (params = {}) => {
     try {
-      const response = await api.get('/vc/clientes/', { params });
+      const response = await api.get('/vendas-compras/clientes/', { params });
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -15,7 +15,7 @@ const salesAPI = {
 
   createClient: async (clientData) => {
     try {
-      const response = await api.post('/vc/clientes/', clientData);
+      const response = await api.post('/vendas-compras/clientes/', clientData);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -24,7 +24,7 @@ const salesAPI = {
 
   getClient: async (id) => {
     try {
-      const response = await api.get(`/vc/clientes/${id}`);
+      const response = await api.get(`/vendas-compras/clientes/${id}`);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -33,7 +33,7 @@ const salesAPI = {
 
   updateClient: async (id, clientData) => {
     try {
-      const response = await api.put(`/vc/clientes/${id}`, clientData);
+      const response = await api.put(`/vendas-compras/clientes/${id}`, clientData);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -42,36 +42,17 @@ const salesAPI = {
 
   deleteClient: async (id) => {
     try {
-      await api.delete(`/vc/clientes/${id}`);
+      await api.delete(`/vendas-compras/clientes/${id}`);
       return true;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  // ========== VENDEDORES ==========
-  getSellers: async (params = {}) => {
-    try {
-      const response = await api.get('/vc/vendedores/', { params });
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  createSeller: async (sellerData) => {
-    try {
-      const response = await api.post('/vc/vendedores/', sellerData);
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  // ========== PEDIDOS/VENDAS ==========
+  // ========== PEDIDOS DE VENDA ==========
   getSales: async (params = {}) => {
     try {
-      const response = await api.get('/vc/pedidos/', { params });
+      const response = await api.get('/vendas-compras/pedidos-venda/', { params });
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -80,7 +61,7 @@ const salesAPI = {
 
   createSale: async (saleData) => {
     try {
-      const response = await api.post('/vc/pedidos/', saleData);
+      const response = await api.post('/vendas-compras/pedidos-venda/', saleData);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -89,18 +70,16 @@ const salesAPI = {
 
   getSale: async (id) => {
     try {
-      const response = await api.get(`/vc/pedidos/${id}`);
+      const response = await api.get(`/vendas-compras/pedidos-venda/${id}`);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  updateSaleStatus: async (id, status) => {
+  updateSale: async (id, saleData) => {
     try {
-      const response = await api.put(`/vc/pedidos/${id}/status`, null, {
-        params: { status }
-      });
+      const response = await api.put(`/vendas-compras/pedidos-venda/${id}`, saleData);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -109,7 +88,7 @@ const salesAPI = {
 
   deleteSale: async (id) => {
     try {
-      await api.delete(`/vc/pedidos/${id}`);
+      await api.delete(`/vendas-compras/pedidos-venda/${id}`);
       return true;
     } catch (error) {
       throw handleApiError(error);
@@ -119,7 +98,7 @@ const salesAPI = {
   // ========== CONTRATOS ==========
   getContracts: async (params = {}) => {
     try {
-      const response = await api.get('/vc/contratos/', { params });
+      const response = await api.get('/vendas-compras/contratos/', { params });
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -128,8 +107,35 @@ const salesAPI = {
 
   createContract: async (contractData) => {
     try {
-      const response = await api.post('/vc/contratos/', contractData);
+      const response = await api.post('/vendas-compras/contratos/', contractData);
       return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  getContract: async (id) => {
+    try {
+      const response = await api.get(`/vendas-compras/contratos/${id}`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateContract: async (id, contractData) => {
+    try {
+      const response = await api.put(`/vendas-compras/contratos/${id}`, contractData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  deleteContract: async (id) => {
+    try {
+      await api.delete(`/vendas-compras/contratos/${id}`);
+      return true;
     } catch (error) {
       throw handleApiError(error);
     }
@@ -138,65 +144,16 @@ const salesAPI = {
   // ========== HISTÓRICOS DE COMPRA ==========
   getPurchaseHistory: async (params = {}) => {
     try {
-      const response = await api.get('/vc/historicos/', { params });
+      const response = await api.get('/vendas-compras/historico-compras/', { params });
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  getClientPurchaseHistory: async (clientId) => {
+  getPurchaseHistoryItem: async (id) => {
     try {
-      const response = await api.get(`/vc/clientes/${clientId}/historicos`);
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  // ========== PROSPECTOS ==========
-  getProspects: async (params = {}) => {
-    try {
-      const response = await api.get('/vc/prospectos/', { params });
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  createProspect: async (prospectData) => {
-    try {
-      const response = await api.post('/vc/prospectos/', prospectData);
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  updateProspectPhase: async (id, phase) => {
-    try {
-      const response = await api.put(`/vc/prospectos/${id}/fase`, null, {
-        params: { fase_funil: phase }
-      });
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  // ========== RELATÓRIOS ==========
-  getSalesBySellerReport: async (params = {}) => {
-    try {
-      const response = await api.get('/vc/relatorios/vendas-por-vendedor', { params });
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
-
-  getActiveClientsReport: async () => {
-    try {
-      const response = await api.get('/vc/relatorios/clientes-ativos');
+      const response = await api.get(`/vendas-compras/historico-compras/${id}`);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -205,6 +162,7 @@ const salesAPI = {
 
   // ========== UTILIDADES ==========
   formatCurrency: (value) => {
+    if (!value && value !== 0) return 'R$ 0,00';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -225,7 +183,18 @@ const salesAPI = {
   formatDate: (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
     return date.toLocaleDateString('pt-BR');
+  },
+  
+  formatDateTime: (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   },
 };
 

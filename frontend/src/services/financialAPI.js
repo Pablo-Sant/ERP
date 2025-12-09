@@ -1,60 +1,83 @@
-// src/services/salesApi.js
+// src/services/financialApi.js
 import api from './api';
 
-const salesApi = {
-  // ========== CLIENTES ==========
-  getClients: (params) => api.get('/vc/clientes', { params }),
-  getClient: (id) => api.get(`/vc/clientes/${id}`),
-  createClient: (data) => api.post('/vc/clientes', data),
-  updateClient: (id, data) => api.put(`/vc/clientes/${id}`, data),
-  deleteClient: (id) => api.delete(`/vc/clientes/${id}`),
+const financialApi = {
+  // ========== CONTAS FINANCEIRAS ==========
+  getAccounts: (params) => api.get('/financeiro/contas', { params }),
+  getAccount: (id) => api.get(`/financeiro/contas/${id}`),
+  createAccount: (data) => api.post('/financeiro/contas', data),
+  updateAccount: (id, data) => api.put(`/financeiro/contas/${id}`, data),
+  deleteAccount: (id) => api.delete(`/financeiro/contas/${id}`),
 
-  // ========== VENDEDORES ==========
-  getSellers: (params) => api.get('/vc/vendedores', { params }),
-  getSeller: (id) => api.get(`/vc/vendedores/${id}`),
-  createSeller: (data) => api.post('/vc/vendedores', data),
-  updateSeller: (id, data) => api.put(`/vc/vendedores/${id}`, data),
-  deleteSeller: (id) => api.delete(`/vc/vendedores/${id}`),
+  // ========== EXTRATOS ==========
+  getStatements: (params) => api.get('/financeiro/extratos', { params }),
+  getStatement: (id) => api.get(`/financeiro/extratos/${id}`),
+  createStatement: (data) => api.post('/financeiro/extratos', data),
+  updateStatement: (id, data) => api.put(`/financeiro/extratos/${id}`, data),
+  deleteStatement: (id) => api.delete(`/financeiro/extratos/${id}`),
 
-  // ========== PEDIDOS/VENDAS ==========
-  getSales: (params) => api.get('/vc/pedidos', { params }),
-  getSale: (id) => api.get(`/vc/pedidos/${id}`),
-  createSale: (data) => api.post('/vc/pedidos', data),
-  updateSale: (id, data) => api.put(`/vc/pedidos/${id}`, data),
-  updateSaleStatus: (id, status) => api.put(`/vc/pedidos/${id}/status`, { status }),
-  deleteSale: (id) => api.delete(`/vc/pedidos/${id}`),
+  // ========== FLUXO DE CAIXA ==========
+  getCashFlows: (params) => api.get('/financeiro/fluxo-caixa', { params }),
+  getCashFlow: (id) => api.get(`/financeiro/fluxo-caixa/${id}`),
+  createCashFlow: (data) => api.post('/financeiro/fluxo-caixa', data),
+  updateCashFlow: (id, data) => api.put(`/financeiro/fluxo-caixa/${id}`, data),
+  deleteCashFlow: (id) => api.delete(`/financeiro/fluxo-caixa/${id}`),
 
-  // ========== CONTRATOS ==========
-  getContracts: (params) => api.get('/vc/contratos', { params }),
-  getContract: (id) => api.get(`/vc/contratos/${id}`),
-  createContract: (data) => api.post('/vc/contratos', data),
-  updateContract: (id, data) => api.put(`/vc/contratos/${id}`, data),
-  deleteContract: (id) => api.delete(`/vc/contratos/${id}`),
+  // ========== CONCILIAÇÕES ==========
+  getReconciliations: (params) => api.get('/financeiro/conciliacoes', { params }),
+  getReconciliation: (id) => api.get(`/financeiro/conciliacoes/${id}`),
+  createReconciliation: (data) => api.post('/financeiro/conciliacoes', data),
+  updateReconciliation: (id, data) => api.put(`/financeiro/conciliacoes/${id}`, data),
+  deleteReconciliation: (id) => api.delete(`/financeiro/conciliacoes/${id}`),
 
-  // ========== PROSPECTOS ==========
-  getProspects: (params) => api.get('/vc/prospectos', { params }),
-  getProspect: (id) => api.get(`/vc/prospectos/${id}`),
-  createProspect: (data) => api.post('/vc/prospectos', data),
-  updateProspect: (id, data) => api.put(`/vc/prospectos/${id}`, data),
-  updateProspectPhase: (id, faseFunil) => api.put(`/vc/prospectos/${id}/fase`, { fase_funil: faseFunil }),
-  deleteProspect: (id) => api.delete(`/vc/prospectos/${id}`),
+  // ========== ORÇAMENTOS ==========
+  getBudgets: (params) => api.get('/financeiro/orcamentos', { params }),
+  getBudget: (id) => api.get(`/financeiro/orcamentos/${id}`),
+  createBudget: (data) => api.post('/financeiro/orcamentos', data),
+  updateBudget: (id, data) => api.put(`/financeiro/orcamentos/${id}`, data),
+  deleteBudget: (id) => api.delete(`/financeiro/orcamentos/${id}`),
 
-  // ========== HISTÓRICO DE COMPRA ==========
-  getPurchaseHistory: (params) => api.get('/vc/historicos', { params }),
-  getClientPurchaseHistory: (clientId) => api.get(`/vc/clientes/${clientId}/historicos`),
-  createPurchaseHistory: (data) => api.post('/vc/historicos', data),
-  deletePurchaseHistory: (id) => api.delete(`/vc/historicos/${id}`),
+  // ========== CONTABILIDADE ==========
+  // Lançamentos Contábeis
+  getAccountingEntries: (params) => api.get('/contabilidade/lancamentos', { params }),
+  getAccountingEntry: (id) => api.get(`/contabilidade/lancamentos/${id}`),
+  createAccountingEntry: (data) => api.post('/contabilidade/lancamentos', data),
+  updateAccountingEntry: (id, data) => api.put(`/contabilidade/lancamentos/${id}`, data),
+  deleteAccountingEntry: (id) => api.delete(`/contabilidade/lancamentos/${id}`),
 
-  // ========== RELATÓRIOS ==========
-  getSalesBySeller: (params) => api.get('/vc/relatorios/vendas-por-vendedor', { params }),
-  getActiveClients: () => api.get('/vc/relatorios/clientes-ativos'),
+  // Planos de Contas
+  getChartOfAccounts: (params) => api.get('/contabilidade/planos-contas', { params }),
+  getChartOfAccount: (id) => api.get(`/contabilidade/planos-contas/${id}`),
+  createChartOfAccount: (data) => api.post('/contabilidade/planos-contas', data),
+  updateChartOfAccount: (id, data) => api.put(`/contabilidade/planos-contas/${id}`, data),
+  deleteChartOfAccount: (id) => api.delete(`/contabilidade/planos-contas/${id}`),
 
-  // ========== DASHBOARD ==========
-  getSalesDashboard: () => api.get('/vc/dashboard'),
-  getSalesSummary: (params) => api.get('/vc/resumo-vendas', { params }),
+  // ========== FISCAL ==========
+  // Impostos
+  getTaxes: (params) => api.get('/fiscal/impostos', { params }),
+  getTax: (id) => api.get(`/fiscal/impostos/${id}`),
+  createTax: (data) => api.post('/fiscal/impostos', data),
+  updateTax: (id, data) => api.put(`/fiscal/impostos/${id}`, data),
+  deleteTax: (id) => api.delete(`/fiscal/impostos/${id}`),
+
+  // Notas Fiscais
+  getInvoices: (params) => api.get('/fiscal/notas-fiscais', { params }),
+  getInvoice: (id) => api.get(`/fiscal/notas-fiscais/${id}`),
+  createInvoice: (data) => api.post('/fiscal/notas-fiscais', data),
+  updateInvoice: (id, data) => api.put(`/fiscal/notas-fiscais/${id}`, data),
+  deleteInvoice: (id) => api.delete(`/fiscal/notas-fiscais/${id}`),
+
+  // ========== RELATÓRIOS FINANCEIROS ==========
+  getFinancialReport: (params) => api.get('/financeiro/relatorios', { params }),
+  getCashFlowReport: (params) => api.get('/financeiro/relatorios/fluxo-caixa', { params }),
+  getBudgetReport: (params) => api.get('/financeiro/relatorios/orcamento', { params }),
+
+  // ========== DASHBOARD FINANCEIRO ==========
+  getFinancialDashboard: () => api.get('/financeiro/dashboard'),
+  getFinancialSummary: (params) => api.get('/financeiro/resumo', { params }),
 
   // ========== SAÚDE DO MÓDULO ==========
-  healthCheck: () => api.get('/vc/health')
+  healthCheck: () => api.get('/financeiro/health')
 };
 
-export default salesApi;
+export default financialApi;

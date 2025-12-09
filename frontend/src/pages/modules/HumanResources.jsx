@@ -32,25 +32,43 @@ const HumanResources = () => {
       setLoading(true);
       setError(null);
       
-      // Verificar se API está acessível
-      try {
-        const health = await rhService.checkHealth();
-        console.log('API RH Health:', health);
-      } catch (healthError) {
-        console.warn('API RH pode não estar disponível:', healthError);
-      }
-      
       // Carregar funções primeiro
       const funcoesData = await rhService.getFuncoes({ limit: 20 });
       console.log('Funções carregadas:', funcoesData);
-      setFuncoes(funcoesData);
+      // Verificar se a resposta tem uma estrutura de paginação
+      const funcoesList = Array.isArray(funcoesData) ? funcoesData : 
+                         (funcoesData.data || funcoesData.items || []);
+      setFuncoes(funcoesList);
       
       // Carregar colaboradores
-      const colaboradores = await rhService.getColaboradores({ limit: 50 });
-      console.log('Colaboradores carregados:', colaboradores);
-      setEmployees(colaboradores);
+      const colaboradoresResponse = await rhService.getColaboradores({ limit: 50 });
+      console.log('Colaboradores carregados:', colaboradoresResponse);
       
-      // Carregar dashboard
+      // Extrair a lista de colaboradores da resposta
+      let colaboradoresList;
+      if (Array.isArray(colaboradoresResponse)) {
+        colaboradoresList = colaboradoresResponse;
+      } else if (colaboradoresResponse && colaboradoresResponse.data) {
+        colaboradoresList = colaboradoresResponse.data;
+      } else if (colaboradoresResponse && colaboradoresResponse.items) {
+        colaboradoresList = colaboradoresResponse.items;
+      } else {
+        colaboradoresList = [];
+      }
+      
+      // Enriquecer colaboradores com dados da função
+      const colaboradoresEnriquecidos = colaboradoresList.map(colab => {
+        // Encontrar função correspondente
+        const funcao = funcoesList.find(f => f.id === colab.funcao_id);
+        return {
+          ...colab,
+          funcao_rel: funcao || { id: colab.funcao_id, nome: 'Não especificada' }
+        };
+      });
+      
+      setEmployees(colaboradoresEnriquecidos);
+      
+      // Tentar carregar dashboard (pode não existir no backend)
       try {
         const dashboard = await rhService.getDashboard();
         console.log('Dashboard carregado:', dashboard);
@@ -68,13 +86,15 @@ const HumanResources = () => {
         setError('API não disponível. Usando dados de demonstração.');
         
         // Dados mockados
-        setFuncoes([
+        const mockFuncoes = [
           { id: 1, nome: 'Desenvolvedor' },
           { id: 2, nome: 'Analista Financeiro' },
           { id: 3, nome: 'Vendedor' },
           { id: 4, nome: 'Gerente' },
           { id: 5, nome: 'Analista de RH' }
-        ]);
+        ];
+        
+        setFuncoes(mockFuncoes);
         
         setEmployees([
           {
@@ -88,7 +108,7 @@ const HumanResources = () => {
             data_contratacao: '2022-03-15',
             salario: 8000.00,
             funcao_id: 1,
-            funcao_rel: { id: 1, nome: 'Desenvolvedor' },
+            funcao_rel: mockFuncoes[0],
             ativo: 1
           },
           {
@@ -102,7 +122,7 @@ const HumanResources = () => {
             data_contratacao: '2021-08-20',
             salario: 6000.00,
             funcao_id: 2,
-            funcao_rel: { id: 2, nome: 'Analista Financeiro' },
+            funcao_rel: mockFuncoes[1],
             ativo: 1
           },
           {
@@ -116,7 +136,7 @@ const HumanResources = () => {
             data_contratacao: '2023-01-10',
             salario: 5000.00,
             funcao_id: 3,
-            funcao_rel: { id: 3, nome: 'Vendedor' },
+            funcao_rel: mockFuncoes[2],
             ativo: 1
           }
         ]);
@@ -187,14 +207,15 @@ const HumanResources = () => {
 
       const createdEmployee = await rhService.createColaborador(employeeData);
       
-      // Adicionar função_rel para exibição imediata
+      // Encontrar função correspondente
       const funcao = funcoes.find(f => f.id === parseInt(newEmployee.funcao_id));
-      if (funcao) {
-        createdEmployee.funcao_rel = funcao;
-      }
+      const enrichedEmployee = {
+        ...createdEmployee,
+        funcao_rel: funcao || { id: newEmployee.funcao_id, nome: 'Não especificada' }
+      };
       
       // Atualizar lista local
-      setEmployees([...employees, createdEmployee]);
+      setEmployees([...employees, enrichedEmployee]);
       
       // Limpar formulário
       setNewEmployee({
@@ -210,7 +231,7 @@ const HumanResources = () => {
         ativo: 1
       });
       
-      // Recarregar dashboard
+      // Tentar recarregar dashboard
       try {
         const dashboard = await rhService.getDashboard();
         setDashboardData(dashboard);
@@ -221,7 +242,12 @@ const HumanResources = () => {
       alert('Colaborador adicionado com sucesso!');
     } catch (err) {
       console.error('Erro ao adicionar colaborador:', err);
-      alert(`Erro ao adicionar colaborador: ${err.message || err.detail || 'Erro desconhecido'}`);
+      // Extrair mensagem de erro do response
+      const errorMessage = err.response?.data?.detail || 
+                          err.response?.data?.message || 
+                          err.message || 
+                          'Erro desconhecido';
+      alert(`Erro ao adicionar colaborador: ${errorMessage}`);
     }
   };
 
@@ -239,7 +265,7 @@ const HumanResources = () => {
       // Atualizar lista local
       setEmployees(employees.filter(employee => employee.id !== id));
       
-      // Recarregar dashboard se API estiver disponível
+      // Tentar recarregar dashboard se não for ambiente de desenvolvimento
       if (!import.meta.env.DEV) {
         try {
           const dashboard = await rhService.getDashboard();
@@ -258,7 +284,11 @@ const HumanResources = () => {
         setEmployees(employees.filter(employee => employee.id !== id));
         alert('Colaborador excluído localmente!');
       } else {
-        alert(`Erro ao excluir colaborador: ${err.message || err.detail || 'Erro desconhecido'}`);
+        const errorMessage = err.response?.data?.detail || 
+                            err.response?.data?.message || 
+                            err.message || 
+                            'Erro desconhecido';
+        alert(`Erro ao excluir colaborador: ${errorMessage}`);
       }
     }
   };
@@ -276,7 +306,7 @@ const HumanResources = () => {
         emp.id === employee.id ? { ...emp, ativo: novoStatus } : emp
       ));
       
-      // Recarregar dashboard se API estiver disponível
+      // Tentar recarregar dashboard se não for ambiente de desenvolvimento
       if (!import.meta.env.DEV) {
         try {
           const dashboard = await rhService.getDashboard();
@@ -297,17 +327,21 @@ const HumanResources = () => {
         ));
         alert('Status atualizado localmente!');
       } else {
-        alert(`Erro ao atualizar status: ${err.message || err.detail || 'Erro desconhecido'}`);
+        const errorMessage = err.response?.data?.detail || 
+                            err.response?.data?.message || 
+                            err.message || 
+                            'Erro desconhecido';
+        alert(`Erro ao atualizar status: ${errorMessage}`);
       }
     }
   };
 
   const getStatusText = (ativo) => {
-    return ativo ? 'Ativo' : 'Inativo';
+    return ativo === 1 ? 'Ativo' : 'Inativo';
   };
 
   const getStatusClass = (ativo) => {
-    return ativo ? 'ativo' : 'inativo';
+    return ativo === 1 ? 'ativo' : 'inativo';
   };
 
   const getDepartamento = (funcaoNome) => {
@@ -329,12 +363,13 @@ const HumanResources = () => {
   };
 
   const formatCurrency = (value) => {
-    if (!value && value !== 0) return 'R$ 0,00';
-    return `R$ ${parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (value === null || value === undefined || value === '') return 'R$ 0,00';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return `R$ ${numValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return '-';
     try {
       return new Date(dateString).toLocaleDateString('pt-BR');
     } catch {
@@ -382,19 +417,21 @@ const HumanResources = () => {
             <>
               <div className="summary-card">
                 <h3>Total de Colaboradores</h3>
-                <p className="count">{dashboardData.estatisticas.total_colaboradores}</p>
+                <p className="count">{dashboardData.estatisticas?.total_colaboradores || employees.length}</p>
               </div>
               <div className="summary-card">
                 <h3>Ativos</h3>
-                <p className="active">{dashboardData.estatisticas.colaboradores_ativos}</p>
+                <p className="active">{dashboardData.estatisticas?.colaboradores_ativos || employees.filter(e => e.ativo === 1).length}</p>
               </div>
               <div className="summary-card">
                 <h3>Inativos</h3>
-                <p className="inactive">{dashboardData.estatisticas.colaboradores_inativos}</p>
+                <p className="inactive">{dashboardData.estatisticas?.colaboradores_inativos || employees.filter(e => !e.ativo).length}</p>
               </div>
               <div className="summary-card">
                 <h3>Folha Último Mês</h3>
-                <p className="departments">{formatCurrency(dashboardData.estatisticas.folha_pagamento_ultimo_mes)}</p>
+                <p className="departments">
+                  {formatCurrency(dashboardData.estatisticas?.folha_pagamento_ultimo_mes)}
+                </p>
               </div>
             </>
           ) : (
@@ -405,11 +442,11 @@ const HumanResources = () => {
               </div>
               <div className="summary-card">
                 <h3>Ativos</h3>
-                <p className="active">{employees.filter(e => e.ativo).length}</p>
+                <p className="active">{employees.filter(e => e.ativo === 1).length}</p>
               </div>
               <div className="summary-card">
                 <h3>Inativos</h3>
-                <p className="inactive">{employees.filter(e => !e.ativo).length}</p>
+                <p className="inactive">{employees.filter(e => e.ativo !== 1).length}</p>
               </div>
               <div className="summary-card">
                 <h3>Funções</h3>
@@ -581,11 +618,11 @@ const HumanResources = () => {
                 <tbody>
                   {employees.map(employee => (
                     <tr key={employee.id}>
-                      <td><strong>{employee.nome}</strong></td>
-                      <td>{employee.funcao_rel?.nome || 'Sem função'}</td>
+                      <td><strong>{employee.nome || 'Sem nome'}</strong></td>
+                      <td>{employee.funcao_rel?.nome || employee.funcao || 'Sem função'}</td>
                       <td>
-                        <span className={`dept-badge dept-${getDepartamento(employee.funcao_rel?.nome).toLowerCase().replace(/\s+/g, '-')}`}>
-                          {getDepartamento(employee.funcao_rel?.nome)}
+                        <span className={`dept-badge dept-${getDepartamento(employee.funcao_rel?.nome || employee.funcao).toLowerCase().replace(/\s+/g, '-')}`}>
+                          {getDepartamento(employee.funcao_rel?.nome || employee.funcao)}
                         </span>
                       </td>
                       <td>{employee.email || '-'}</td>
@@ -601,10 +638,10 @@ const HumanResources = () => {
                         <div className="action-buttons">
                           <button 
                             onClick={() => toggleEmployeeStatus(employee)}
-                            className={`btn btn-sm ${employee.ativo ? 'btn-warning' : 'btn-success'}`}
-                            title={employee.ativo ? 'Inativar colaborador' : 'Ativar colaborador'}
+                            className={`btn btn-sm ${employee.ativo === 1 ? 'btn-warning' : 'btn-success'}`}
+                            title={employee.ativo === 1 ? 'Inativar colaborador' : 'Ativar colaborador'}
                           >
-                            {employee.ativo ? 'Inativar' : 'Ativar'}
+                            {employee.ativo === 1 ? 'Inativar' : 'Ativar'}
                           </button>
                           <button 
                             onClick={() => deleteEmployee(employee.id)}

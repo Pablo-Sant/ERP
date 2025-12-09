@@ -1,4 +1,3 @@
-// src/pages/modules/Financial.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
@@ -20,7 +19,8 @@ const Financial = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/fi/dashboard');
+      // Atualizado para usar a rota correta /financeiro/dashboard
+      const response = await api.get('/financeiro/dashboard');
       setDashboardData(response.data);
       setError(null);
     } catch (error) {
@@ -34,7 +34,8 @@ const Financial = () => {
   // Buscar dados do relatório de receitas/despesas
   const fetchIncomeExpenseReport = async (startDate, endDate) => {
     try {
-      const response = await api.get('/fi/relatorios/receitas-despesas', {
+      // Atualizado para usar a rota correta /financeiro/relatorios/receitas-despesas
+      const response = await api.get('/financeiro/relatorios/receitas-despesas', {
         params: {
           data_inicio: startDate,
           data_fim: endDate
@@ -43,6 +44,72 @@ const Financial = () => {
       return response.data;
     } catch (error) {
       console.error('Erro ao carregar relatório:', error);
+      throw error;
+    }
+  };
+
+  // Buscar extratos
+  const fetchStatements = async (params) => {
+    try {
+      const response = await api.get('/financeiro/extratos', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar extratos:', error);
+      throw error;
+    }
+  };
+
+  // Buscar fluxo de caixa
+  const fetchCashFlow = async (params) => {
+    try {
+      const response = await api.get('/financeiro/fluxo-caixa', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar fluxo de caixa:', error);
+      throw error;
+    }
+  };
+
+  // Buscar contas
+  const fetchAccounts = async (params) => {
+    try {
+      const response = await api.get('/financeiro/contas', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar contas:', error);
+      throw error;
+    }
+  };
+
+  // Buscar orçamentos
+  const fetchBudgets = async (params) => {
+    try {
+      const response = await api.get('/financeiro/orcamentos', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar orçamentos:', error);
+      throw error;
+    }
+  };
+
+  // Buscar notas fiscais
+  const fetchInvoices = async (params) => {
+    try {
+      const response = await api.get('/fiscal/notas-fiscais', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar notas fiscais:', error);
+      throw error;
+    }
+  };
+
+  // Buscar impostos
+  const fetchTaxes = async (params) => {
+    try {
+      const response = await api.get('/fiscal/impostos', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar impostos:', error);
       throw error;
     }
   };
@@ -74,21 +141,58 @@ const Financial = () => {
           />
         );
       case 'accounts':
-        return <FinancialAccounts />;
+        return (
+          <FinancialAccounts 
+            fetchAccounts={fetchAccounts}
+            fetchStatements={fetchStatements}
+          />
+        );
       case 'transactions':
-        return <FinancialTransactions />;
+        return (
+          <FinancialTransactions 
+            fetchStatements={fetchStatements}
+            fetchCashFlow={fetchCashFlow}
+          />
+        );
       case 'budgets':
-        return <FinancialBudgets />;
+        return (
+          <FinancialBudgets 
+            fetchBudgets={fetchBudgets}
+          />
+        );
       case 'reports':
         return (
           <FinancialReports 
             onGenerateReport={fetchIncomeExpenseReport}
+            fetchCashFlow={fetchCashFlow}
           />
         );
       case 'invoices':
-        return <div className="card"><h3>Notas Fiscais</h3><p>Em desenvolvimento...</p></div>;
+        return (
+          <div className="card">
+            <h3>Notas Fiscais</h3>
+            <p>Integração com módulo fiscal em desenvolvimento...</p>
+            <button 
+              className="action-btn"
+              onClick={() => fetchInvoices({ limit: 10 })}
+            >
+              🧾 Listar Notas Fiscais
+            </button>
+          </div>
+        );
       case 'taxes':
-        return <div className="card"><h3>Impostos</h3><p>Em desenvolvimento...</p></div>;
+        return (
+          <div className="card">
+            <h3>Impostos</h3>
+            <p>Integração com módulo fiscal em desenvolvimento...</p>
+            <button 
+              className="action-btn"
+              onClick={() => fetchTaxes({ limit: 10 })}
+            >
+              💰 Listar Impostos
+            </button>
+          </div>
+        );
       default:
         return <div>Selecione uma opção</div>;
     }
@@ -154,7 +258,7 @@ const Financial = () => {
           <span className="module-version">v1.0.0</span>
         </div>
         <div className="footer-links">
-          <a href="/api/fi/health" target="_blank" rel="noopener noreferrer">
+          <a href="/api/financeiro/health" target="_blank" rel="noopener noreferrer">
             🔍 Verificar Saúde da API
           </a>
           <a href="/docs#/Financeiro" target="_blank" rel="noopener noreferrer">
