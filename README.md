@@ -22,6 +22,22 @@ A construção do backend prioriza a manutenção e a independência entre as ca
 * **Segurança de Credenciais:** Implementação de hashing de senhas via Argon2 e autenticação baseada em tokens JWT.
 * **Processamento Assíncrono:** Utilização de `AsyncSession` para operações não bloqueantes com o banco de dados PostgreSQL.
 
+## 🔐 Fluxos de Segurança e Dados
+
+### Autenticação e Autorização
+O sistema utiliza um fluxo stateless baseado em tokens para garantir segurança e escalabilidade:
+1. **Login:** O cliente envia credenciais via `POST /usuarios/login`.
+2. **Validação:** O sistema valida a senha (Argon2), recupera o `user_id` e emite um JWT com claims específicas (`sub`).
+3. **Requisições Protegidas:** Em chamadas subsequentes, o middleware valida o token, extrai o contexto do usuário e restringe o escopo de dados ao perfil autenticado.
+
+### Ciclo de Vida de Recurso (Request-Response)
+Cada criação de recurso no BluERP segue um padrão rigoroso:
+* **Request:** Entrada de dados validada por **Pydantic Schemas**.
+* **Router:** Orquestração da chamada para a **Service Layer**.
+* **Service:** Injeção do contexto do usuário, aplicação de regras de negócio e comunicação com o **Model**.
+* **Persistência:** O **SQLAlchemy** garante a transação no PostgreSQL.
+* **Response:** Retorno de dados formatado via Response Schema.
+
 ## 🛠️ Tecnologias
 * **Linguagem:** Python.
 * **Framework:** FastAPI.
