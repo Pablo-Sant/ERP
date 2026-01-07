@@ -22,7 +22,6 @@ class FiscalImpostosResponse(FiscalImpostosBase):
         from_attributes = True
 
 
-# ADICIONE ESTA CLASSE
 class FiscalImpostosUpdate(BaseModel):
     """Schema para atualização parcial de impostos"""
     id_nota: Optional[int] = None

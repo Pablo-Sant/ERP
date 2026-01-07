@@ -48,9 +48,8 @@ class ColaboradorService:
     ) -> List[Colaborador]:
         query = db.query(Colaborador)
         
-        # Como 'ativo' é campo virtual, filtramos pelo campo que existe
         if ativo is not None:
-            # Se temos o campo virtual, usamos filtro condicional
+        
             query = query.filter(Colaborador.ativo == (1 if ativo else 0))
         
         if funcao_id:

@@ -22,7 +22,6 @@ class FinanceiroOrcamentosResponse(FinanceiroOrcamentosBase):
         from_attributes = True
 
 
-# ADICIONE ESTA CLASSE
 class FinanceiroOrcamentosUpdate(BaseModel):
     """Schema para atualização parcial de orçamentos"""
     ano: Optional[int] = None

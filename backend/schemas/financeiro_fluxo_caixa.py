@@ -22,7 +22,6 @@ class FinanceiroFluxoCaixaResponse(FinanceiroFluxoCaixaBase):
         from_attributes = True
 
 
-# ADICIONE ESTA CLASSE
 class FinanceiroFluxoCaixaUpdate(BaseModel):
     """Schema para atualização parcial de fluxo de caixa"""
     data: Optional[date] = None

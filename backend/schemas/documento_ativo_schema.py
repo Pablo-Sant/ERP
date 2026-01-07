@@ -23,7 +23,6 @@ class DocumentoAtivoResponse(DocumentoAtivoBase):
         from_attributes = True  # Corrigido: de orm_mode para from_attributes
 
 
-# ADICIONE ESTA CLASSE
 class DocumentoAtivoUpdate(BaseModel):
     """Schema para atualização parcial de documento de ativo"""
     id_ativo: Optional[int] = None

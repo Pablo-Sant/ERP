@@ -23,7 +23,6 @@ class FinanceiroExtratosBancariosResponse(FinanceiroExtratosBancariosBase):
         from_attributes = True
 
 
-# ADICIONE ESTA CLASSE
 class FinanceiroExtratosBancariosUpdate(BaseModel):
     """Schema para atualização parcial de extratos bancários"""
     id_conta: Optional[int] = None

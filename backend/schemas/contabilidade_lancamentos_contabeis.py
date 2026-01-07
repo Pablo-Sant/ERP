@@ -24,7 +24,7 @@ class ContabilidadeLancamentosResponse(ContabilidadeLancamentosBase):
         from_attributes = True
 
 
-# ADICIONE ESTA CLASSE
+
 class ContabilidadeLancamentosUpdate(BaseModel):
     """Schema para atualização parcial de lançamentos contábeis"""
     data: Optional[date] = None

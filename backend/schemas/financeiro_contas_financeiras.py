@@ -23,7 +23,6 @@ class FinanceiroContasResponse(FinanceiroContasBase):
 
 
 class FinanceiroContasUpdate(BaseModel):
-    """Schema para atualização parcial de contas financeiras"""
     nome: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
     tipo: Optional[Annotated[str, StringConstraints(max_length=50)]] = None
     saldo_inicial: Optional[Decimal] = None

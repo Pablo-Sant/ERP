@@ -54,7 +54,7 @@ class Ativo(DBBaseModel):
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
     data_atualizacao = Column(DateTime(timezone=True), server_default=func.now())
 
-    # CORREÇÃO: Use string literals para todos os relacionamentos
+  
     #categoria = relationship("CategoriaAtivo", back_populates="ativos")
     #localizacao = relationship("Localizacao", back_populates="ativos")
     #fornecedor = relationship("Fornecedor", back_populates="ativos")

@@ -1,4 +1,3 @@
-# services/vendedor_service.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List, Optional
@@ -29,7 +28,7 @@ class VendedorService:
 
     @staticmethod
     def _limpar_cpf_cnpj(cpf_cnpj: Optional[str]) -> Optional[str]:
-        """Remove tudo que não for número do CPF/CNPJ"""
+   
         if cpf_cnpj is None:
             return None
         return ''.join(filter(str.isdigit, cpf_cnpj))

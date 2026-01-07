@@ -25,7 +25,6 @@ class FinanceiroLancamentosResponse(FinanceiroLancamentosBase):
         from_attributes = True
 
 class FinanceiroLancamentosUpdate(BaseModel):
-    """Schema para atualização parcial de lançamentos financeiros"""
     id_conta: Optional[int] = None
     tipo: Optional[Annotated[str, StringConstraints(max_length=10)]] = None
     valor: Optional[Decimal] = None

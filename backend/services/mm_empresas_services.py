@@ -9,19 +9,7 @@ class EmpresaService:
 
     @staticmethod
     async def criar(dto, db: AsyncSession) -> Empresa:
-        """
-        Cria uma nova empresa
-        
-        Args:
-            dto: Objeto de transferência de dados (Pydantic model)
-            db: Sessão do banco de dados
-            
-        Returns:
-            Empresa: Objeto da empresa criada
-            
-        Raises:
-            ValueError: Se o CNPJ/CPF já estiver cadastrado
-        """
+
         # Verifica se já existe empresa com mesmo CNPJ/CPF
         if dto.cpf_cnpj:
             empresa_existente = await EmpresaService.buscar_por_cpf_cnpj(
@@ -44,15 +32,7 @@ class EmpresaService:
 
     @staticmethod
     async def get_all(db: AsyncSession) -> List[Empresa]:
-        """
-        Retorna todas as empresas cadastradas
-        
-        Args:
-            db: Sessão do banco de dados
-            
-        Returns:
-            List[Empresa]: Lista de empresas
-        """
+
         result = await db.execute(
             select(Empresa)
             .order_by(Empresa.nome)
@@ -61,16 +41,7 @@ class EmpresaService:
 
     @staticmethod
     async def get_by_id(empresa_id: int, db: AsyncSession) -> Optional[Empresa]:
-        """
-        Busca empresa por ID
-        
-        Args:
-            empresa_id: ID da empresa
-            db: Sessão do banco de dados
-            
-        Returns:
-            Optional[Empresa]: Empresa encontrada ou None
-        """
+
         result = await db.execute(
             select(Empresa)
             .filter(Empresa.id == empresa_id)
@@ -79,16 +50,7 @@ class EmpresaService:
 
     @staticmethod
     async def buscar_por_cpf_cnpj(cpf_cnpj: str, db: AsyncSession) -> Optional[Empresa]:
-        """
-        Busca empresa por CPF/CNPJ
-        
-        Args:
-            cpf_cnpj: CPF ou CNPJ da empresa
-            db: Sessão do banco de dados
-            
-        Returns:
-            Optional[Empresa]: Empresa encontrada ou None
-        """
+
         if not cpf_cnpj:
             return None
             
@@ -100,16 +62,7 @@ class EmpresaService:
 
     @staticmethod
     async def buscar_por_nome(nome: str, db: AsyncSession) -> List[Empresa]:
-        """
-        Busca empresas por nome (busca parcial)
-        
-        Args:
-            nome: Nome ou parte do nome da empresa
-            db: Sessão do banco de dados
-            
-        Returns:
-            List[Empresa]: Lista de empresas encontradas
-        """
+
         result = await db.execute(
             select(Empresa)
             .filter(Empresa.nome.ilike(f"%{nome}%"))
@@ -119,20 +72,7 @@ class EmpresaService:
 
     @staticmethod
     async def update(empresa_id: int, dto, db: AsyncSession) -> Optional[Empresa]:
-        """
-        Atualiza uma empresa existente
-        
-        Args:
-            empresa_id: ID da empresa a ser atualizada
-            dto: Objeto de transferência de dados com as alterações
-            db: Sessão do banco de dados
-            
-        Returns:
-            Optional[Empresa]: Empresa atualizada ou None se não encontrada
-            
-        Raises:
-            ValueError: Se o CNPJ/CPF já estiver cadastrado em outra empresa
-        """
+
         empresa = await EmpresaService.get_by_id(empresa_id, db)
         
         if not empresa:
@@ -159,33 +99,12 @@ class EmpresaService:
 
     @staticmethod
     async def delete(empresa_id: int, db: AsyncSession) -> bool:
-        """
-        Remove uma empresa
-        
-        Args:
-            empresa_id: ID da empresa a ser removida
-            db: Sessão do banco de dados
-            
-        Returns:
-            bool: True se removida, False se não encontrada
-            
-        Raises:
-            ValueError: Se a empresa tiver produtos vinculados
-        """
+
         empresa = await EmpresaService.get_by_id(empresa_id, db)
         
         if not empresa:
             return False
 
-        # TODO: Verificar se empresa tem produtos vinculados
-        # Isso requer importar o modelo Produto e verificar relacionamentos
-        # from models.mm_produto_model import Produto
-        # produtos_count = await db.execute(
-        #     select(func.count(Produto.id))
-        #     .filter(Produto.empresa_id == empresa_id)
-        # )
-        # if produtos_count.scalar() > 0:
-        #     raise ValueError("Não é possível excluir empresa com produtos vinculados")
 
         await db.delete(empresa)
         await db.commit()
@@ -193,19 +112,10 @@ class EmpresaService:
 
     @staticmethod
     async def validar_cpf_cnpj(cpf_cnpj: str) -> None:
-        """
-        Valida formato do CPF/CNPJ
-        
-        Args:
-            cpf_cnpj: CPF ou CNPJ a ser validado
-            
-        Raises:
-            ValueError: Se o CPF/CNPJ for inválido
-        """
+
         if not cpf_cnpj:
             return
             
-        # Remove caracteres não numéricos
         numeros = ''.join(filter(str.isdigit, cpf_cnpj))
         
         # Validação básica de tamanho
@@ -214,41 +124,17 @@ class EmpresaService:
 
     @staticmethod
     async def verificar_empresa_ativa(empresa_id: int, db: AsyncSession) -> bool:
-        """
-        Verifica se uma empresa existe e está ativa
-        
-        Args:
-            empresa_id: ID da empresa
-            db: Sessão do banco de dados
-            
-        Returns:
-            bool: True se empresa existe
-            
-        Raises:
-            ValueError: Se empresa não for encontrada
-        """
+
         empresa = await EmpresaService.get_by_id(empresa_id, db)
         
         if not empresa:
             raise ValueError(f"Empresa com ID {empresa_id} não encontrada")
             
-        # Se tiver campo ativo/inativo, adicione a verificação:
-        # if hasattr(empresa, 'ativo') and not empresa.ativo:
-        #     raise ValueError(f"Empresa com ID {empresa_id} está inativa")
             
         return True
 
     @staticmethod
     async def get_empresas_com_produtos(db: AsyncSession) -> List[Empresa]:
-        """
-        Retorna empresas que possuem produtos cadastrados
-        
-        Args:
-            db: Sessão do banco de dados
-            
-        Returns:
-            List[Empresa]: Lista de empresas com produtos
-        """
         from models.mm_produto_model import Produto
         from sqlalchemy import func
         
@@ -263,15 +149,7 @@ class EmpresaService:
 
     @staticmethod
     async def get_contagem_produtos_por_empresa(db: AsyncSession) -> dict:
-        """
-        Retorna contagem de produtos por empresa
-        
-        Args:
-            db: Sessão do banco de dados
-            
-        Returns:
-            dict: Dicionário com ID da empresa e quantidade de produtos
-        """
+
         from models.mm_produto_model import Produto
         from sqlalchemy import func
         
