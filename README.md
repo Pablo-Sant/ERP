@@ -16,6 +16,15 @@ O sistema foi projetado para atuar como o núcleo operacional de uma organizaç�
 ## 🏗️ Decisões de Engenharia
 A construção do backend prioriza a manutenção e a independência entre as camadas do sistema:
 
+```text
+src/
+ ├── api/       # Rotas HTTP e orquestração de endpoints
+ ├── services/  # Regras de negócio e lógica de domínio
+ ├── models/    # Entidades ORM e persistência de dados
+ ├── schemas/   # Contratos de entrada/saída (Pydantic)
+ └── core/      # Segurança (JWT), configurações e dependências
+```
+
 * **Modularização:** Organização do projeto em diretórios específicos para `api`, `models`, `schemas` e `services`, garantindo a separação de responsabilidades.
 * **Lógica de Domínio:** Isolamento das regras de negócio na camada de `services`, mantendo as rotas da API focadas apenas na orquestração das requisições.
 * **Integridade de Dados:** Uso de schemas Pydantic para validação rigorosa de contratos e models SQLAlchemy para gerenciamento do banco de dados relacional.
