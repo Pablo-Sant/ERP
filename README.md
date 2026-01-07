@@ -29,9 +29,33 @@ A construção do backend prioriza a manutenção e a independência entre as ca
 * **ORM:** SQLAlchemy (Async).
 * **Segurança:** JWT (JSON Web Tokens) e Argon2.
 
-## 🚀 Desenvolvimento e Roadmap
-O projeto encontra-se em sua fase funcional de backend, com os módulos de negócio e rotas de integração já estabelecidos. As próximas etapas de engenharia contemplam:
 
-* **Testes:** Expansão da cobertura de testes automatizados na pasta `tests`.
-* **DevOps:** Configuração de pipelines para automação de deploy e ambiente de produção.
-* **Segurança:** Refinamento dos protocolos de segurança em endpoints administrativos.
+## ⚡ Quick Start (Como executar)
+
+### Pré-requisitos
+* Python 3.10+
+* PostgreSQL ativo
+
+### Instalação
+1. Clone o repositório: `git clone https://github.com/seu-usuario/bluerp.git`
+2. Crie o ambiente virtual: `python -m venv .venv`
+3. Ative o venv: `source .venv/bin/activate` (Linux/Mac) ou `.venv\Scripts\activate` (Windows)
+4. Instale as dependências: `pip install -r requirements.txt`
+5. Configure o `.env` com sua `DATABASE_URL`.
+6. Crie as tabelas: `python criar_tabelas.py`
+7. Inicie a API: `uvicorn main:app --reload`
+
+📍 Acesse a documentação interativa em: `http://127.0.0.1:8000/docs`
+
+---
+
+## 📊 Status do Projeto e Maturidade
+| Recurso | Status | Observação |
+| :--- | :--- | :--- |
+| **Arquitetura Base** | ✅ Concluído | Estrutura modular (Services/Models/Schemas). |
+| **Módulos de Negócio** | ✅ Implementado | Rotas de todos os departamentos (Vendas, RH, Financeiro, etc). |
+| **Autenticação** | 🔐 Parcial | JWT e Argon2 implementados; proteção em rotas críticas. |
+| **Testes Unitários** | 🏗️ Em progresso | Estrutura de diretórios criada para Pytest. |
+| **Deploy/CI-CD** | ⏳ Planejado | Próxima fase do roadmap. |
+
+---
