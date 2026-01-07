@@ -1,12 +1,12 @@
 from sqlalchemy import Column, Integer, String, Text, Date, Numeric, DateTime
 from sqlalchemy.sql import func
-from core.database import Base
+from core.configs import DBBaseModel
 
-class ProjetoModel(Base):
+class ProjetoModel(DBBaseModel):
     __tablename__ = "projetos"
     __table_args__ = {"schema": "ps"}
     
-    # COLUNAS REAIS DO SEU BANCO
+   
     id_projeto = Column(Integer, primary_key=True, index=True)
     nome = Column(String(200), nullable=False)
     descricao = Column(Text)
@@ -24,7 +24,7 @@ class ProjetoModel(Base):
     created_at = Column(DateTime(timezone=False), server_default=func.now())
     updated_at = Column(DateTime(timezone=False), server_default=func.now(), onupdate=func.now())
     
-    # PROPRIEDADES PARA COMPATIBILIDADE (opcional)
+    
     @property
     def id(self):
         """Alias para id_projeto para compatibilidade com código existente"""

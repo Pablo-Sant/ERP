@@ -5,27 +5,28 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt
-from models.usuario_model import Usuario
+from models.usuario_model import UsuarioModel
 from core.configs import settings
 from core.security import verificar_senha
 from pydantic import EmailStr
+from exceptions.usuarios_execeptions import UsuarioNaoCadastrado, SenhaIncorreta
 
 oauth2_schema = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/usuarios/login"
 ) 
 
-async def autenticar(email: EmailStr, senha: str, db: AsyncSession) -> Optional[Usuario]:
+async def autenticar(email: EmailStr, senha: str, db: AsyncSession) -> Optional[UsuarioModel]:
     result = await db.execute( # O await só é usado quando for fazer uma operação no banco
-        select(Usuario).filter(Usuario.email == email)
+        select(UsuarioModel).filter(UsuarioModel.email == email)
     )
     
     usuario = result.scalars().unique().one_or_none()
     
     if not usuario:
-        return None
+        raise UsuarioNaoCadastrado
     
     if not verificar_senha(senha, usuario.senha):
-        return None
+        raise SenhaIncorreta
     
     return usuario
 

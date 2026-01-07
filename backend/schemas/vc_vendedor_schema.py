@@ -16,21 +16,16 @@ class VendedorBase(BaseModel):
     status: Optional[str] = None
     data_cadastro: Optional[date] = None
 
-
 class VendedorCreate(VendedorBase):
     pass
-
 
 class VendedorResponse(VendedorBase):
     vendedorid: int
 
     class Config:
-        from_attributes = True  # Corrigido: de orm_mode para from_attributes
+        from_attributes = True  
 
-
-# ADICIONE ESTA CLASSE
 class VendedorUpdate(BaseModel):
-    """Schema para atualização parcial de vendedor"""
     nome: Optional[str] = None
     cpf_cnpj: Optional[str] = None
     inscricao_estadual: Optional[str] = None

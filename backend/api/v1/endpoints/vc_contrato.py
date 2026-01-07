@@ -9,14 +9,14 @@ from services.vc_contrato_service import ContratoService
 router = APIRouter()
 
 @router.post("/", response_model=ContratoResponse, status_code=status.HTTP_201_CREATED)
-async def criar_contrato(
-    contrato: ContratoCreate,
-    db: AsyncSession = Depends(get_session)
-):
+async def criar_contrato(contrato: ContratoCreate, db: AsyncSession = Depends(get_session)):
     try:
         return await ContratoService.criar(contrato, db)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    
+    
+    
 
 @router.get("/", response_model=List[ContratoResponse])
 async def listar_contratos(
@@ -58,14 +58,12 @@ async def buscar_contratos_por_vendedor(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 @router.get("/vencimento/em", response_model=List[ContratoResponse])
-async def buscar_contratos_vencendo_em(
-    data_vencimento: date = Query(..., description="Data de vencimento (YYYY-MM-DD)"),
-    db: AsyncSession = Depends(get_session)
-):
+async def buscar_contratos_vencendo_em(data_vencimento: date = Query(..., description="Data de vencimento (YYYY-MM-DD)"), db: AsyncSession = Depends(get_session)):
     try:
         return await ContratoService.buscar_vencendo_em(data_vencimento, db)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    
 
 @router.get("/vencimento/proximos", response_model=List[ContratoResponse])
 async def buscar_contratos_a_vencer(

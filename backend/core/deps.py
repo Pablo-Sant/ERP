@@ -1,52 +1,63 @@
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, AsyncGenerator
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from models.usuario import UsuarioModel
+from jose import jwt, JWTError
+
+from sqlalchemy.ext.asyncio import AsyncSession 
 from sqlalchemy.future import select
-from core.database import Session
+from pydantic import BaseModel
 
-# Configuração do OAuth2
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+from core.database import SessionLocal
+from core.auth import oauth2_schema
+from core.configs import settings
+from models.usuario_model import UsuarioModel
 
+
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+    
+    
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    async with Session() as session:
+    async with SessionLocal() as session:
+    
         try:
             yield session
         finally:
             await session.close()
+        
 
-# ADICIONE ESTA LINHA - Alias para compatibilidade
-get_db = get_session
-
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_session)  # Pode usar get_session ou get_db
-) -> UsuarioModel:
-    credentials_exception = HTTPException(
+async def get_current_user(db = Depends(get_session), token:str = Depends(oauth2_schema)) -> UsuarioModel:
+    
+    credential_exception: HTTPException = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        detail='Não foi possível autenticar a credencial',
+        headers={'WWW-Authenticate': 'Bearer'}
     )
     
-    if not token:
-        raise credentials_exception
-    
-    payload = verificar_token_jwt(token)
-    if payload is None:
-        raise credentials_exception
-    
-    user_id: str = payload.get("sub")
-    if user_id is None:
-        raise credentials_exception
-    
     try:
-        query = select(UsuarioModel).filter(UsuarioModel.id == int(user_id))
-        result = await db.execute(query)
-        user = result.scalar_one_or_none()
+        payload = jwt.decode(
+            token, 
+            settings.JWT_SECRET,
+            algorithms=[settings.ALGORITHM],
+            options={'verify_aud': False}
+        )
         
-        if user is None:
-            raise credentials_exception
-        return user
-    except Exception as e:
-        raise credentials_exception
+        user_id: str = payload.get('sub')
+        if user_id is None:
+            raise credential_exception
+        token_data = TokenData(username=user_id)
+    except JWTError:
+        raise credential_exception
+    
+    result = await db.execute(
+        select(UsuarioModel).filter(UsuarioModel.id == int(token_data.username)),
+    )
+    
+    usuario = result.scalars().unique().one_or_none()
+    
+    if usuario is None:
+        raise credential_exception
+    
+    return usuario
+    
+        

@@ -20,6 +20,7 @@ class ClienteFinal(DBBaseModel):
     cidade = Column(String(100))
     data_ultima_compra = Column(Date)
     valor_compra = Column(Numeric(10, 2))
+    usuario_id = Column(Integer, ForeignKey('usuarios.id'))
 
     
     contratos = relationship("Contrato", lazy="select")

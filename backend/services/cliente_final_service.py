@@ -4,7 +4,8 @@ from typing import List, Optional
 from datetime import date
 from decimal import Decimal
 from models.vc_cliente_final_model import ClienteFinal
-
+from models.usuario_model import UsuarioModel
+from exceptions.usuarios_execeptions import ClienteNaoEncontrado
 
 class ClienteFinalService:
     
@@ -43,7 +44,7 @@ class ClienteFinalService:
         return ''.join(filter(str.isdigit, cpf_cnpj))
 
     @staticmethod
-    async def criar(dto, db: AsyncSession) -> ClienteFinal:
+    async def criar(usuario_logado: UsuarioModel, dto, db: AsyncSession) -> ClienteFinal:
 
         ClienteFinalService._validar_cpf_cnpj(dto.cpf_cnpj)
 
@@ -64,7 +65,7 @@ class ClienteFinalService:
             if cliente_existente:
                 raise ValueError(f"CPF/CNPJ {cpf_cnpj_limpo} já cadastrado")
         
-        novo_cliente = ClienteFinal(**dados)
+        novo_cliente = ClienteFinal(**dados, usuario_id = usuario_logado.id)
         
         db.add(novo_cliente)
         await db.commit()
@@ -73,25 +74,29 @@ class ClienteFinalService:
         return novo_cliente
 
     @staticmethod
-    async def get_all(db: AsyncSession) -> List[ClienteFinal]:
+    async def get_all(usuario_logado: UsuarioModel, db: AsyncSession) -> List[ClienteFinal]:
 
         result = await db.execute(
-            select(ClienteFinal)
-            .order_by(ClienteFinal.nome)
+            select(ClienteFinal).filter(ClienteFinal.usuario_id == usuario_logado.id).order_by(ClienteFinal.nome)
         )
         return result.unique().scalars().all()
+    
+    
 
     @staticmethod
-    async def get_by_id(cliente_id: int, db: AsyncSession) -> Optional[ClienteFinal]:
+    async def get_by_id(usuario_logado: UsuarioModel, cliente_id: int, db: AsyncSession) -> Optional[ClienteFinal]:
 
         result = await db.execute(
             select(ClienteFinal)
             .filter(ClienteFinal.cliente_finalid == cliente_id)
+            .filter(ClienteFinal.usuario_id == usuario_logado.id)
         )
+        
         return result.scalars().first()
+    
 
     @staticmethod
-    async def buscar_por_cpf_cnpj(cpf_cnpj: str, db: AsyncSession) -> Optional[ClienteFinal]:
+    async def buscar_por_cpf_cnpj(usuario_logado: UsuarioModel, cpf_cnpj: str, db: AsyncSession) -> Optional[ClienteFinal]:
 
         if not cpf_cnpj:
             return None
@@ -99,30 +104,40 @@ class ClienteFinalService:
         result = await db.execute(
             select(ClienteFinal)
             .filter(ClienteFinal.cpf_cnpj == cpf_cnpj)
+            .filter(ClienteFinal.usuario_id == usuario_logado.id)
+            
         )
         return result.scalars().first()
+    
+    
 
     @staticmethod
-    async def buscar_por_nome(nome: str, db: AsyncSession) -> List[ClienteFinal]:
+    async def buscar_por_nome(usuario_logado: UsuarioModel, nome: str, db: AsyncSession) -> List[ClienteFinal]:
 
         result = await db.execute(
             select(ClienteFinal)
             .filter(ClienteFinal.nome.ilike(f"%{nome}%"))
+            .filter(ClienteFinal.usuario_id == usuario_logado.id)
             .order_by(ClienteFinal.nome)
         )
+        
         return result.unique().scalars().all()
+    
+    
 
     @staticmethod
-    async def update(cliente_id: int, dto, db: AsyncSession) -> Optional[ClienteFinal]:
+    async def update(usuario_logado: UsuarioModel, cliente_id: int, dto, db: AsyncSession) -> Optional[ClienteFinal]:
 
-        cliente = await ClienteFinalService.get_by_id(cliente_id, db)
+        cliente = await ClienteFinalService.get_by_id(usuario_logado, cliente_id, db)
         
         if not cliente:
             return None
 
         if dto.cpf_cnpj is not None:
+            
             try:
                 ClienteFinalService._validar_cpf_cnpj(dto.cpf_cnpj)
+                
             except ValueError as e:
                 raise ValueError(f"Erro de validação CPF/CNPJ: {str(e)}")
             
@@ -131,16 +146,18 @@ class ClienteFinalService:
             
             if novo_cpf_cnpj_limpo != cpf_cnpj_atual_limpo:
                 
-                cliente_existente = await ClienteFinalService.buscar_por_cpf_cnpj(
-                    novo_cpf_cnpj_limpo, db
-                )
+                cliente_existente = await ClienteFinalService.buscar_por_cpf_cnpj(usuario_logado, novo_cpf_cnpj_limpo, db)
+                
                 if cliente_existente and cliente_existente.cliente_finalid != cliente_id:
                     raise ValueError(f"CPF/CNPJ {dto.cpf_cnpj} já cadastrado em outro cliente")
 
         dados = dto.model_dump(exclude_unset=True)
+        
         for campo, valor in dados.items():
+            
             if campo == 'cpf_cnpj' and valor is not None:
                 setattr(cliente, campo, ''.join(filter(str.isdigit, valor)))
+                
             else:
                 setattr(cliente, campo, valor)
 
@@ -149,9 +166,9 @@ class ClienteFinalService:
         return cliente
 
     @staticmethod
-    async def delete(cliente_id: int, db: AsyncSession) -> bool:
+    async def delete(cliente_id: int, usuario_logado: UsuarioModel, db: AsyncSession) -> bool:
 
-        cliente = await ClienteFinalService.get_by_id(cliente_id, db)
+        cliente = await ClienteFinalService.get_by_id(usuario_logado, cliente_id, db)
         
         if not cliente:
             return False
@@ -167,8 +184,8 @@ class ClienteFinalService:
         return True
 
     @staticmethod
-    async def verificar_cliente_existe(cliente_id: int, db: AsyncSession) -> bool:
-        cliente = await ClienteFinalService.get_by_id(cliente_id, db)
+    async def verificar_cliente_existe(cliente_id: int, usuario_logado: UsuarioModel, db: AsyncSession) -> bool:
+        cliente = await ClienteFinalService.get_by_id(usuario_logado, cliente_id, db)
         
         if not cliente:
             raise ValueError(f"Cliente com ID {cliente_id} não encontrado")
@@ -176,16 +193,12 @@ class ClienteFinalService:
         return True
 
     @staticmethod
-    async def atualizar_dados_compra(
-        cliente_id: int, 
-        valor_compra: float, 
-        db: AsyncSession
-    ) -> Optional[ClienteFinal]:
+    async def atualizar_dados_compra(cliente_id: int, valor_compra: float, usuario_logado: UsuarioModel, db: AsyncSession) -> Optional[ClienteFinal]:
 
-        cliente = await ClienteFinalService.get_by_id(cliente_id, db)
+        cliente = await ClienteFinalService.get_by_id(usuario_logado, cliente_id, db)
         
         if not cliente:
-            return None
+            raise ClienteNaoEncontrado
 
         cliente.data_ultima_compra = date.today()
         cliente.valor_compra = valor_compra
