@@ -2,42 +2,39 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../styles/Sidebar.css';
 
-const Sidebar = ({ isOpen, onClose }) => {
+const modules = [
+  { path: '/dashboard', name: 'Dashboard' },
+  { path: '/mm', name: 'Materiais' },
+  { path: '/fi', name: 'Financeiro' },
+  { path: '/am', name: 'Ativos' },
+  { path: '/rh', name: 'Recursos Humanos' },
+  { path: '/vc', name: 'Vendas' },
+  { path: '/bi', name: 'Business Intelligence' },
+];
+
+export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
-  
-  const modules = [
-    { path: '/dashboard', name: 'Dashboard', icon: '📊' },
-    { path: '/ps', name: 'Gestão de Projetos', icon: '📋' },
-    { path: '/mm', name: 'Gestão de Materiais', icon: '📦' },
-    { path: '/fi', name: 'Financeiro', icon: '💰' },
-    { path: '/am', name: 'Gestão de Ativos', icon: '🏢' },
-    { path: '/rh', name: 'Recursos Humanos', icon: '👥' },
-    { path: '/vc', name: 'Vendas', icon: '🛒' },
-    { path: '/sm', name: 'Serviços', icon: '🔧' },
-    { path: '/bi', name: 'Business Intelligence', icon: '📈' }
-  ];
 
   return (
     <>
-      {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
-      <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
+      {isOpen ? <div className="sidebar-overlay" onClick={onClose} /> : null}
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h3>Módulos ERP</h3>
-          <button className="close-sidebar" onClick={onClose}>×</button>
+          <h3>Módulos</h3>
+          <button className="close-sidebar" onClick={onClose} type="button">
+            ×
+          </button>
         </div>
         <ul className="sidebar-menu">
-          {modules.map(module => (
-            <li key={module.path} className={location.pathname === module.path ? 'active' : ''}>
-              <Link to={module.path} onClick={onClose}>
-                <span className="icon">{module.icon}</span>
+          {modules.map((module) => (
+            <li className={location.pathname === module.path ? 'active' : ''} key={module.path}>
+              <Link onClick={onClose} to={module.path}>
                 <span className="text">{module.name}</span>
               </Link>
             </li>
           ))}
         </ul>
-      </nav>
+      </aside>
     </>
   );
-};
-
-export default Sidebar;
+}

@@ -1,15 +1,13 @@
 import React from 'react';
 import '../styles/Footer.css';
 
-const Footer = () => {
+export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-content">
-        <p>&copy; 2024 ERP System. Todos os direitos reservados.</p>
-        <p>Sistema de Gestão Empresarial Integrado</p>
+        <p>BluERP</p>
+        <p>Plataforma de gestao empresarial para integracao de processos, pessoas e informacoes.</p>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -1,123 +1,87 @@
-// src/pages/Login.js
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import '../styles/Login.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { getErrorMessage } from "../services/api";
+import "../styles/Login.css";
 
-const Login = () => {
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
+export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  async function handleSubmit(event) {
+    event.preventDefault();
 
     try {
-      const result = await login(credentials);
-      
-      if (result.success) {
-        console.log('✅ Login bem-sucedido, redirecionando...');
-        navigate('/dashboard', { replace: true }); // Adicione replace: true
-      } else {
-        setError(result.error);
-      }
-    } catch (error) {
-      setError('Erro ao conectar com o servidor');
-      console.error('Erro no login:', error);
+      setLoading(true);
+      setError("");
+      await login(form);
+      navigate("/dashboard", { replace: true });
+    } catch (loginError) {
+      setError(
+        getErrorMessage(loginError, "Não foi possivel autenticar o acesso."),
+      );
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (error) setError('');
-  };
+  }
 
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
           <div className="logo">BluERP</div>
-          <h1>Bem-vindo de Volta</h1>
-          <p>Faça login para acessar o sistema</p>
+          <h1>Acessar o sistema</h1>
+          <p>
+            Entre com suas credenciais para acessar os módulos de gestão da
+            plataforma.
+          </p>
         </div>
-        
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && (
-            <div className="error-message">
-              ❌ {error}
-            </div>
-          )}
-          
+
+        <form className="login-form" onSubmit={handleSubmit}>
+          {error ? <div className="error-message">{error}</div> : null}
+
           <div className="form-group">
-            <label htmlFor="username">Email ou Nome de Usuário</label>
+            <label htmlFor="email">E-mail</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={credentials.username}
-              onChange={handleInputChange}
-              placeholder="Digite seu email ou nome de usuário"
-              required
-              disabled={loading}
               autoComplete="username"
+              id="email"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  email: event.target.value,
+                }))
+              }
+              required
+              type="email"
+              value={form.email}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Senha</label>
             <input
-              type="password"
-              id="password"
-              name="password"
-              value={credentials.password}
-              onChange={handleInputChange}
-              placeholder="Digite sua senha"
-              required
-              disabled={loading}
               autoComplete="current-password"
+              id="password"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  password: event.target.value,
+                }))
+              }
+              required
+              type="password"
+              value={form.password}
             />
           </div>
 
-          <button 
-            type="submit" 
-            className={`login-btn ${loading ? 'loading' : ''}`}
-            disabled={loading || !credentials.username || !credentials.password}
-          >
-            {loading ? (
-              <>
-                <div className="spinner"></div>
-                Entrando...
-              </>
-            ) : (
-              'Entrar'
-            )}
+          <button className="login-btn" disabled={loading} type="submit">
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
-
-        <div className="login-footer">
-          <p className="demo-credentials">
-            <strong>Credenciais de teste:</strong><br />
-            Email: <code>admin@bluerp.com</code><br />
-            Senha: <code>admin123</code>
-          </p>
-        </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

@@ -1,86 +1,85 @@
-// src/pages/Dashboard.jsx
-import React from 'react';
-import { useAuth } from '../hooks/useAuth';
-import '../styles/Dashboard.css';
+import React, { useEffect, useState } from "react";
+import ModuleShell from "../components/ModuleShell";
+import { erpApi } from "../services/erpApi";
+import { getErrorMessage } from "../services/api";
 
-const Dashboard = () => {
-  const { user } = useAuth();
+const cards = [
+  {
+    key: "materials",
+    label: "Produtos",
+    loader: () => erpApi.materials.listProducts(),
+  },
+  {
+    key: "financial",
+    label: "Contas Financeiras",
+    loader: () => erpApi.financial.listAccounts(),
+  },
+  { key: "assets", label: "Ativos", loader: () => erpApi.assets.listAssets() },
+  {
+    key: "hr",
+    label: "Colaboradores",
+    loader: () => erpApi.hr.listEmployees(),
+  },
+  { key: "sales", label: "Clientes", loader: () => erpApi.sales.listClients() },
+  { key: "bi", label: "Dashboards", loader: () => erpApi.bi.listDashboards() },
+];
 
-  const stats = [
-    { title: 'Projetos Ativos', value: '12', icon: '📋', color: '#3498db' },
-    { title: 'Itens em Estoque', value: '245', icon: '📦', color: '#2ecc71' },
-    { title: 'Vendas do Mês', value: 'R$ 48.250', icon: '💰', color: '#9b59b6' },
-    { title: 'Tickets Abertos', value: '8', icon: '🔧', color: '#e74c3c' }
-  ];
+export default function Dashboard() {
+  const [stats, setStats] = useState({});
+  const [error, setError] = useState("");
 
-  const recentActivities = [
-    { action: 'Novo projeto criado', module: 'PS', time: '5 min atrás' },
-    { action: 'Item adicionado ao estoque', module: 'MM', time: '12 min atrás' },
-    { action: 'Venda realizada', module: 'VC', time: '1 hora atrás' },
-    { action: 'Relatório gerado', module: 'BI', time: '2 horas atrás' }
-  ];
+  useEffect(() => {
+    async function loadStats() {
+      const results = await Promise.allSettled(
+        cards.map((card) => card.loader()),
+      );
+      const nextStats = {};
+      let firstError = "";
+
+      results.forEach((result, index) => {
+        const card = cards[index];
+        if (result.status === "fulfilled") {
+          nextStats[card.key] = result.value.data.length;
+        } else {
+          nextStats[card.key] = "-";
+          if (!firstError) {
+            firstError = getErrorMessage(
+              result.reason,
+              "Falha ao carregar indicadores do painel.",
+            );
+          }
+        }
+      });
+
+      setStats(nextStats);
+      setError(firstError);
+    }
+
+    loadStats();
+  }, []);
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>Dashboard</h1>
-        <p>Bem-vindo de volta, <strong>{user?.nome}</strong>! 👋</p>
-      </div>
-
-      <div className="stats-grid">
-        {stats.map((stat, index) => (
-          <div key={index} className="stat-card">
-            <div className="stat-icon" style={{ backgroundColor: stat.color }}>
-              {stat.icon}
-            </div>
-            <div className="stat-info">
-              <h3>{stat.value}</h3>
-              <p>{stat.title}</p>
-            </div>
-          </div>
+    <ModuleShell
+      description="Visão consolidada dos principais registros disponiveis nos modulos do BluERP."
+      title="Dashboard"
+    >
+      {error ? <div className="alert alert-danger">{error}</div> : null}
+      <section className="dashboard-grid">
+        {cards.map((card) => (
+          <article className="card dashboard-card" key={card.key}>
+            <h2>{card.label}</h2>
+            <p className="dashboard-metric">{stats[card.key] ?? "..."}</p>
+          </article>
         ))}
-      </div>
-
-      <div className="dashboard-content">
-        <div className="dashboard-card">
-          <h2>Atividades Recentes</h2>
-          <div className="activities-list">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="activity-item">
-                <div className="activity-content">
-                  <span className="activity-action">{activity.action}</span>
-                  <span className="activity-module">{activity.module}</span>
-                </div>
-                <span className="activity-time">{activity.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="dashboard-card">
-          <h2>Módulos do Sistema</h2>
-          <div className="modules-grid">
-            <div className="module-quick">
-              <span className="module-icon">📋</span>
-              <span className="module-name">Gestão de Projetos</span>
-            </div>
-            <div className="module-quick">
-              <span className="module-icon">📦</span>
-              <span className="module-name">Gestão de Materiais</span>
-            </div>
-            <div className="module-quick">
-              <span className="module-icon">💰</span>
-              <span className="module-name">Financeiro</span>
-            </div>
-            <div className="module-quick">
-              <span className="module-icon">🏢</span>
-              <span className="module-name">Gestão de Ativos</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </section>
+      <section className="card">
+        <h2>Panorama operacional</h2>
+        <p>
+          Este painel apresenta um resumo inicial da base de dados por area,
+          facilitando a navegação entre os módulos e oferecendo uma leitura
+          rapida do volume de registros do sistema.
+        </p>
+      </section>
+    </ModuleShell>
   );
-};
-
-export default Dashboard;
+}

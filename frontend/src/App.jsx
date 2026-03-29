@@ -1,194 +1,153 @@
-// src/App.js
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './styles/App.css';
-
-// Components
+import { AuthProvider } from './contexts/AuthContext';
+import { useAuth } from './hooks/useAuth';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import Loading from './components/Loading';
-
-// Pages
 import Home from './pages/Home';
 import About from './pages/About';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-
-// Módulos
-import ProjectManagement from './pages/modules/ProjectManagement';
-import MaterialManagement from './pages/modules/MaterialManagement';
-import Financial from './pages/modules/Financial';
 import AssetManagement from './pages/modules/AssetManagement';
-import HumanResources from './pages/modules/HumanResources';
-import Sales from './pages/modules/Sales';
-import Services from './pages/modules/Services';
 import BusinessIntelligence from './pages/modules/BusinessIntelligence';
+import Financial from './pages/modules/Financial';
+import HumanResources from './pages/modules/HumanResources';
+import MaterialManagement from './pages/modules/MaterialManagement';
+import Sales from './pages/modules/Sales';
 
-// Componente para Layout Autenticado
-const AuthenticatedLayout = ({ user, logout, children }) => {
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <Loading />;
+  if (!isAuthenticated) return <Navigate replace to="/login" />;
+  return children;
+}
+
+function PublicRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <Loading />;
+  if (isAuthenticated) return <Navigate replace to="/dashboard" />;
+  return children;
+}
+
+function AuthenticatedLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <div className="app-layout">
-      <Header 
+      <Header
+        onLogout={logout}
+        onToggleSidebar={() => setSidebarOpen((current) => !current)}
         user={user}
-        onLogout={logout} 
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
       <div className="main-content">
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)}
-          user={user}
-        />
-        <div className="content-area">
-          {children}
-        </div>
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <main className="content-area">{children}</main>
       </div>
       <Footer />
     </div>
   );
-};
+}
 
-// Componente para Rotas Protegidas
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user, logout, loading } = useAuth();
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
+function AppRoutes() {
   return (
-    <AuthenticatedLayout user={user} logout={logout}>
-      {children}
-    </AuthenticatedLayout>
-  );
-};
-
-// Componente para Rotas Públicas
-const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return children;
-};
-
-function App() {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          {/* Rotas Públicas */}
-          <Route path="/" element={<Home />} />
-          <Route path="/sobre" element={<About />} />
-          <Route 
-            path="/login" 
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            } 
-          />
-          
-          {/* Rotas Protegidas */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Home />} path="/" />
+        <Route element={<About />} path="/sobre" />
+        <Route
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+          path="/login"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/ps" 
-            element={
-              <ProtectedRoute>
-                <ProjectManagement />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/mm" 
-            element={
-              <ProtectedRoute>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/dashboard"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <MaterialManagement />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/fi" 
-            element={
-              <ProtectedRoute>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/mm"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <Financial />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/am" 
-            element={
-              <ProtectedRoute>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/fi"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <AssetManagement />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/rh" 
-            element={
-              <ProtectedRoute>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/am"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <HumanResources />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/vc" 
-            element={
-              <ProtectedRoute>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/rh"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <Sales />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/sm" 
-            element={
-              <ProtectedRoute>
-                <Services />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/bi" 
-            element={
-              <ProtectedRoute>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/vc"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
                 <BusinessIntelligence />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </div>
-    </Router>
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+          path="/bi"
+        />
+        <Route element={<Navigate replace to="/dashboard" />} path="*" />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}

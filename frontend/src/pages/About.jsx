@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 import "../styles/About.css";
 
-const About = () => {
+export default function About() {
   return (
     <div className="about-page">
       <nav className="home-nav">
@@ -10,61 +10,53 @@ const About = () => {
           <h2>BluERP</h2>
         </div>
         <div className="nav-links">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/login" className="nav-link login-link">Login</Link>
+          <Link className="nav-link" to="/">
+            Home
+          </Link>
+          <Link className="nav-link login-link" to="/login">
+            Login
+          </Link>
         </div>
       </nav>
 
       <div className="about-container">
         <div className="about-header">
           <h1>Sobre o BluERP</h1>
-          <p>Solução completa para gestão empresarial</p>
+          <p>
+            Uma plataforma de gestão empresarial integrada para conectar
+            processos, equipes e informações.
+          </p>
         </div>
 
         <div className="about-content">
           <div className="about-section">
-            <h2>Nossa Missão</h2>
+            <h2>Visão do sistema</h2>
             <p>
-              Fornecer uma plataforma de gestão integrada que simplifique os processos empresariais, 
-              aumente a eficiência operacional e proporcione insights valiosos para a tomada de decisões estratégicas.
+              O BluERP foi concebido para centralizar operações de diferentes
+              áreas da empresa, oferecendo uma experiência unificada para
+              consulta, registro e acompanhamento de informações.
             </p>
           </div>
 
           <div className="about-section">
-            <h2>O Sistema</h2>
+            <h2>Áreas atendidas</h2>
             <p>
-              Desenvolvido com as mais modernas tecnologias, nosso ERP oferece módulos especializados 
-              para cada área da empresa, permitindo gestão unificada e em tempo real de todos os processos.
+              O projeto contempla módulos voltados a Gestão de Materiais,
+              Financeiro, Gestão de Ativos, Recursos Humanos, Vendas e Compras e
+              Business Intelligence.
             </p>
           </div>
 
-          <div className="features-highlight">
-            <div className="feature-item">
-              <h3>✅ Integração Completa</h3>
-              <p>Todos os departamentos conectados em uma única plataforma</p>
-            </div>
-            <div className="feature-item">
-              <h3>✅ Relatórios em Tempo Real</h3>
-              <p>Dados atualizados instantaneamente para decisões precisas</p>
-            </div>
-            <div className="feature-item">
-              <h3>✅ Segurança de Dados</h3>
-              <p>Proteção avançada para suas informações empresariais</p>
-            </div>
-            <div className="feature-item">
-              <h3>✅ Suporte 24/7</h3>
-              <p>Assistência técnica sempre disponível</p>
-            </div>
-          </div>
-
-          <div className="about-cta">
-            <Link to="/login" className="btn btn-primary">Experimente Grátis</Link>
-            <Link to="/" className="btn btn-secondary">Voltar para Home</Link>
+          <div className="about-section">
+            <h2>Propósito</h2>
+            <p>
+              O objetivo do BluERP é apoiar controle operacional,
+              rastreabilidade das informações e tomada de decisão em uma
+              estrutura única de gestão empresarial.
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default About;
+}
