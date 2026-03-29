@@ -38,14 +38,13 @@
 }
 
 .nav-link:hover {
-  color: #2563eb;
+  color: #334155;
   background: rgba(37, 99, 235, 0.1);
 }
 
 .login-link:hover {
-  background: #b91c1c;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 4px 12px rgba(101, 91, 178, 0.4);
 }
 
 .hero {
