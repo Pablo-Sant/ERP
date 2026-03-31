@@ -9,7 +9,7 @@ DBBaseModel = declarative_base()
 
 class Settings(BaseSettings):
     API_V1_STR:str = '/api/v1'
-    DB_URL:str
+    DB_URL:str 
     
 
     class Config:
