@@ -69,10 +69,10 @@ class UsuarioService:
      # sobre o próprio empresário
      
     @staticmethod
-    async def verificar_autorizacao(id: int, db: AsyncSession):
+    async def verificar_existencia(email: str, db: AsyncSession):
          
          result = await db.execute(
-             select(UsuarioModel).filter(UsuarioModel.id == id)
+             select(UsuarioModel).filter(UsuarioModel.email == email)
          )
          
          usuario = result.scalar_one_or_none()
