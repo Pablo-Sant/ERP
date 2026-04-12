@@ -13,9 +13,9 @@ class FinanceiroOrcamentos(DBBaseModel):
     valor_previsto = Column(Numeric(14, 2), nullable=False)
     valor_realizado = Column(Numeric(14, 2), default=0)
 
-    __table_args__ = (
+   """ __table_args__ = (
         CheckConstraint("mes >= 1 AND mes <= 12", name="financeiro_orcamentos_mes_check"),
         {'schema': 'fi'}
-    )
+    )"""
 
     #conta = relationship("FinanceiroContas", back_populates="orcamentos")
