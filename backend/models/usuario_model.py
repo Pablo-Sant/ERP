@@ -13,7 +13,7 @@ class UsuarioModel(DBBaseModel):
     is_admin = Column(Boolean, default=False)
     data_criacao = Column(DateTime, default=datetime.now())
     
-    clientes = relationship('ClienteFinal', back_populates='usuarios', cascade='all, delete-orphan')
+    #clientes = relationship('ClienteFinal', back_populates='usuarios', cascade='all, delete-orphan')
 
     
     
