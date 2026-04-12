@@ -98,7 +98,7 @@ class UsuarioService:
         try:
             db.add(usuario)
             await db.commit()
-            await db.refresh()
+            await db.refresh(usuario)
         
             return usuario
         
